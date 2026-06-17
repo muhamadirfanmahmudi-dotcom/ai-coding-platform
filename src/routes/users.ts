@@ -7,15 +7,15 @@ export const userRoutes = Router();
 
 // ─── Sid helpers ─────────────────────────────────────
 
-function encodeSid(userId: string): string {
-  return Buffer.from(JSON.stringify({ id: userId, t: Date.now() })).toString('base64');
+function encodeSid(userId: string, role: string): string {
+  return Buffer.from(JSON.stringify({ id: userId, role, t: Date.now() })).toString('base64');
 }
 
-function decodeSid(sid: string): { id: string } | null {
+function decodeSid(sid: string): { id: string; role: string } | null {
   try {
     const raw = Buffer.from(sid, 'base64').toString('utf-8');
     const data = JSON.parse(raw);
-    if (data.id) return { id: data.id };
+    if (data.id && data.role) return { id: data.id, role: data.role };
     return null;
   } catch {
     return null;
@@ -33,23 +33,17 @@ export function getUserFromSid(req: Request): { id: string; name: string; role: 
   const user = db.getUserById(decoded.id);
   if (!user) return null;
 
-  return { id: user.id, name: user.name, role: user.role };
+  return { id: user.id, name: user.name, role: decoded.role };
 }
 
 // ─── POST /api/users/register ──────────────────────────
 
 userRoutes.post('/register', (req: Request, res: Response) => {
   try {
-    const { name, email, password, role } = req.body as RegisterRequest;
+    const { name, email, password } = req.body as RegisterRequest;
 
     if (!name || !email || !password) {
       res.status(400).json({ success: false, error: '请填写完整信息' } as ApiResponse);
-      return;
-    }
-
-    const validRoles = ['buyer', 'developer'];
-    if (role && !validRoles.includes(role)) {
-      res.status(400).json({ success: false, error: '无效的角色' } as ApiResponse);
       return;
     }
 
@@ -60,11 +54,11 @@ userRoutes.post('/register', (req: Request, res: Response) => {
     }
 
     const id = uuid();
-    const user = db.createUser({ id, name, email, password, role });
+    const user = db.createUser({ id, name, email, password });
 
     const response: ApiResponse<UserResponse> = {
       success: true,
-      data: { id: user.id, name: user.name, email: user.email, role: user.role, sid: '' },
+      data: { id: user.id, name: user.name, email: user.email, role: 'buyer', sid: '' },
     };
 
     res.status(201).json(response);
@@ -78,12 +72,15 @@ userRoutes.post('/register', (req: Request, res: Response) => {
 
 userRoutes.post('/login', (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body as LoginRequest;
+    const { email, password, role } = req.body as LoginRequest;
 
     if (!email || !password) {
       res.status(400).json({ success: false, error: '请填写邮箱和密码' } as ApiResponse);
       return;
     }
+
+    const validRoles = ['buyer', 'developer'];
+    const loginRole = role && validRoles.includes(role) ? role : 'buyer';
 
     const user = db.getUserByEmail(email);
     if (!user || user.password !== password) {
@@ -91,11 +88,11 @@ userRoutes.post('/login', (req: Request, res: Response) => {
       return;
     }
 
-    const sid = encodeSid(user.id);
+    const sid = encodeSid(user.id, loginRole);
 
     const response: ApiResponse<UserResponse> = {
       success: true,
-      data: { id: user.id, name: user.name, email: user.email, role: user.role, sid },
+      data: { id: user.id, name: user.name, email: user.email, role: loginRole, sid },
     };
 
     res.json(response);
@@ -126,7 +123,7 @@ userRoutes.get('/me', (req: Request, res: Response) => {
       id: fullUser.id,
       name: fullUser.name,
       email: fullUser.email,
-      role: fullUser.role,
+      role: user.role,
       sid: req.headers.authorization!.replace('Bearer ', ''),
     },
   };

@@ -14,6 +14,7 @@ export interface RegisterRequest {
 export interface LoginRequest {
   email: string;
   password: string;
+  role?: 'buyer' | 'developer';
 }
 
 export interface CreateOrderRequest {

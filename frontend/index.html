@@ -156,6 +156,16 @@ select option{background:var(--surface2);color:var(--text)}
       <div class="auth-tab" onclick="switchAuthTab('register')">注册</div>
     </div>
     <div id="login-form">
+      <div class="role-selector">
+        <div class="role-btn active" onclick="selectRole('buyer', this)">
+          <div class="role-icon">&#128100;</div>
+          <div class="role-name">我是买家</div>
+        </div>
+        <div class="role-btn" onclick="selectRole('developer', this)">
+          <div class="role-icon">&#128187;</div>
+          <div class="role-name">我是开发者</div>
+        </div>
+      </div>
       <div class="form-group">
         <label>邮箱</label>
         <input type="email" id="login-email" placeholder="请输入邮箱">
@@ -167,16 +177,6 @@ select option{background:var(--surface2);color:var(--text)}
       <button class="btn-primary" onclick="doLogin()">登录</button>
     </div>
     <div id="register-form" style="display:none">
-      <div class="role-selector">
-        <div class="role-btn active" onclick="selectRole('buyer', this)">
-          <div class="role-icon">&#128100;</div>
-          <div class="role-name">我是买家</div>
-        </div>
-        <div class="role-btn" onclick="selectRole('developer', this)">
-          <div class="role-icon">&#128187;</div>
-          <div class="role-name">我是开发者</div>
-        </div>
-      </div>
       <div class="form-group">
         <label>用户名</label>
         <input type="text" id="reg-name" placeholder="请输入用户名">
@@ -333,7 +333,7 @@ async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
   if (!email || !password) return showAuthError('请填写完整信息');
-  const res = await api('POST', '/api/users/login', { email, password });
+  const res = await api('POST', '/api/users/login', { email, password, role: selectedRole });
   if (!res.success) return showAuthError(res.error);
   currentUser = res.data;
   localStorage.setItem('sid', currentUser.sid);
@@ -347,7 +347,7 @@ async function doRegister() {
   const email = document.getElementById('reg-email').value.trim();
   const password = document.getElementById('reg-password').value;
   if (!name || !email || !password) return showAuthError('请填写完整信息');
-  const res = await api('POST', '/api/users/register', { name, email, password, role: selectedRole });
+  const res = await api('POST', '/api/users/register', { name, email, password });
   if (!res.success) return showAuthError(res.error);
   document.getElementById('auth-error').textContent = '注册成功，请登录';
   document.getElementById('auth-error').style.color = 'var(--green)';
