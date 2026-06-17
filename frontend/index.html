@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 代写平台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0a;--surface:#1a1a1a;--surface2:#242424;--surface3:#2a2a2a;
+  --border:#333;--text:#f5f5f7;--text2:#a1a1a6;--text3:#6e6e73;
+  --blue:#007aff;--blue2:#0056cc;--green:#34c759;--orange:#ff9500;--red:#ff3b30;--purple:#af52de;
+  --radius:12px;--radius2:8px;
+}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;animation:fadeIn .5s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+a{color:var(--blue);text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;border-radius:var(--radius2);padding:10px 20px;font-size:14px;font-weight:500;transition:all .2s}
+input,textarea{font-family:inherit;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius2);padding:12px 16px;color:var(--text);font-size:14px;width:100%;outline:none;transition:border-color .2s}
+input:focus,textarea:focus{border-color:var(--blue)}
+textarea{resize:vertical;min-height:80px}
+
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue2)}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{background:var(--surface3)}
+.btn-danger{background:var(--red);color:#fff}.btn-danger:hover{opacity:.85}
+.btn-sm{padding:6px 14px;font-size:13px}
+.btn-ghost{background:transparent;color:var(--text2)}.btn-ghost:hover{color:var(--text);background:var(--surface2)}
+
+/* ─── Auth Page ─────────────────────────────────── */
+.auth-page{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;width:100%;max-width:400px;animation:slideUp .5s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.auth-card h1{font-size:24px;font-weight:700;text-align:center;margin-bottom:8px}
+.auth-card .subtitle{text-align:center;color:var(--text2);font-size:14px;margin-bottom:32px}
+.auth-tabs{display:flex;gap:4px;background:var(--surface2);border-radius:var(--radius2);padding:4px;margin-bottom:24px}
+.auth-tab{flex:1;text-align:center;padding:8px;border-radius:6px;font-size:14px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .2s}
+.auth-tab.active{background:var(--surface);color:var(--text)}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;color:var(--text2);margin-bottom:6px;font-weight:500}
+.auth-card .btn-primary{width:100%;padding:12px;font-size:15px;margin-top:8px}
+.auth-card .error{color:var(--red);font-size:13px;text-align:center;margin-top:12px;min-height:20px}
+
+/* ─── App Layout ────────────────────────────────── */
+.app-page{display:none;min-height:100vh}
+.navbar{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);background:rgba(10,10,10,.8);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100}
+.navbar .logo{font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px}
+.navbar .logo span{color:var(--blue)}
+.navbar .user-info{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--text2)}
+.container{max-width:900px;margin:0 auto;padding:24px}
+
+/* ─── Header ────────────────────────────────────── */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.page-header h2{font-size:20px;font-weight:600}
+
+/* ─── Tabs ──────────────────────────────────────── */
+.tabs{display:flex;gap:4px;background:var(--surface);border-radius:var(--radius);padding:4px;margin-bottom:24px}
+.tab{flex:1;text-align:center;padding:10px;border-radius:var(--radius2);font-size:14px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .2s}
+.tab.active{background:var(--surface2);color:var(--text)}
+.tab:hover:not(.active){color:var(--text)}
+
+/* ─── Order Cards ───────────────────────────────── */
+.order-list{display:flex;flex-direction:column;gap:12px}
+.order-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:all .2s}
+.order-card:hover{border-color:var(--blue);transform:translateY(-1px)}
+.order-card .top{display:flex;align-items:start;justify-content:space-between;margin-bottom:8px}
+.order-card .title{font-size:16px;font-weight:600;flex:1}
+.order-card .desc{color:var(--text2);font-size:14px;line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.order-card .meta{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text3)}
+.order-card .time{color:var(--text3)}
+
+/* ─── Status Badge ──────────────────────────────── */
+.status{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500}
+.status-pending{background:rgba(255,149,0,.15);color:var(--orange)}
+.status-claimed{background:rgba(0,122,255,.15);color:var(--blue)}
+.status-in_progress{background:rgba(175,82,222,.15);color:var(--purple)}
+.status-reviewing{background:rgba(255,204,0,.15);color:#ffcc00}
+.status-completed{background:rgba(52,199,89,.15);color:var(--green)}
+.status-cancelled{background:rgba(255,59,48,.15);color:var(--red)}
+
+/* ─── Create Order Form ─────────────────────────── */
+.create-page{display:none}
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px}
+.form-card h2{font-size:20px;font-weight:600;margin-bottom:24px}
+.form-card .form-group{margin-bottom:20px}
+.form-card .form-group label{font-size:14px;color:var(--text);margin-bottom:8px;font-weight:500}
+.form-card .form-group .hint{font-size:12px;color:var(--text3);margin-top:4px}
+.form-actions{display:flex;gap:12px;margin-top:24px}
+
+/* ─── Order Detail ──────────────────────────────── */
+.detail-page{display:none}
+.detail-back{display:flex;align-items:center;gap:6px;color:var(--text2);font-size:14px;cursor:pointer;margin-bottom:20px;transition:color .2s}
+.detail-back:hover{color:var(--text)}
+.detail-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:20px}
+.detail-card h2{font-size:20px;font-weight:600;margin-bottom:16px}
+.detail-field{margin-bottom:16px}
+.detail-field .label{font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.detail-field .value{font-size:14px;color:var(--text);line-height:1.6;white-space:pre-wrap}
+
+/* ─── Progress Timeline ─────────────────────────── */
+.timeline{margin-top:20px}
+.timeline h3{font-size:16px;font-weight:600;margin-bottom:16px}
+.timeline-empty{color:var(--text3);font-size:14px;text-align:center;padding:40px 0}
+.timeline-item{position:relative;padding-left:24px;padding-bottom:24px;border-left:2px solid var(--border)}
+.timeline-item:last-child{border-left-color:transparent;padding-bottom:0}
+.timeline-item::before{content:'';position:absolute;left:-5px;top:2px;width:8px;height:8px;border-radius:50%;background:var(--blue)}
+.timeline-item .t-title{font-size:14px;font-weight:600;margin-bottom:4px}
+.timeline-item .t-content{font-size:14px;color:var(--text2);line-height:1.5}
+.timeline-item .t-time{font-size:12px;color:var(--text3);margin-top:4px}
+
+/* ─── Empty State ───────────────────────────────── */
+.empty{text-align:center;padding:60px 0;color:var(--text3)}
+.empty .icon{font-size:48px;margin-bottom:12px}
+.empty p{font-size:14px}
+
+/* ─── Responsive ────────────────────────────────── */
+@media(max-width:640px){
+  .container{padding:16px}
+  .auth-card{padding:24px}
+  .form-card{padding:20px}
+  .detail-card{padding:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ Auth Page ═══════════════ -->
+<div class="auth-page" id="auth-page">
+  <div class="auth-card">
+    <h1>AI 代写平台</h1>
+    <p class="subtitle">发布需求，让开发者帮你搞定</p>
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="switchAuthTab('login')">登录</div>
+      <div class="auth-tab" onclick="switchAuthTab('register')">注册</div>
+    </div>
+    <div id="login-form">
+      <div class="form-group">
+        <label>邮箱</label>
+        <input type="email" id="login-email" placeholder="请输入邮箱">
+      </div>
+      <div class="form-group">
+        <label>密码</label>
+        <input type="password" id="login-password" placeholder="请输入密码">
+      </div>
+      <button class="btn-primary" onclick="doLogin()">登录</button>
+    </div>
+    <div id="register-form" style="display:none">
+      <div class="form-group">
+        <label>用户名</label>
+        <input type="text" id="reg-name" placeholder="请输入用户名">
+      </div>
+      <div class="form-group">
+        <label>邮箱</label>
+        <input type="email" id="reg-email" placeholder="请输入邮箱">
+      </div>
+      <div class="form-group">
+        <label>密码</label>
+        <input type="password" id="reg-password" placeholder="请输入密码">
+      </div>
+      <button class="btn-primary" onclick="doRegister()">注册</button>
+    </div>
+    <div class="error" id="auth-error"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ App Page ═══════════════ -->
+<div class="app-page" id="app-page">
+  <nav class="navbar">
+    <div class="logo"><span>&#9889;</span> AI 代写平台</div>
+    <div class="user-info">
+      <span id="user-name"></span>
+      <button class="btn-ghost btn-sm" onclick="doLogout()">退出</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- ─── Main View ─── -->
+    <div id="main-view">
+      <div class="page-header">
+        <h2 id="view-title">抢单大厅</h2>
+        <button class="btn-primary" onclick="showCreate()">+ 创建新订单</button>
+      </div>
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('hall')">抢单大厅</div>
+        <div class="tab" onclick="switchTab('mine')">我的订单</div>
+      </div>
+      <div class="order-list" id="order-list"></div>
+    </div>
+
+    <!-- ─── Create View ─── -->
+    <div id="create-view" style="display:none">
+      <div class="detail-back" onclick="showMain()">&#8592; 返回</div>
+      <div class="form-card">
+        <h2>创建新订单</h2>
+        <div class="form-group">
+          <label>用户是谁</label>
+          <textarea id="order-userinfo" placeholder="你的项目的目标用户是谁？例如：大学生、小商户、开发者等"></textarea>
+        </div>
+        <div class="form-group">
+          <label>解决什么问题</label>
+          <textarea id="order-problem" placeholder="你的项目要解决什么问题？"></textarea>
+        </div>
+        <div class="form-group">
+          <label>核心功能（≤5）</label>
+          <textarea id="order-features" placeholder="列出核心功能点，最多5个"></textarea>
+        </div>
+        <div class="form-group">
+          <label>不做什么</label>
+          <textarea id="order-anti" placeholder="明确不需要的功能或方向"></textarea>
+        </div>
+        <div class="form-group">
+          <label>成功标准</label>
+          <textarea id="order-success" placeholder="怎样算完成"></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn-secondary" onclick="showMain()">取消</button>
+          <button class="btn-primary" onclick="submitOrder()">提交订单</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Detail View ─── -->
+    <div id="detail-view" style="display:none">
+      <div class="detail-back" onclick="showMain()">&#8592; 返回</div>
+      <div class="detail-card">
+        <div class="top" style="display:flex;align-items:start;justify-content:space-between;margin-bottom:16px">
+          <h2 id="detail-title"></h2>
+          <span class="status" id="detail-status"></span>
+        </div>
+        <div class="detail-field"><div class="label">用户是谁</div><div class="value" id="detail-userinfo"></div></div>
+        <div class="detail-field"><div class="label">解决什么问题</div><div class="value" id="detail-problem"></div></div>
+        <div class="detail-field"><div class="label">核心功能</div><div class="value" id="detail-features"></div></div>
+        <div class="detail-field"><div class="label">不做什么</div><div class="value" id="detail-anti"></div></div>
+        <div class="detail-field"><div class="label">成功标准</div><div class="value" id="detail-success"></div></div>
+        <div class="detail-field"><div class="label">创建时间</div><div class="value" id="detail-time"></div></div>
+      </div>
+      <div class="detail-card">
+        <div class="timeline" id="detail-timeline">
+          <h3>进度追踪</h3>
+          <div id="timeline-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '';
+let currentUser = null;
+let currentTab = 'hall';
+let currentOrderId = null;
+
+// ─── API Helper ────────────────────────────────────
+async function api(method, path, body) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (currentUser?.sid) headers['Authorization'] = 'Bearer ' + currentUser.sid;
+  const opts = { method, headers };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API + path, opts);
+  return res.json();
+}
+
+// ─── Auth ──────────────────────────────────────────
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('auth-error').textContent = '';
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!email || !password) return showAuthError('请填写完整信息');
+  const res = await api('POST', '/api/users/login', { email, password });
+  if (!res.success) return showAuthError(res.error);
+  currentUser = res.data;
+  localStorage.setItem('sid', currentUser.sid);
+  localStorage.setItem('userName', currentUser.name);
+  enterApp();
+}
+
+async function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  if (!name || !email || !password) return showAuthError('请填写完整信息');
+  const res = await api('POST', '/api/users/register', { name, email, password });
+  if (!res.success) return showAuthError(res.error);
+  document.getElementById('auth-error').textContent = '注册成功，请登录';
+  document.getElementById('auth-error').style.color = 'var(--green)';
+  switchAuthTab('login');
+  document.querySelectorAll('.auth-tab')[0].click();
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  el.style.color = 'var(--red)';
+  el.textContent = msg;
+}
+
+function doLogout() {
+  currentUser = null;
+  localStorage.removeItem('sid');
+  localStorage.removeItem('userName');
+  document.getElementById('auth-page').style.display = 'flex';
+  document.getElementById('app-page').style.display = 'none';
+}
+
+function enterApp() {
+  document.getElementById('auth-page').style.display = 'none';
+  document.getElementById('app-page').style.display = 'block';
+  document.getElementById('user-name').textContent = currentUser.name;
+  showMain();
+  loadOrders();
+}
+
+// ─── Views ─────────────────────────────────────────
+function showMain() {
+  document.getElementById('main-view').style.display = 'block';
+  document.getElementById('create-view').style.display = 'none';
+  document.getElementById('detail-view').style.display = 'none';
+  currentOrderId = null;
+  loadOrders();
+}
+
+function showCreate() {
+  document.getElementById('main-view').style.display = 'none';
+  document.getElementById('create-view').style.display = 'block';
+  document.getElementById('detail-view').style.display = 'none';
+  ['order-userinfo','order-problem','order-features','order-anti','order-success'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+}
+
+function showDetail(orderId) {
+  document.getElementById('main-view').style.display = 'none';
+  document.getElementById('create-view').style.display = 'none';
+  document.getElementById('detail-view').style.display = 'block';
+  currentOrderId = orderId;
+  loadOrderDetail(orderId);
+}
+
+// ─── Tabs ──────────────────────────────────────────
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('view-title').textContent = tab === 'hall' ? '抢单大厅' : '我的订单';
+  loadOrders();
+}
+
+// ─── Load Orders ───────────────────────────────────
+async function loadOrders() {
+  const path = currentTab === 'hall' ? '/api/orders/hall' : '/api/orders/mine';
+  const res = await api('GET', path);
+  const list = document.getElementById('order-list');
+  if (!res.success || !res.data.length) {
+    list.innerHTML = '<div class="empty"><div class="icon">&#128203;</div><p>' + (currentTab === 'hall' ? '大厅暂无订单' : '你还没有创建过订单') + '</p></div>';
+    return;
+  }
+  list.innerHTML = res.data.map(o => `
+    <div class="order-card" onclick="showDetail('${o.id}')">
+      <div class="top">
+        <div class="title">${esc(o.title)}</div>
+        <span class="status status-${o.status}">${statusText(o.status)}</span>
+      </div>
+      <div class="desc">${esc(o.problem || o.description)}</div>
+      <div class="meta">
+        <span>${esc(o.userInfo ? '👤 ' + o.userInfo.slice(0, 30) : '')}</span>
+        <span class="time">${formatTime(o.createdAt)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─── Submit Order ──────────────────────────────────
+async function submitOrder() {
+  const problem = document.getElementById('order-problem').value.trim();
+  if (!problem) return alert('请填写解决什么问题');
+  const res = await api('POST', '/api/orders', {
+    title: problem.slice(0, 50),
+    description: problem,
+    userInfo: document.getElementById('order-userinfo').value.trim() || null,
+    problem,
+    features: document.getElementById('order-features').value.trim() || null,
+    antiFeatures: document.getElementById('order-anti').value.trim() || null,
+    successCriteria: document.getElementById('order-success').value.trim() || null,
+  });
+  if (!res.success) return alert(res.error);
+  showMain();
+}
+
+// ─── Load Order Detail ─────────────────────────────
+async function loadOrderDetail(orderId) {
+  const res = await api('GET', '/api/orders/' + orderId);
+  if (!res.success) return alert(res.error);
+  const o = res.data.order;
+  document.getElementById('detail-title').textContent = o.title;
+  document.getElementById('detail-status').className = 'status status-' + o.status;
+  document.getElementById('detail-status').textContent = statusText(o.status);
+  document.getElementById('detail-userinfo').textContent = o.userInfo || '未填写';
+  document.getElementById('detail-problem').textContent = o.problem || '未填写';
+  document.getElementById('detail-features').textContent = o.features || '未填写';
+  document.getElementById('detail-anti').textContent = o.antiFeatures || '未填写';
+  document.getElementById('detail-success').textContent = o.successCriteria || '未填写';
+  document.getElementById('detail-time').textContent = formatTime(o.createdAt);
+
+  const progress = res.data.progress;
+  const tl = document.getElementById('timeline-list');
+  if (!progress.length) {
+    tl.innerHTML = '<div class="timeline-empty">暂无进度更新</div>';
+  } else {
+    tl.innerHTML = progress.map(p => `
+      <div class="timeline-item">
+        <div class="t-title">${esc(p.title || '进度更新')}</div>
+        <div class="t-content">${esc(p.content)}</div>
+        <div class="t-time">${formatTime(p.createdAt)}</div>
+      </div>
+    `).join('');
+  }
+}
+
+// ─── Helpers ───────────────────────────────────────
+function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function statusText(s) {
+  const map = { pending:'待接单', claimed:'已接单', in_progress:'开发中', reviewing:'验收中', completed:'已完成', cancelled:'已取消' };
+  return map[s] || s;
+}
+
+function formatTime(t) {
+  if (!t) return '';
+  const d = new Date(t + 'Z');
+  return d.toLocaleDateString('zh-CN') + ' ' + d.toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' });
+}
+
+// ─── Init ──────────────────────────────────────────
+(function init() {
+  const sid = localStorage.getItem('sid');
+  const name = localStorage.getItem('userName');
+  if (sid) {
+    currentUser = { sid, name };
+    enterApp();
+  }
+})();
+</script>
+</body>
+</html>
