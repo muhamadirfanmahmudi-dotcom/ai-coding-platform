@@ -81,6 +81,21 @@ class Database {
       )
     `);
 
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS order_stages (
+        id TEXT PRIMARY KEY,
+        order_id TEXT NOT NULL,
+        stage TEXT NOT NULL,
+        stage_order INTEGER NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending'
+          CHECK(status IN ('pending','in_progress','completed')),
+        content TEXT,
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now')),
+        FOREIGN KEY (order_id) REFERENCES orders(id)
+      )
+    `);
+
     // Migrate: add role column to users if missing
     const userCols = this.db.exec(`PRAGMA table_info(users)`);
     if (userCols.length > 0) {
@@ -261,6 +276,61 @@ class Database {
     stmt.free();
     return items;
   }
+
+  // ═══════════════════════════════════════════════════
+  //  Order Stages Methods
+  // ═══════════════════════════════════════════════════
+
+  initStages(orderId: string) {
+    const stages = [
+      { key: 'requirement', name: '需求分析', order: 1 },
+      { key: 'design', name: '系统设计', order: 2 },
+      { key: 'techstack', name: '技术选型', order: 3 },
+      { key: 'implementation', name: '开发阶段', order: 4 },
+      { key: 'testing', name: '测试阶段', order: 5 },
+    ];
+    for (const s of stages) {
+      this.db.run(
+        `INSERT INTO order_stages (id, order_id, stage, stage_order, status) VALUES (?, ?, ?, ?, 'pending')`,
+        [`${orderId}_${s.key}`, orderId, s.key, s.order]
+      );
+    }
+    this.save();
+  }
+
+  getStages(orderId: string) {
+    const stmt = this.db.prepare(`SELECT * FROM order_stages WHERE order_id = ? ORDER BY stage_order ASC`);
+    stmt.bind([orderId]);
+    const items: any[] = [];
+    while (stmt.step()) {
+      items.push(rowToStage(stmt.getAsObject()));
+    }
+    stmt.free();
+    return items;
+  }
+
+  getStage(orderId: string, stage: string) {
+    const stmt = this.db.prepare(`SELECT * FROM order_stages WHERE order_id = ? AND stage = ?`);
+    stmt.bind([orderId, stage]);
+    if (stmt.step()) {
+      const item = rowToStage(stmt.getAsObject());
+      stmt.free();
+      return item;
+    }
+    stmt.free();
+    return null;
+  }
+
+  updateStage(orderId: string, stage: string, data: { status?: string; content?: string }) {
+    const setClauses: string[] = [];
+    const params: any[] = [];
+    if (data.status) { setClauses.push('status = ?'); params.push(data.status); }
+    if (data.content !== undefined) { setClauses.push('content = ?'); params.push(data.content); }
+    setClauses.push(`updated_at = datetime('now')`);
+    params.push(orderId, stage);
+    this.db.run(`UPDATE order_stages SET ${setClauses.join(', ')} WHERE order_id = ? AND stage = ?`, params);
+    this.save();
+  }
 }
 
 // ─── Row Mappers ──────────────────────────────────────
@@ -303,6 +373,19 @@ function rowToProgress(row: any) {
     title: row.title,
     content: row.content,
     createdAt: row.created_at,
+  };
+}
+
+function rowToStage(row: any) {
+  return {
+    id: row.id,
+    orderId: row.order_id,
+    stage: row.stage,
+    stageOrder: row.stage_order,
+    status: row.status,
+    content: row.content,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 

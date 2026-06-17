@@ -118,6 +118,31 @@ select option{background:var(--surface2);color:var(--text)}
 .progress-form{margin-top:16px}
 .progress-form .form-group{margin-bottom:12px}
 
+/* ─── Stage Workflow ─────────────────────────────── */
+.stage-progress{display:flex;gap:0;margin-bottom:24px;position:relative}
+.stage-step{flex:1;text-align:center;position:relative;padding:12px 8px}
+.stage-step .stage-dot{width:32px;height:32px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:14px;font-weight:600;color:var(--text3);transition:all .3s}
+.stage-step.completed .stage-dot{background:var(--green);border-color:var(--green);color:#fff}
+.stage-step.active .stage-dot{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 0 0 4px rgba(0,122,255,.2)}
+.stage-step .stage-name{font-size:12px;color:var(--text3);font-weight:500}
+.stage-step.active .stage-name{color:var(--blue)}
+.stage-step.completed .stage-name{color:var(--green)}
+.stage-connector{position:absolute;top:28px;left:calc(50% + 16px);right:calc(-50% + 16px);height:2px;background:var(--border)}
+.stage-step.completed .stage-connector{background:var(--green)}
+
+.stage-form{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:16px}
+.stage-form h4{font-size:16px;font-weight:600;margin-bottom:4px}
+.stage-form .stage-desc{color:var(--text2);font-size:13px;margin-bottom:16px;line-height:1.5}
+.stage-form .output-list{background:var(--surface);border-radius:8px;padding:12px 16px;margin-bottom:16px}
+.stage-form .output-list li{font-size:13px;color:var(--text2);margin-bottom:4px;list-style:none}
+.stage-form .output-list li::before{content:'📌 ';font-size:12px}
+.stage-form textarea{min-height:120px}
+.stage-actions{display:flex;gap:8px;margin-top:16px}
+.stage-status{font-size:13px;padding:4px 12px;border-radius:12px;font-weight:500}
+.stage-status.pending{background:rgba(255,149,0,.15);color:var(--orange)}
+.stage-status.in_progress{background:rgba(0,122,255,.15);color:var(--blue)}
+.stage-status.completed{background:rgba(52,199,89,.15);color:var(--green)}
+
 /* ─── Progress Timeline ─────────────────────────── */
 .timeline{margin-top:20px}
 .timeline h3{font-size:16px;font-weight:600;margin-bottom:16px}
@@ -538,28 +563,151 @@ function renderActionPanel(order) {
   }
 
   panel.style.display = '';
-  let html = '';
 
   if (order.status === 'pending') {
-    html = '<button class="btn-primary" onclick="claimOrder()">接此订单</button>';
+    buttons.innerHTML = '<button class="btn-primary" onclick="claimOrder()">接此订单</button>';
     form.style.display = 'none';
-  } else if (order.developerId === currentUser.id) {
-    if (order.status === 'claimed') {
-      html = '<button class="btn-success" onclick="updateStatus(\'in_progress\')">开始开发</button>';
-    } else if (order.status === 'in_progress') {
-      html = '<button class="btn-primary" onclick="updateStatus(\'reviewing\')">提交验收</button>';
-    } else if (order.status === 'reviewing') {
-      html = '';
-    } else {
-      html = '';
-    }
-    form.style.display = (order.status === 'in_progress' || order.status === 'claimed') ? '' : 'none';
+    return;
+  }
+
+  if (order.developerId !== currentUser.id) {
+    buttons.innerHTML = '<span style="color:var(--text3);font-size:14px">已被其他开发者接单</span>';
+    form.style.display = 'none';
+    return;
+  }
+
+  // Developer is the owner - show stage workflow
+  form.style.display = 'none';
+  loadStages(order.id);
+}
+
+const STAGE_CONFIG = [
+  {
+    key: 'requirement', name: '需求分析', emoji: '🟢',
+    desc: '明确要做什么产品、给谁用、解决什么问题',
+    fields: [
+      { label: '产品定位', placeholder: '你要做什么产品？核心价值是什么？' },
+      { label: '目标用户', placeholder: '给谁用？用户画像是什么？' },
+      { label: '核心问题', placeholder: '解决什么问题？痛点是什么？' },
+      { label: '用户故事', placeholder: '作为[用户]，我想要[功能]，以便[价值]' },
+      { label: '功能列表', placeholder: '列出所有功能点' },
+    ]
+  },
+  {
+    key: 'design', name: '系统设计', emoji: '🟡',
+    desc: '把需求变成工程蓝图：模块拆分、数据库设计、API设计、页面结构',
+    fields: [
+      { label: '模块拆分', placeholder: '系统包含哪些模块？各自负责什么？' },
+      { label: '数据库设计', placeholder: '需要哪些表？字段有哪些？' },
+      { label: 'API设计', placeholder: '需要哪些接口？请求/响应格式？' },
+      { label: '页面结构', placeholder: '有哪些页面？页面间如何跳转？' },
+    ]
+  },
+  {
+    key: 'techstack', name: '技术选型', emoji: '🟠',
+    desc: '决定用什么工具做：前端、后端、数据库、部署方式',
+    fields: [
+      { label: '前端技术', placeholder: 'React / Vue / 其他？为什么选这个？' },
+      { label: '后端技术', placeholder: 'Node / Python / 其他？为什么选这个？' },
+      { label: '数据库', placeholder: 'MySQL / MongoDB / SQLite？为什么选这个？' },
+      { label: '部署方案', placeholder: 'Vercel / Docker / 服务器？' },
+    ]
+  },
+  {
+    key: 'implementation', name: '开发阶段', emoji: '🔵',
+    desc: '真正写代码，按模块逐步开发',
+    fields: [
+      { label: '开发计划', placeholder: '按什么顺序开发？先做什么模块？' },
+      { label: '当前进度', placeholder: '目前完成了哪些模块？' },
+      { label: '技术难点', placeholder: '遇到了什么技术问题？如何解决的？' },
+      { label: '代码结构', placeholder: '项目目录结构是怎样的？' },
+    ]
+  },
+  {
+    key: 'testing', name: '测试阶段', emoji: '🟣',
+    desc: '检查系统是否可用：单元测试、集成测试、用户测试',
+    fields: [
+      { label: '测试类型', placeholder: '做了哪些测试？单元/集成/用户测试？' },
+      { label: '测试结果', placeholder: '测试通过了吗？有什么问题？' },
+      { label: '边界情况', placeholder: '是否测试了边界情况？异常输入？' },
+      { label: 'Bug列表', placeholder: '发现了哪些bug？修复了吗？' },
+    ]
+  },
+];
+
+let currentStages = [];
+
+async function loadStages(orderId) {
+  const res = await api('GET', '/api/orders/' + orderId + '/stages');
+  if (!res.success) return;
+  currentStages = res.data || [];
+  renderStages();
+}
+
+function renderStages() {
+  const panel = document.getElementById('action-panel');
+  const buttons = document.getElementById('action-buttons');
+
+  let html = '<div class="stage-progress">';
+  STAGE_CONFIG.forEach((cfg, i) => {
+    const stage = currentStages.find(s => s.stage === cfg.key);
+    const status = stage ? stage.status : 'pending';
+    const cls = status === 'completed' ? 'completed' : (status === 'in_progress' ? 'active' : '');
+    html += `<div class="stage-step ${cls}">
+      <div class="stage-dot">${status === 'completed' ? '✓' : (i + 1)}</div>
+      <div class="stage-name">${cfg.emoji} ${cfg.name}</div>
+      ${i < STAGE_CONFIG.length - 1 ? '<div class="stage-connector"></div>' : ''}
+    </div>`;
+  });
+  html += '</div>';
+
+  // Find current active stage (first non-completed)
+  const activeStage = STAGE_CONFIG.find(cfg => {
+    const s = currentStages.find(x => x.stage === cfg.key);
+    return s && s.status !== 'completed';
+  });
+
+  if (activeStage) {
+    const stage = currentStages.find(s => s.stage === activeStage.key);
+    const cfg = activeStage;
+    html += `<div class="stage-form">
+      <h4>${cfg.emoji} ${cfg.name}</h4>
+      <div class="stage-desc">${cfg.desc}</div>
+      <div class="output-list"><ul>`;
+    cfg.fields.forEach(f => { html += `<li>${f.label}</li>`; });
+    html += `</ul></div>
+      <div class="form-group">
+        <textarea id="stage-content" placeholder="填写${cfg.name}的详细内容...">${esc(stage?.content || '')}</textarea>
+      </div>
+      <div class="stage-actions">
+        <span class="stage-status ${stage?.status || 'pending'}">${stage?.status === 'completed' ? '已完成' : (stage?.status === 'in_progress' ? '进行中' : '待开始')}</span>
+        ${stage?.status !== 'completed' ? `<button class="btn-primary btn-sm" onclick="saveStage('${cfg.key}')">保存</button>` : ''}
+        ${stage?.status !== 'completed' && stage?.content ? `<button class="btn-success btn-sm" onclick="completeStage('${cfg.key}')">完成本阶段</button>` : ''}
+      </div>
+    </div>`;
   } else {
-    html = '<span style="color:var(--text3);font-size:14px">已被其他开发者接单</span>';
-    form.style.display = 'none';
+    html += '<div style="text-align:center;padding:20px;color:var(--green);font-size:16px">🎉 所有阶段已完成！等待买家验收</div>';
   }
 
   buttons.innerHTML = html;
+}
+
+async function saveStage(stageKey) {
+  const content = document.getElementById('stage-content').value.trim();
+  if (!content) return alert('请填写内容');
+  const res = await api('PUT', '/api/orders/' + currentOrderId + '/stages/' + stageKey, { content });
+  if (!res.success) return alert(res.error);
+  loadStages(currentOrderId);
+}
+
+async function completeStage(stageKey) {
+  if (!confirm('确定完成本阶段？')) return;
+  const res = await api('POST', '/api/orders/' + currentOrderId + '/stages/' + stageKey + '/complete');
+  if (!res.success) return alert(res.error);
+  if (res.data?.allCompleted) {
+    alert('所有阶段已完成！订单已进入验收状态');
+  }
+  loadStages(currentOrderId);
 }
 
 // ─── Claim Order ───────────────────────────────────

@@ -248,6 +248,7 @@ orderRoutes.post('/:id/claim', (req: Request, res: Response) => {
     }
 
     db.updateOrder(order.id, { developerId: user.id, status: 'claimed' });
+    db.initStages(order.id);
 
     res.json({ success: true, data: { status: 'claimed' } } as ApiResponse);
   } catch (err: any) {
@@ -357,6 +358,137 @@ orderRoutes.post('/:id/status', (req: Request, res: Response) => {
     res.json({ success: true, data: { status } } as ApiResponse);
   } catch (err: any) {
     console.error('[Orders] Status error:', err.message);
+    res.status(500).json({ success: false, error: '服务器错误' } as ApiResponse);
+  }
+});
+
+// ─── GET /api/orders/:id/stages ── 获取阶段列表 ───────
+
+orderRoutes.get('/:id/stages', (req: Request, res: Response) => {
+  const user = getUserFromSid(req);
+  if (!user) {
+    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
+    return;
+  }
+
+  try {
+    const order = db.getOrderById(paramId(req));
+    if (!order) {
+      res.status(404).json({ success: false, error: '订单不存在' } as ApiResponse);
+      return;
+    }
+
+    let stages = db.getStages(order.id);
+    if (stages.length === 0 && order.status === 'claimed') {
+      db.initStages(order.id);
+      stages = db.getStages(order.id);
+    }
+
+    res.json({ success: true, data: stages } as ApiResponse);
+  } catch (err: any) {
+    console.error('[Orders] Stages error:', err.message);
+    res.status(500).json({ success: false, error: '服务器错误' } as ApiResponse);
+  }
+});
+
+// ─── PUT /api/orders/:id/stages/:stage ── 更新阶段内容 ──
+
+orderRoutes.put('/:id/stages/:stage', (req: Request, res: Response) => {
+  const user = getUserFromSid(req);
+  if (!user) {
+    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
+    return;
+  }
+
+  try {
+    const order = db.getOrderById(paramId(req));
+    if (!order) {
+      res.status(404).json({ success: false, error: '订单不存在' } as ApiResponse);
+      return;
+    }
+    if (order.developerId !== user.id) {
+      res.status(403).json({ success: false, error: '只有接单的开发者可以操作' } as ApiResponse);
+      return;
+    }
+
+    const stageName = Array.isArray(req.params.stage) ? req.params.stage[0] : req.params.stage;
+    const { content } = req.body as { content?: string };
+    if (!content) {
+      res.status(400).json({ success: false, error: '请填写内容' } as ApiResponse);
+      return;
+    }
+
+    const stage = db.getStage(order.id, stageName);
+    if (!stage) {
+      res.status(404).json({ success: false, error: '阶段不存在' } as ApiResponse);
+      return;
+    }
+
+    db.updateStage(order.id, stageName, { content, status: 'in_progress' });
+
+    res.json({ success: true } as ApiResponse);
+  } catch (err: any) {
+    console.error('[Orders] Stage update error:', err.message);
+    res.status(500).json({ success: false, error: '服务器错误' } as ApiResponse);
+  }
+});
+
+// ─── POST /api/orders/:id/stages/:stage/complete ── 完成阶段
+
+orderRoutes.post('/:id/stages/:stage/complete', (req: Request, res: Response) => {
+  const user = getUserFromSid(req);
+  if (!user) {
+    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
+    return;
+  }
+
+  try {
+    const order = db.getOrderById(paramId(req));
+    if (!order) {
+      res.status(404).json({ success: false, error: '订单不存在' } as ApiResponse);
+      return;
+    }
+    if (order.developerId !== user.id) {
+      res.status(403).json({ success: false, error: '只有接单的开发者可以操作' } as ApiResponse);
+      return;
+    }
+
+    const stageName = Array.isArray(req.params.stage) ? req.params.stage[0] : req.params.stage;
+    const stage = db.getStage(order.id, stageName);
+    if (!stage) {
+      res.status(404).json({ success: false, error: '阶段不存在' } as ApiResponse);
+      return;
+    }
+    if (stage.status === 'completed') {
+      res.status(400).json({ success: false, error: '该阶段已完成' } as ApiResponse);
+      return;
+    }
+    if (!stage.content) {
+      res.status(400).json({ success: false, error: '请先填写阶段内容' } as ApiResponse);
+      return;
+    }
+
+    // Check previous stage is completed
+    if (stage.stageOrder > 1) {
+      const prevStage = db.getStages(order.id).find(s => s.stageOrder === stage.stageOrder - 1);
+      if (prevStage && prevStage.status !== 'completed') {
+        res.status(400).json({ success: false, error: '请先完成上一阶段' } as ApiResponse);
+        return;
+      }
+    }
+
+    db.updateStage(order.id, stageName, { status: 'completed' });
+
+    // Check if all stages completed
+    const allStages = db.getStages(order.id);
+    const allCompleted = allStages.every(s => s.status === 'completed');
+    if (allCompleted) {
+      db.updateOrder(order.id, { status: 'reviewing' });
+    }
+
+    res.json({ success: true, data: { allCompleted } } as ApiResponse);
+  } catch (err: any) {
+    console.error('[Orders] Stage complete error:', err.message);
     res.status(500).json({ success: false, error: '服务器错误' } as ApiResponse);
   }
 });
