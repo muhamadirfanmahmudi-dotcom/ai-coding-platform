@@ -385,7 +385,7 @@ orderRoutes.get('/:id/stages', (req: Request, res: Response) => {
     }
 
     let stages = db.getStages(order.id);
-    if (stages.length === 0 && order.status === 'claimed') {
+    if (stages.length === 0 && order.developerId) {
       db.initStages(order.id);
       stages = db.getStages(order.id);
     }
