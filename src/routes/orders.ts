@@ -185,6 +185,11 @@ orderRoutes.get('/:id', (req: Request, res: Response) => {
     }
 
     const progress = db.getOrderProgress(order.id);
+    let developerName = null;
+    if (order.developerId) {
+      const dev = db.getUserById(order.developerId);
+      if (dev) developerName = dev.name;
+    }
 
     res.json({
       success: true,
@@ -201,6 +206,7 @@ orderRoutes.get('/:id', (req: Request, res: Response) => {
           status: order.status,
           buyerId: order.buyerId,
           developerId: order.developerId,
+          developerName,
           createdAt: order.createdAt,
           updatedAt: order.updatedAt,
         },

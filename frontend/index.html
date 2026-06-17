@@ -362,6 +362,7 @@ async function doLogin() {
   if (!res.success) return showAuthError(res.error);
   currentUser = res.data;
   localStorage.setItem('sid', currentUser.sid);
+  localStorage.setItem('userId', currentUser.id);
   localStorage.setItem('userName', currentUser.name);
   localStorage.setItem('userRole', currentUser.role);
   enterApp();
@@ -389,6 +390,7 @@ function showAuthError(msg) {
 function doLogout() {
   currentUser = null;
   localStorage.removeItem('sid');
+  localStorage.removeItem('userId');
   localStorage.removeItem('userName');
   localStorage.removeItem('userRole');
   document.getElementById('auth-page').style.display = 'flex';
@@ -662,10 +664,16 @@ function renderStages() {
   html += '</div>';
 
   // Find current active stage (first non-completed)
-  const activeStage = STAGE_CONFIG.find(cfg => {
+  // If currentStages is empty, show first stage as active
+  let activeStage = STAGE_CONFIG.find(cfg => {
     const s = currentStages.find(x => x.stage === cfg.key);
     return s && s.status !== 'completed';
   });
+
+  // If no active stage found but currentStages is empty, default to first stage
+  if (!activeStage && currentStages.length === 0) {
+    activeStage = STAGE_CONFIG[0];
+  }
 
   if (activeStage) {
     const stage = currentStages.find(s => s.stage === activeStage.key);
@@ -756,10 +764,11 @@ function formatTime(t) {
 // ─── Init ──────────────────────────────────────────
 (function init() {
   const sid = localStorage.getItem('sid');
+  const id = localStorage.getItem('userId');
   const name = localStorage.getItem('userName');
   const role = localStorage.getItem('userRole');
   if (sid) {
-    currentUser = { sid, name, role };
+    currentUser = { sid, id, name, role };
     enterApp();
   }
 })();
