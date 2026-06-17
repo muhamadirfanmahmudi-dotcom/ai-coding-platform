@@ -81,6 +81,16 @@ class Database {
       )
     `);
 
+    // Migrate: add role column to users if missing
+    const userCols = this.db.exec(`PRAGMA table_info(users)`);
+    if (userCols.length > 0) {
+      const colNames = userCols[0].values.map((v: any) => v[1]);
+      if (!colNames.includes('role')) {
+        this.db.run(`ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'buyer'`);
+        console.log('[DB] Added users.role');
+      }
+    }
+
     this.save();
     console.log('[DB] Migration completed');
   }
