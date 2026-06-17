@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 // ─── Serve frontend static files ────────────────────────
-app.use(express.static(path.resolve(__dirname, '../frontend')));
+app.use(express.static(path.resolve(__dirname, '../frontend'), { maxAge: 0, etag: false }));
 
 // ─── Routes ─────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {

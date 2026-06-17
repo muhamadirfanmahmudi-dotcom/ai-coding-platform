@@ -133,10 +133,9 @@ select option{background:var(--surface2);color:var(--text)}
 .stage-form{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:16px}
 .stage-form h4{font-size:16px;font-weight:600;margin-bottom:4px}
 .stage-form .stage-desc{color:var(--text2);font-size:13px;margin-bottom:16px;line-height:1.5}
-.stage-form .output-list{background:var(--surface);border-radius:8px;padding:12px 16px;margin-bottom:16px}
-.stage-form .output-list li{font-size:13px;color:var(--text2);margin-bottom:4px;list-style:none}
-.stage-form .output-list li::before{content:'📌 ';font-size:12px}
-.stage-form textarea{min-height:120px}
+.stage-form .form-group{margin-bottom:14px}
+.stage-form .form-group label{display:block;font-size:13px;color:var(--text);margin-bottom:6px;font-weight:500}
+.stage-form .form-group textarea{min-height:60px}
 .stage-actions{display:flex;gap:8px;margin-top:16px}
 .stage-status{font-size:13px;padding:4px 12px;border-radius:12px;font-weight:500}
 .stage-status.pending{background:rgba(255,149,0,.15);color:var(--orange)}
@@ -681,19 +680,24 @@ function renderStages() {
   if (activeStage) {
     const stage = currentStages.find(s => s.stage === activeStage.key);
     const cfg = activeStage;
+    let savedContent = {};
+    try { savedContent = stage?.content ? JSON.parse(stage.content) : {}; } catch(e) { savedContent = {}; }
+
     html += `<div class="stage-form">
       <h4>${cfg.emoji} ${cfg.name}</h4>
-      <div class="stage-desc">${cfg.desc}</div>
-      <div class="output-list"><ul>`;
-    cfg.fields.forEach(f => { html += `<li>${f.label}</li>`; });
-    html += `</ul></div>
-      <div class="form-group">
-        <textarea id="stage-content" placeholder="填写${cfg.name}的详细内容...">${esc(stage?.content || '')}</textarea>
-      </div>
-      <div class="stage-actions">
+      <div class="stage-desc">${cfg.desc}</div>`;
+
+    cfg.fields.forEach((f, i) => {
+      html += `<div class="form-group">
+        <label>${f.label}</label>
+        <textarea id="field-${cfg.key}-${i}" placeholder="${f.placeholder}">${esc(savedContent[f.label] || '')}</textarea>
+      </div>`;
+    });
+
+    html += `<div class="stage-actions">
         <span class="stage-status ${stage?.status || 'pending'}">${stage?.status === 'completed' ? '已完成' : (stage?.status === 'in_progress' ? '进行中' : '待开始')}</span>
         ${stage?.status !== 'completed' ? `<button class="btn-primary btn-sm" onclick="saveStage('${cfg.key}')">保存</button>` : ''}
-        ${stage?.status !== 'completed' && stage?.content ? `<button class="btn-success btn-sm" onclick="completeStage('${cfg.key}')">${cfg.completeBtn || '完成本阶段'}</button>` : ''}
+        ${stage?.status !== 'completed' ? `<button class="btn-success btn-sm" onclick="completeStage('${cfg.key}')">${cfg.completeBtn || '完成本阶段'}</button>` : ''}
       </div>
     </div>`;
   } else {
@@ -704,18 +708,33 @@ function renderStages() {
 }
 
 async function saveStage(stageKey) {
-  const content = document.getElementById('stage-content').value.trim();
-  if (!content) return alert('请填写内容');
-  const res = await api('PUT', '/api/orders/' + currentOrderId + '/stages/' + stageKey, { content });
+  const cfg = STAGE_CONFIG.find(c => c.key === stageKey);
+  const content = {};
+  cfg.fields.forEach((f, i) => {
+    const el = document.getElementById(`field-${stageKey}-${i}`);
+    if (el) content[f.label] = el.value.trim();
+  });
+  const hasContent = Object.values(content).some(v => v);
+  if (!hasContent) return alert('请至少填写一项内容');
+  const res = await api('PUT', '/api/orders/' + currentOrderId + '/stages/' + stageKey, { content: JSON.stringify(content) });
   if (!res.success) return alert(res.error);
   loadStages(currentOrderId);
 }
 
 async function completeStage(stageKey) {
-  if (!confirm('确定完成本阶段？')) return;
-  const res = await api('POST', '/api/orders/' + currentOrderId + '/stages/' + stageKey + '/complete');
+  const cfg = STAGE_CONFIG.find(c => c.key === stageKey);
+  const content = {};
+  cfg.fields.forEach((f, i) => {
+    const el = document.getElementById(`field-${stageKey}-${i}`);
+    if (el) content[f.label] = el.value.trim();
+  });
+  const hasContent = Object.values(content).some(v => v);
+  if (!hasContent) return alert('请先填写内容');
+  const res = await api('PUT', '/api/orders/' + currentOrderId + '/stages/' + stageKey, { content: JSON.stringify(content) });
   if (!res.success) return alert(res.error);
-  if (res.data?.allCompleted) {
+  const res2 = await api('POST', '/api/orders/' + currentOrderId + '/stages/' + stageKey + '/complete');
+  if (!res2.success) return alert(res2.error);
+  if (res2.data?.allCompleted) {
     alert('所有阶段已完成！订单已进入验收状态');
   }
   loadStages(currentOrderId);
