@@ -22,7 +22,7 @@ function decodeSid(sid: string): { id: string } | null {
   }
 }
 
-export function getUserFromSid(req: Request): { id: string; name: string } | null {
+export function getUserFromSid(req: Request): { id: string; name: string; role: string } | null {
   const authHeader = req.headers.authorization;
   if (!authHeader) return null;
 
@@ -33,17 +33,23 @@ export function getUserFromSid(req: Request): { id: string; name: string } | nul
   const user = db.getUserById(decoded.id);
   if (!user) return null;
 
-  return { id: user.id, name: user.name };
+  return { id: user.id, name: user.name, role: user.role };
 }
 
 // ─── POST /api/users/register ──────────────────────────
 
 userRoutes.post('/register', (req: Request, res: Response) => {
   try {
-    const { name, email, password } = req.body as RegisterRequest;
+    const { name, email, password, role } = req.body as RegisterRequest;
 
     if (!name || !email || !password) {
       res.status(400).json({ success: false, error: '请填写完整信息' } as ApiResponse);
+      return;
+    }
+
+    const validRoles = ['buyer', 'developer'];
+    if (role && !validRoles.includes(role)) {
+      res.status(400).json({ success: false, error: '无效的角色' } as ApiResponse);
       return;
     }
 
@@ -54,11 +60,11 @@ userRoutes.post('/register', (req: Request, res: Response) => {
     }
 
     const id = uuid();
-    const user = db.createUser({ id, name, email, password });
+    const user = db.createUser({ id, name, email, password, role });
 
     const response: ApiResponse<UserResponse> = {
       success: true,
-      data: { id: user.id, name: user.name, email: user.email, sid: '' },
+      data: { id: user.id, name: user.name, email: user.email, role: user.role, sid: '' },
     };
 
     res.status(201).json(response);
@@ -89,7 +95,7 @@ userRoutes.post('/login', (req: Request, res: Response) => {
 
     const response: ApiResponse<UserResponse> = {
       success: true,
-      data: { id: user.id, name: user.name, email: user.email, sid },
+      data: { id: user.id, name: user.name, email: user.email, role: user.role, sid },
     };
 
     res.json(response);
@@ -120,6 +126,7 @@ userRoutes.get('/me', (req: Request, res: Response) => {
       id: fullUser.id,
       name: fullUser.name,
       email: fullUser.email,
+      role: fullUser.role,
       sid: req.headers.authorization!.replace('Bearer ', ''),
     },
   };

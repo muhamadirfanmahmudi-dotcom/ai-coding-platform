@@ -134,6 +134,40 @@ orderRoutes.get('/mine', (req: Request, res: Response) => {
   }
 });
 
+// ─── GET /api/orders/developer ── 我接的单 ──────────────
+
+orderRoutes.get('/developer', (req: Request, res: Response) => {
+  const user = getUserFromSid(req);
+  if (!user) {
+    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
+    return;
+  }
+
+  try {
+    const orders = db.listDeveloperOrders(user.id);
+    const data: OrderResponse[] = orders.map((o) => ({
+      id: o.id,
+      title: o.title,
+      description: o.description,
+      userInfo: o.userInfo,
+      problem: o.problem,
+      features: o.features,
+      antiFeatures: o.antiFeatures,
+      successCriteria: o.successCriteria,
+      status: o.status,
+      buyerId: o.buyerId,
+      developerId: o.developerId,
+      createdAt: o.createdAt,
+      updatedAt: o.updatedAt,
+    }));
+
+    res.json({ success: true, data } as ApiResponse<OrderResponse[]>);
+  } catch (err: any) {
+    console.error('[Orders] Developer error:', err.message);
+    res.status(500).json({ success: false, error: '服务器错误' } as ApiResponse);
+  }
+});
+
 // ─── GET /api/orders/:id ── 订单详情 + 进度 ────────────
 
 orderRoutes.get('/:id', (req: Request, res: Response) => {
@@ -193,6 +227,10 @@ orderRoutes.post('/:id/claim', (req: Request, res: Response) => {
     res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
     return;
   }
+  if (user.role !== 'developer') {
+    res.status(403).json({ success: false, error: '只有开发者可以接单' } as ApiResponse);
+    return;
+  }
 
   try {
     const order = db.getOrderById(paramId(req));
@@ -202,6 +240,10 @@ orderRoutes.post('/:id/claim', (req: Request, res: Response) => {
     }
     if (order.status !== 'pending') {
       res.status(409).json({ success: false, error: '该订单已被接单' } as ApiResponse);
+      return;
+    }
+    if (order.buyerId === user.id) {
+      res.status(403).json({ success: false, error: '不能接自己的单' } as ApiResponse);
       return;
     }
 
@@ -227,6 +269,10 @@ orderRoutes.post('/:id/progress', (req: Request, res: Response) => {
     const order = db.getOrderById(paramId(req));
     if (!order) {
       res.status(404).json({ success: false, error: '订单不存在' } as ApiResponse);
+      return;
+    }
+    if (order.developerId !== user.id) {
+      res.status(403).json({ success: false, error: '只有接单的开发者可以添加进度' } as ApiResponse);
       return;
     }
 
@@ -292,6 +338,10 @@ orderRoutes.post('/:id/status', (req: Request, res: Response) => {
     const order = db.getOrderById(paramId(req));
     if (!order) {
       res.status(404).json({ success: false, error: '订单不存在' } as ApiResponse);
+      return;
+    }
+    if (order.developerId !== user.id) {
+      res.status(403).json({ success: false, error: '只有接单的开发者可以更新状态' } as ApiResponse);
       return;
     }
 

@@ -42,6 +42,7 @@ class Database {
         name TEXT NOT NULL,
         email TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'buyer' CHECK(role IN ('buyer','developer')),
         sid TEXT,
         created_at TEXT DEFAULT (datetime('now')),
         updated_at TEXT DEFAULT (datetime('now'))
@@ -99,10 +100,10 @@ class Database {
   //  User Methods
   // ═══════════════════════════════════════════════════
 
-  createUser(params: { id: string; name: string; email: string; password: string }) {
+  createUser(params: { id: string; name: string; email: string; password: string; role?: string }) {
     this.db.run(
-      `INSERT INTO users (id, name, email, password, sid) VALUES (?, ?, ?, ?, '')`,
-      [params.id, params.name, params.email, params.password]
+      `INSERT INTO users (id, name, email, password, role, sid) VALUES (?, ?, ?, ?, ?, '')`,
+      [params.id, params.name, params.email, params.password, params.role || 'buyer']
     );
     this.save();
     return this.getUserById(params.id)!;
@@ -196,6 +197,17 @@ class Database {
     return orders;
   }
 
+  listDeveloperOrders(developerId: string) {
+    const stmt = this.db.prepare(`SELECT * FROM orders WHERE developer_id = ? ORDER BY created_at DESC`);
+    stmt.bind([developerId]);
+    const orders: any[] = [];
+    while (stmt.step()) {
+      orders.push(rowToOrder(stmt.getAsObject()));
+    }
+    stmt.free();
+    return orders;
+  }
+
   updateOrder(id: string, data: Record<string, any>) {
     const setClauses: string[] = [];
     const params: any[] = [];
@@ -249,6 +261,7 @@ function rowToUser(row: any) {
     name: row.name,
     email: row.email,
     password: row.password,
+    role: row.role,
     sid: row.sid,
     createdAt: row.created_at,
     updatedAt: row.updated_at,

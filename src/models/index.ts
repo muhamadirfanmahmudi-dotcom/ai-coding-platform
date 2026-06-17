@@ -8,6 +8,7 @@ export interface RegisterRequest {
   name: string;
   email: string;
   password: string;
+  role?: 'buyer' | 'developer';
 }
 
 export interface LoginRequest {
@@ -35,6 +36,7 @@ export interface UserResponse {
   id: string;
   name: string;
   email: string;
+  role: string;
   sid: string;
 }
 

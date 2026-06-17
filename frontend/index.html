@@ -19,13 +19,16 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 
 a{color:var(--blue);text-decoration:none}
 button{font-family:inherit;cursor:pointer;border:none;border-radius:var(--radius2);padding:10px 20px;font-size:14px;font-weight:500;transition:all .2s}
-input,textarea{font-family:inherit;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius2);padding:12px 16px;color:var(--text);font-size:14px;width:100%;outline:none;transition:border-color .2s}
-input:focus,textarea:focus{border-color:var(--blue)}
+input,textarea,select{font-family:inherit;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius2);padding:12px 16px;color:var(--text);font-size:14px;width:100%;outline:none;transition:border-color .2s}
+input:focus,textarea:focus,select:focus{border-color:var(--blue)}
 textarea{resize:vertical;min-height:80px}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a1a1a6' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+select option{background:var(--surface2);color:var(--text)}
 
 .btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue2)}
 .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{background:var(--surface3)}
 .btn-danger{background:var(--red);color:#fff}.btn-danger:hover{opacity:.85}
+.btn-success{background:var(--green);color:#fff}.btn-success:hover{opacity:.85}
 .btn-sm{padding:6px 14px;font-size:13px}
 .btn-ghost{background:transparent;color:var(--text2)}.btn-ghost:hover{color:var(--text);background:var(--surface2)}
 
@@ -43,12 +46,22 @@ textarea{resize:vertical;min-height:80px}
 .auth-card .btn-primary{width:100%;padding:12px;font-size:15px;margin-top:8px}
 .auth-card .error{color:var(--red);font-size:13px;text-align:center;margin-top:12px;min-height:20px}
 
+/* ─── Role Selector ──────────────────────────────── */
+.role-selector{display:flex;gap:8px;margin-bottom:16px}
+.role-btn{flex:1;padding:12px;border-radius:var(--radius2);border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center}
+.role-btn.active{border-color:var(--blue);color:var(--text);background:rgba(0,122,255,.1)}
+.role-btn .role-icon{font-size:24px;margin-bottom:4px}
+.role-btn .role-name{font-size:13px}
+
 /* ─── App Layout ────────────────────────────────── */
 .app-page{display:none;min-height:100vh}
 .navbar{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);background:rgba(10,10,10,.8);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100}
 .navbar .logo{font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px}
 .navbar .logo span{color:var(--blue)}
 .navbar .user-info{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--text2)}
+.navbar .role-badge{padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.role-buyer{background:rgba(0,122,255,.15);color:var(--blue)}
+.role-developer{background:rgba(175,82,222,.15);color:var(--purple)}
 .container{max-width:900px;margin:0 auto;padding:24px}
 
 /* ─── Header ────────────────────────────────────── */
@@ -81,7 +94,6 @@ textarea{resize:vertical;min-height:80px}
 .status-cancelled{background:rgba(255,59,48,.15);color:var(--red)}
 
 /* ─── Create Order Form ─────────────────────────── */
-.create-page{display:none}
 .form-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px}
 .form-card h2{font-size:20px;font-weight:600;margin-bottom:24px}
 .form-card .form-group{margin-bottom:20px}
@@ -90,14 +102,21 @@ textarea{resize:vertical;min-height:80px}
 .form-actions{display:flex;gap:12px;margin-top:24px}
 
 /* ─── Order Detail ──────────────────────────────── */
-.detail-page{display:none}
 .detail-back{display:flex;align-items:center;gap:6px;color:var(--text2);font-size:14px;cursor:pointer;margin-bottom:20px;transition:color .2s}
 .detail-back:hover{color:var(--text)}
 .detail-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:20px}
 .detail-card h2{font-size:20px;font-weight:600;margin-bottom:16px}
+.detail-card h3{font-size:16px;font-weight:600;margin-bottom:12px}
 .detail-field{margin-bottom:16px}
 .detail-field .label{font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
 .detail-field .value{font-size:14px;color:var(--text);line-height:1.6;white-space:pre-wrap}
+
+/* ─── Action Panel (Developer) ──────────────────── */
+.action-panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:20px}
+.action-panel h3{font-size:16px;font-weight:600;margin-bottom:16px}
+.status-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.progress-form{margin-top:16px}
+.progress-form .form-group{margin-bottom:12px}
 
 /* ─── Progress Timeline ─────────────────────────── */
 .timeline{margin-top:20px}
@@ -121,6 +140,7 @@ textarea{resize:vertical;min-height:80px}
   .auth-card{padding:24px}
   .form-card{padding:20px}
   .detail-card{padding:20px}
+  .action-panel{padding:20px}
 }
 </style>
 </head>
@@ -147,6 +167,16 @@ textarea{resize:vertical;min-height:80px}
       <button class="btn-primary" onclick="doLogin()">登录</button>
     </div>
     <div id="register-form" style="display:none">
+      <div class="role-selector">
+        <div class="role-btn active" onclick="selectRole('buyer', this)">
+          <div class="role-icon">&#128100;</div>
+          <div class="role-name">我是买家</div>
+        </div>
+        <div class="role-btn" onclick="selectRole('developer', this)">
+          <div class="role-icon">&#128187;</div>
+          <div class="role-name">我是开发者</div>
+        </div>
+      </div>
       <div class="form-group">
         <label>用户名</label>
         <input type="text" id="reg-name" placeholder="请输入用户名">
@@ -170,6 +200,7 @@ textarea{resize:vertical;min-height:80px}
   <nav class="navbar">
     <div class="logo"><span>&#9889;</span> AI 代写平台</div>
     <div class="user-info">
+      <span id="user-role-badge"></span>
       <span id="user-name"></span>
       <button class="btn-ghost btn-sm" onclick="doLogout()">退出</button>
     </div>
@@ -180,12 +211,9 @@ textarea{resize:vertical;min-height:80px}
     <div id="main-view">
       <div class="page-header">
         <h2 id="view-title">抢单大厅</h2>
-        <button class="btn-primary" onclick="showCreate()">+ 创建新订单</button>
+        <button class="btn-primary" id="btn-create" onclick="showCreate()">+ 创建新订单</button>
       </div>
-      <div class="tabs">
-        <div class="tab active" onclick="switchTab('hall')">抢单大厅</div>
-        <div class="tab" onclick="switchTab('mine')">我的订单</div>
-      </div>
+      <div class="tabs" id="main-tabs"></div>
       <div class="order-list" id="order-list"></div>
     </div>
 
@@ -229,6 +257,10 @@ textarea{resize:vertical;min-height:80px}
           <h2 id="detail-title"></h2>
           <span class="status" id="detail-status"></span>
         </div>
+        <div id="detail-developer" style="display:none" class="detail-field">
+          <div class="label">接单开发者</div>
+          <div class="value" id="detail-dev-name"></div>
+        </div>
         <div class="detail-field"><div class="label">用户是谁</div><div class="value" id="detail-userinfo"></div></div>
         <div class="detail-field"><div class="label">解决什么问题</div><div class="value" id="detail-problem"></div></div>
         <div class="detail-field"><div class="label">核心功能</div><div class="value" id="detail-features"></div></div>
@@ -236,6 +268,24 @@ textarea{resize:vertical;min-height:80px}
         <div class="detail-field"><div class="label">成功标准</div><div class="value" id="detail-success"></div></div>
         <div class="detail-field"><div class="label">创建时间</div><div class="value" id="detail-time"></div></div>
       </div>
+
+      <!-- Developer Action Panel -->
+      <div class="action-panel" id="action-panel" style="display:none">
+        <h3>操作</h3>
+        <div id="action-buttons"></div>
+        <div class="progress-form" id="progress-form" style="display:none">
+          <div class="form-group">
+            <label>进度标题</label>
+            <input type="text" id="progress-title" placeholder="例如：需求确认、开发中、测试通过">
+          </div>
+          <div class="form-group">
+            <label>进度内容</label>
+            <textarea id="progress-content" placeholder="描述当前进度..."></textarea>
+          </div>
+          <button class="btn-primary btn-sm" onclick="submitProgress()">添加进度</button>
+        </div>
+      </div>
+
       <div class="detail-card">
         <div class="timeline" id="detail-timeline">
           <h3>进度追踪</h3>
@@ -251,6 +301,8 @@ const API = '';
 let currentUser = null;
 let currentTab = 'hall';
 let currentOrderId = null;
+let currentOrder = null;
+let selectedRole = 'buyer';
 
 // ─── API Helper ────────────────────────────────────
 async function api(method, path, body) {
@@ -263,6 +315,12 @@ async function api(method, path, body) {
 }
 
 // ─── Auth ──────────────────────────────────────────
+function selectRole(role, el) {
+  selectedRole = role;
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
 function switchAuthTab(tab) {
   document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
   event.target.classList.add('active');
@@ -280,6 +338,7 @@ async function doLogin() {
   currentUser = res.data;
   localStorage.setItem('sid', currentUser.sid);
   localStorage.setItem('userName', currentUser.name);
+  localStorage.setItem('userRole', currentUser.role);
   enterApp();
 }
 
@@ -288,7 +347,7 @@ async function doRegister() {
   const email = document.getElementById('reg-email').value.trim();
   const password = document.getElementById('reg-password').value;
   if (!name || !email || !password) return showAuthError('请填写完整信息');
-  const res = await api('POST', '/api/users/register', { name, email, password });
+  const res = await api('POST', '/api/users/register', { name, email, password, role: selectedRole });
   if (!res.success) return showAuthError(res.error);
   document.getElementById('auth-error').textContent = '注册成功，请登录';
   document.getElementById('auth-error').style.color = 'var(--green)';
@@ -306,6 +365,7 @@ function doLogout() {
   currentUser = null;
   localStorage.removeItem('sid');
   localStorage.removeItem('userName');
+  localStorage.removeItem('userRole');
   document.getElementById('auth-page').style.display = 'flex';
   document.getElementById('app-page').style.display = 'none';
 }
@@ -314,8 +374,33 @@ function enterApp() {
   document.getElementById('auth-page').style.display = 'none';
   document.getElementById('app-page').style.display = 'block';
   document.getElementById('user-name').textContent = currentUser.name;
+  const roleBadge = document.getElementById('user-role-badge');
+  if (currentUser.role === 'developer') {
+    roleBadge.innerHTML = '<span class="role-badge role-developer">开发者</span>';
+  } else {
+    roleBadge.innerHTML = '<span class="role-badge role-buyer">买家</span>';
+  }
+  renderTabs();
   showMain();
-  loadOrders();
+}
+
+// ─── Tabs ──────────────────────────────────────────
+function renderTabs() {
+  const tabsEl = document.getElementById('main-tabs');
+  const createBtn = document.getElementById('btn-create');
+  if (currentUser.role === 'developer') {
+    tabsEl.innerHTML = `
+      <div class="tab active" onclick="switchTab('hall')">抢单大厅</div>
+      <div class="tab" onclick="switchTab('developer')">我接的单</div>
+    `;
+    createBtn.style.display = 'none';
+  } else {
+    tabsEl.innerHTML = `
+      <div class="tab active" onclick="switchTab('hall')">抢单大厅</div>
+      <div class="tab" onclick="switchTab('mine')">我的订单</div>
+    `;
+    createBtn.style.display = '';
+  }
 }
 
 // ─── Views ─────────────────────────────────────────
@@ -324,6 +409,7 @@ function showMain() {
   document.getElementById('create-view').style.display = 'none';
   document.getElementById('detail-view').style.display = 'none';
   currentOrderId = null;
+  currentOrder = null;
   loadOrders();
 }
 
@@ -344,22 +430,24 @@ function showDetail(orderId) {
   loadOrderDetail(orderId);
 }
 
-// ─── Tabs ──────────────────────────────────────────
+// ─── Tab Switch ────────────────────────────────────
 function switchTab(tab) {
   currentTab = tab;
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   event.target.classList.add('active');
-  document.getElementById('view-title').textContent = tab === 'hall' ? '抢单大厅' : '我的订单';
+  const titles = { hall: '抢单大厅', mine: '我的订单', developer: '我接的单' };
+  document.getElementById('view-title').textContent = titles[tab] || '';
   loadOrders();
 }
 
 // ─── Load Orders ───────────────────────────────────
 async function loadOrders() {
-  const path = currentTab === 'hall' ? '/api/orders/hall' : '/api/orders/mine';
-  const res = await api('GET', path);
+  const paths = { hall: '/api/orders/hall', mine: '/api/orders/mine', developer: '/api/orders/developer' };
+  const res = await api('GET', paths[currentTab]);
   const list = document.getElementById('order-list');
   if (!res.success || !res.data.length) {
-    list.innerHTML = '<div class="empty"><div class="icon">&#128203;</div><p>' + (currentTab === 'hall' ? '大厅暂无订单' : '你还没有创建过订单') + '</p></div>';
+    const msgs = { hall: '大厅暂无订单', mine: '你还没有创建过订单', developer: '你还没有接过单' };
+    list.innerHTML = '<div class="empty"><div class="icon">&#128203;</div><p>' + msgs[currentTab] + '</p></div>';
     return;
   }
   list.innerHTML = res.data.map(o => `
@@ -399,6 +487,7 @@ async function loadOrderDetail(orderId) {
   const res = await api('GET', '/api/orders/' + orderId);
   if (!res.success) return alert(res.error);
   const o = res.data.order;
+  currentOrder = o;
   document.getElementById('detail-title').textContent = o.title;
   document.getElementById('detail-status').className = 'status status-' + o.status;
   document.getElementById('detail-status').textContent = statusText(o.status);
@@ -409,6 +498,19 @@ async function loadOrderDetail(orderId) {
   document.getElementById('detail-success').textContent = o.successCriteria || '未填写';
   document.getElementById('detail-time').textContent = formatTime(o.createdAt);
 
+  // Show developer name if claimed
+  const devEl = document.getElementById('detail-developer');
+  if (o.developerId) {
+    devEl.style.display = '';
+    document.getElementById('detail-dev-name').textContent = o.developerName || o.developerId;
+  } else {
+    devEl.style.display = 'none';
+  }
+
+  // Developer action panel
+  renderActionPanel(o);
+
+  // Progress timeline
   const progress = res.data.progress;
   const tl = document.getElementById('timeline-list');
   if (!progress.length) {
@@ -422,6 +524,71 @@ async function loadOrderDetail(orderId) {
       </div>
     `).join('');
   }
+}
+
+// ─── Action Panel (Developer) ──────────────────────
+function renderActionPanel(order) {
+  const panel = document.getElementById('action-panel');
+  const buttons = document.getElementById('action-buttons');
+  const form = document.getElementById('progress-form');
+
+  if (currentUser.role !== 'developer') {
+    panel.style.display = 'none';
+    return;
+  }
+
+  panel.style.display = '';
+  let html = '';
+
+  if (order.status === 'pending') {
+    html = '<button class="btn-primary" onclick="claimOrder()">接此订单</button>';
+    form.style.display = 'none';
+  } else if (order.developerId === currentUser.id) {
+    if (order.status === 'claimed') {
+      html = '<button class="btn-success" onclick="updateStatus(\'in_progress\')">开始开发</button>';
+    } else if (order.status === 'in_progress') {
+      html = '<button class="btn-primary" onclick="updateStatus(\'reviewing\')">提交验收</button>';
+    } else if (order.status === 'reviewing') {
+      html = '';
+    } else {
+      html = '';
+    }
+    form.style.display = (order.status === 'in_progress' || order.status === 'claimed') ? '' : 'none';
+  } else {
+    html = '<span style="color:var(--text3);font-size:14px">已被其他开发者接单</span>';
+    form.style.display = 'none';
+  }
+
+  buttons.innerHTML = html;
+}
+
+// ─── Claim Order ───────────────────────────────────
+async function claimOrder() {
+  if (!confirm('确定要接这个订单吗？')) return;
+  const res = await api('POST', '/api/orders/' + currentOrderId + '/claim');
+  if (!res.success) return alert(res.error);
+  loadOrderDetail(currentOrderId);
+}
+
+// ─── Update Status ─────────────────────────────────
+async function updateStatus(status) {
+  const labels = { in_progress: '开始开发', reviewing: '提交验收', completed: '确认完成' };
+  if (!confirm('确定要' + (labels[status] || '更新状态') + '吗？')) return;
+  const res = await api('POST', '/api/orders/' + currentOrderId + '/status', { status });
+  if (!res.success) return alert(res.error);
+  loadOrderDetail(currentOrderId);
+}
+
+// ─── Submit Progress ───────────────────────────────
+async function submitProgress() {
+  const title = document.getElementById('progress-title').value.trim();
+  const content = document.getElementById('progress-content').value.trim();
+  if (!content) return alert('请填写进度内容');
+  const res = await api('POST', '/api/orders/' + currentOrderId + '/progress', { title, content });
+  if (!res.success) return alert(res.error);
+  document.getElementById('progress-title').value = '';
+  document.getElementById('progress-content').value = '';
+  loadOrderDetail(currentOrderId);
 }
 
 // ─── Helpers ───────────────────────────────────────
@@ -442,8 +609,9 @@ function formatTime(t) {
 (function init() {
   const sid = localStorage.getItem('sid');
   const name = localStorage.getItem('userName');
+  const role = localStorage.getItem('userRole');
   if (sid) {
-    currentUser = { sid, name };
+    currentUser = { sid, name, role };
     enterApp();
   }
 })();
