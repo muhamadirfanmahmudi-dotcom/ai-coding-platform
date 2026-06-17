@@ -297,17 +297,13 @@ select option{background:var(--surface2);color:var(--text)}
       <div class="action-panel" id="action-panel" style="display:none">
         <h3>操作</h3>
         <div id="action-buttons"></div>
-        <div class="progress-form" id="progress-form" style="display:none">
-          <div class="form-group">
-            <label>进度标题</label>
-            <input type="text" id="progress-title" placeholder="例如：需求确认、开发中、测试通过">
-          </div>
-          <div class="form-group">
-            <label>进度内容</label>
-            <textarea id="progress-content" placeholder="描述当前进度..."></textarea>
-          </div>
-          <button class="btn-primary btn-sm" onclick="submitProgress()">添加进度</button>
-        </div>
+      </div>
+
+      <!-- Buyer View: Development Progress -->
+      <div class="detail-card" id="buyer-progress-card" style="display:none">
+        <h3>开发进度</h3>
+        <div id="buyer-stage-progress"></div>
+        <div id="buyer-stage-detail"></div>
       </div>
 
       <div class="detail-card">
@@ -536,6 +532,9 @@ async function loadOrderDetail(orderId) {
   // Developer action panel
   renderActionPanel(o);
 
+  // Buyer progress view
+  loadBuyerProgress(o);
+
   // Progress timeline
   const progress = res.data.progress;
   const tl = document.getElementById('timeline-list');
@@ -755,6 +754,68 @@ async function updateStatus(status) {
   const res = await api('POST', '/api/orders/' + currentOrderId + '/status', { status });
   if (!res.success) return alert(res.error);
   loadOrderDetail(currentOrderId);
+}
+
+// ─── Buyer Progress View ────────────────────────────
+async function loadBuyerProgress(order) {
+  const card = document.getElementById('buyer-stage-progress');
+  const detail = document.getElementById('buyer-stage-detail');
+  const cardEl = document.getElementById('buyer-progress-card');
+
+  if (!order.developerId) {
+    cardEl.style.display = 'none';
+    return;
+  }
+
+  const res = await api('GET', '/api/orders/' + order.id + '/stages');
+  if (!res.success || !res.data.length) {
+    cardEl.style.display = 'none';
+    return;
+  }
+
+  cardEl.style.display = '';
+  const stages = res.data;
+
+  let html = '<div class="stage-progress">';
+  STAGE_CONFIG.forEach((cfg, i) => {
+    const stage = stages.find(s => s.stage === cfg.key);
+    const status = stage ? stage.status : 'pending';
+    const cls = status === 'completed' ? 'completed' : (status === 'in_progress' ? 'active' : '');
+    html += `<div class="stage-step ${cls}">
+      <div class="stage-dot">${status === 'completed' ? '✓' : (i + 1)}</div>
+      <div class="stage-name">${cfg.emoji} ${cfg.name}</div>
+      ${i < STAGE_CONFIG.length - 1 ? '<div class="stage-connector"></div>' : ''}
+    </div>`;
+  });
+  html += '</div>';
+  card.innerHTML = html;
+
+  // Show completed/in-progress stage details
+  let detailHtml = '';
+  STAGE_CONFIG.forEach(cfg => {
+    const stage = stages.find(s => s.stage === cfg.key);
+    if (!stage || stage.status === 'pending') return;
+
+    let content = {};
+    try { content = stage.content ? JSON.parse(stage.content) : {}; } catch(e) { content = {}; }
+
+    detailHtml += `<div class="stage-form" style="margin-top:16px">
+      <h4>${cfg.emoji} ${cfg.name} <span class="stage-status ${stage.status}">${stage.status === 'completed' ? '已完成' : '进行中'}</span></h4>`;
+
+    cfg.fields.forEach(f => {
+      const val = content[f.label] || '';
+      if (val) {
+        detailHtml += `<div class="detail-field">
+          <div class="label">${f.label}</div>
+          <div class="value">${esc(val)}</div>
+        </div>`;
+      }
+    });
+
+    detailHtml += '</div>';
+  });
+
+  detail.innerHTML = detailHtml || '<div style="color:var(--text3);font-size:14px;text-align:center;padding:20px">开发者尚未开始</div>';
 }
 
 // ─── Submit Progress ───────────────────────────────
