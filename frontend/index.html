@@ -587,12 +587,15 @@ const STAGE_CONFIG = [
   {
     key: 'requirement', name: '需求分析', emoji: '🟢',
     desc: '明确要做什么产品、给谁用、解决什么问题',
+    completeBtn: '完成需求分析',
     fields: [
-      { label: '产品定位', placeholder: '你要做什么产品？核心价值是什么？' },
-      { label: '目标用户', placeholder: '给谁用？用户画像是什么？' },
-      { label: '核心问题', placeholder: '解决什么问题？痛点是什么？' },
-      { label: '用户故事', placeholder: '作为[用户]，我想要[功能]，以便[价值]' },
-      { label: '功能列表', placeholder: '列出所有功能点' },
+      { label: '1. 产品名称', placeholder: 'XXX系统' },
+      { label: '2. 产品目标', placeholder: '解决什么问题' },
+      { label: '3. 用户群体', placeholder: '谁会用' },
+      { label: '4. 核心问题', placeholder: '用户痛点是什么' },
+      { label: '5. 核心功能范围（MVP）', placeholder: '功能1\n功能2\n功能3' },
+      { label: '6. 非目标（不做什么）', placeholder: '不做移动端（可选）\n不做复杂权限' },
+      { label: '7. 成功标准', placeholder: '能正常运行\n能完成核心流程' },
     ]
   },
   {
@@ -690,7 +693,7 @@ function renderStages() {
       <div class="stage-actions">
         <span class="stage-status ${stage?.status || 'pending'}">${stage?.status === 'completed' ? '已完成' : (stage?.status === 'in_progress' ? '进行中' : '待开始')}</span>
         ${stage?.status !== 'completed' ? `<button class="btn-primary btn-sm" onclick="saveStage('${cfg.key}')">保存</button>` : ''}
-        ${stage?.status !== 'completed' && stage?.content ? `<button class="btn-success btn-sm" onclick="completeStage('${cfg.key}')">完成本阶段</button>` : ''}
+        ${stage?.status !== 'completed' && stage?.content ? `<button class="btn-success btn-sm" onclick="completeStage('${cfg.key}')">${cfg.completeBtn || '完成本阶段'}</button>` : ''}
       </div>
     </div>`;
   } else {
