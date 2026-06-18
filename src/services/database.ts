@@ -534,6 +534,18 @@ class Database {
     return null;
   }
 
+  getCommitByHash(repoId: string, hash: string) {
+    const stmt = this.db.prepare(`SELECT * FROM code_commits WHERE repo_id = ? AND id = ?`);
+    stmt.bind([repoId, hash]);
+    if (stmt.step()) {
+      const row = rowToCommit(stmt.getAsObject());
+      stmt.free();
+      return row;
+    }
+    stmt.free();
+    return null;
+  }
+
   getCommitCount(repoId: string): number {
     const stmt = this.db.prepare(`SELECT COUNT(*) AS cnt FROM code_commits WHERE repo_id = ?`);
     stmt.bind([repoId]);

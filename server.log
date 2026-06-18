@@ -1,0 +1,109 @@
+
+> ai-coding-platform@0.2.0 dev
+> tsx watch src/index.ts
+
+[DB] Loaded: E:\big\dev.db
+[DB] Migration completed
+[DB] SQLite database ready
+[Server] Running at http://0.0.0.0:3000
+[Server] Health check: http://localhost:3000/api/health
+23:32:02 [tsx] change in ./src\services\database.ts Restarting...
+c[DB] Loaded: E:\big\dev.db
+[DB] Migration completed
+[DB] SQLite database ready
+[Server] Running at http://0.0.0.0:3000
+[Server] Health check: http://localhost:3000/api/health
+23:32:26 [tsx] change in ./src\index.ts Restarting...
+c[DB] Loaded: E:\big\dev.db
+[DB] Migration completed
+[DB] SQLite database ready
+[Server] Running at http://0.0.0.0:3000
+[Server] Health check: http://localhost:3000/api/health
+23:32:32 [tsx] change in ./src\index.ts Restarting...
+c[DB] Loaded: E:\big\dev.db
+[DB] Migration completed
+[DB] SQLite database ready
+[Server] Running at http://0.0.0.0:3000
+[Server] Health check: http://localhost:3000/api/health
+23:32:39 [tsx] change in ./src\routes\git.ts Restarting...
+c[DB] Loaded: E:\big\dev.db
+[DB] Migration completed
+[DB] SQLite database ready
+[Server] Running at http://0.0.0.0:3000
+[Server] Health check: http://localhost:3000/api/health
+23:32:43 [tsx] change in ./src\routes\git.ts Restarting...
+c[DB] Loaded: E:\big\dev.db
+[DB] Migration completed
+[DB] SQLite database ready
+[Server] Running at http://0.0.0.0:3000
+[Server] Health check: http://localhost:3000/api/health
+23:32:51 [tsx] change in ./src\routes\git.ts Restarting...
+c[DB] Loaded: E:\big\dev.db
+[DB] Migration completed
+[DB] SQLite database ready
+[Server] Running at http://0.0.0.0:3000
+[Server] Health check: http://localhost:3000/api/health
+23:33:16 [tsx] change in ./src\services\git-repo.ts Restarting...
+c[DB] Loaded: E:\big\dev.db
+[DB] Migration completed
+[DB] SQLite database ready
+[Server] Running at http://0.0.0.0:3000
+[Server] Health check: http://localhost:3000/api/health
+23:33:23 [tsx] change in ./src\routes\git.ts Restarting...
+c[DB] Loaded: E:\big\dev.db
+[DB] Migration completed
+[DB] SQLite database ready
+[Server] Running at http://0.0.0.0:3000
+[Server] Health check: http://localhost:3000/api/health
+23:33:27 [tsx] change in ./src\routes\git.ts Restarting...
+c[DB] Loaded: E:\big\dev.db
+[DB] Migration completed
+[DB] SQLite database ready
+[Server] Running at http://0.0.0.0:3000
+[Server] Health check: http://localhost:3000/api/health
+23:33:33 [tsx] change in ./src\routes\git.ts Restarting...
+c[DB] Loaded: E:\big\dev.db
+[DB] Migration completed
+[DB] SQLite database ready
+[Server] Running at http://0.0.0.0:3000
+[Server] Health check: http://localhost:3000/api/health
+23:33:37 [tsx] change in ./src\routes\git.ts Restarting...
+c[DB] Loaded: E:\big\dev.db
+[DB] Migration completed
+[DB] SQLite database ready
+[Server] Running at http://0.0.0.0:3000
+[Server] Health check: http://localhost:3000/api/health
+23:33:41 [tsx] change in ./src\routes\git.ts Restarting...
+c[DB] Loaded: E:\big\dev.db
+[DB] Migration completed
+[DB] SQLite database ready
+[Server] Running at http://0.0.0.0:3000
+[Server] Health check: http://localhost:3000/api/health
+23:34:18 [tsx] change in ./src\routes\git.ts Restarting...
+c[DB] Loaded: E:\big\dev.db
+[DB] Migration completed
+[DB] SQLite database ready
+[Server] Running at http://0.0.0.0:3000
+[Server] Health check: http://localhost:3000/api/health
+23:34:23 [tsx] change in ./src\routes\git.ts Restarting...
+c[DB] Loaded: E:\big\dev.db
+[DB] Migration completed
+[DB] SQLite database ready
+[Server] Running at http://0.0.0.0:3000
+[Server] Health check: http://localhost:3000/api/health
+00:03:34 [tsx] change in ./src\routes\git.ts Rerunning...
+c[DB] Loaded: E:\big\dev.db
+[DB] Migration completed
+[DB] SQLite database ready
+[Server] Uncaught exception: Error: listen EADDRINUSE: address already in use 0.0.0.0:3000
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at node:net:2274:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '0.0.0.0',
+  port: 3000
+}
+Assertion failed: !(handle->flags & UV_HANDLE_CLOSING), file src\win\async.c, line 76

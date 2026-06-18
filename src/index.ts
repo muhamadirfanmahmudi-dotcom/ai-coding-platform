@@ -5,6 +5,7 @@ import { config } from './config';
 import { userRoutes } from './routes/users';
 import { orderRoutes } from './routes/orders';
 import { repoRoutes } from './routes/repos';
+import { gitRoutes } from './routes/git';
 import { db } from './services/database';
 
 const app = express();
@@ -31,6 +32,7 @@ app.get('/api/health', (_req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/repos', repoRoutes);
+app.use('/git', gitRoutes);
 
 // Fallback: serve index.html for SPA-like routing
 app.get('*', (_req, res) => {
