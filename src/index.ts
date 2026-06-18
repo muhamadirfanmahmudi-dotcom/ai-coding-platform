@@ -4,6 +4,7 @@ import path from 'path';
 import { config } from './config';
 import { userRoutes } from './routes/users';
 import { orderRoutes } from './routes/orders';
+import { repoRoutes } from './routes/repos';
 import { db } from './services/database';
 
 const app = express();
@@ -13,7 +14,14 @@ app.use(cors());
 app.use(express.json());
 
 // ─── Serve frontend static files ────────────────────────
-app.use(express.static(path.resolve(__dirname, '../frontend'), { maxAge: 0, etag: false }));
+app.use((req, res, next) => {
+  // Aggressively disable caching for HTML
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
+app.use(express.static(path.resolve(__dirname, '../frontend'), { maxAge: 0, etag: false, lastModified: false }));
 
 // ─── Routes ─────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
@@ -22,6 +30,7 @@ app.get('/api/health', (_req, res) => {
 
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/repos', repoRoutes);
 
 // Fallback: serve index.html for SPA-like routing
 app.get('*', (_req, res) => {

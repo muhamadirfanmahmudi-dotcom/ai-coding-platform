@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI 代写平台</title>
+<title>AI 代写平台 v0.3.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -115,8 +115,7 @@ select option{background:var(--surface2);color:var(--text)}
 .action-panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:20px}
 .action-panel h3{font-size:16px;font-weight:600;margin-bottom:16px}
 .status-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-.progress-form{margin-top:16px}
-.progress-form .form-group{margin-bottom:12px}
+
 
 /* ─── Stage Workflow ─────────────────────────────── */
 .stage-progress{display:flex;gap:0;margin-bottom:24px;position:relative}
@@ -142,17 +141,6 @@ select option{background:var(--surface2);color:var(--text)}
 .stage-status.in_progress{background:rgba(0,122,255,.15);color:var(--blue)}
 .stage-status.completed{background:rgba(52,199,89,.15);color:var(--green)}
 
-/* ─── Progress Timeline ─────────────────────────── */
-.timeline{margin-top:20px}
-.timeline h3{font-size:16px;font-weight:600;margin-bottom:16px}
-.timeline-empty{color:var(--text3);font-size:14px;text-align:center;padding:40px 0}
-.timeline-item{position:relative;padding-left:24px;padding-bottom:24px;border-left:2px solid var(--border)}
-.timeline-item:last-child{border-left-color:transparent;padding-bottom:0}
-.timeline-item::before{content:'';position:absolute;left:-5px;top:2px;width:8px;height:8px;border-radius:50%;background:var(--blue)}
-.timeline-item .t-title{font-size:14px;font-weight:600;margin-bottom:4px}
-.timeline-item .t-content{font-size:14px;color:var(--text2);line-height:1.5}
-.timeline-item .t-time{font-size:12px;color:var(--text3);margin-top:4px}
-
 /* ─── Empty State ───────────────────────────────── */
 .empty{text-align:center;padding:60px 0;color:var(--text3)}
 .empty .icon{font-size:48px;margin-bottom:12px}
@@ -166,6 +154,53 @@ select option{background:var(--surface2);color:var(--text)}
   .detail-card{padding:20px}
   .action-panel{padding:20px}
 }
+
+/* ─── Code Repo Panel ────────────────────────────── */
+.repo-panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px}
+.repo-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:8px}
+.repo-header h3{font-size:16px;font-weight:600}
+.repo-status{display:flex;gap:16px;font-size:13px;color:var(--text2)}
+.repo-status span{display:flex;align-items:center;gap:4px}
+.repo-status .label{color:var(--text3)}
+.repo-status .value{color:var(--text);font-weight:500}
+.repo-tabs{display:flex;gap:4px;background:var(--surface2);border-radius:var(--radius2);padding:4px;margin-bottom:16px}
+.repo-tab{flex:1;text-align:center;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .2s}
+.repo-tab.active{background:var(--surface);color:var(--text)}
+.repo-empty{text-align:center;padding:32px 0;color:var(--text3);font-size:14px}
+
+/* Version Timeline */
+.version-list{display:flex;flex-direction:column;gap:8px}
+.version-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius2);padding:14px 16px;cursor:pointer;transition:all .2s}
+.version-item:hover{border-color:var(--blue)}
+.version-item.expanded{border-color:var(--blue);background:rgba(0,122,255,.05)}
+.version-item .v-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.version-item .v-ref{font-size:14px;font-weight:600;color:var(--blue)}
+.version-item .v-actions{display:flex;gap:6px}
+.version-item .v-message{font-size:13px;color:var(--text);margin-bottom:4px}
+.version-item .v-meta{display:flex;gap:12px;font-size:12px;color:var(--text3)}
+.version-item .v-files{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.version-item .v-file{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:13px;color:var(--text2)}
+.version-item .v-file .file-icon{color:var(--text3)}
+.version-item .v-file .file-path{color:var(--text)}
+.version-item .v-file .file-size{color:var(--text3);font-size:11px;margin-left:auto}
+
+/* File Tree */
+.repo-tree{margin-top:12px}
+.repo-tree .tree-entry{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;border-bottom:1px solid var(--surface2)}
+.repo-tree .tree-entry:last-child{border-bottom:none}
+.repo-tree .entry-path{color:var(--text);font-family:monospace}
+.repo-tree .entry-size{color:var(--text3);font-size:11px;margin-left:auto}
+
+/* Diff */
+.diff-list{margin-top:12px}
+.diff-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--surface2);font-size:13px}
+.diff-item:last-child{border-bottom:none}
+.diff-action{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;text-transform:uppercase}
+.diff-action.add{background:rgba(52,199,89,.15);color:var(--green)}
+.diff-action.modify{background:rgba(0,122,255,.15);color:var(--blue)}
+.diff-action.delete{background:rgba(255,59,48,.15);color:var(--red)}
+.diff-path{color:var(--text);font-family:monospace}
+.diff-hash{color:var(--text3);font-size:11px}
 </style>
 </head>
 <body>
@@ -299,17 +334,38 @@ select option{background:var(--surface2);color:var(--text)}
         <div id="action-buttons"></div>
       </div>
 
-      <!-- Buyer View: Development Progress -->
+      <!-- Buyer View: Development Progress (synced from developer stages) -->
       <div class="detail-card" id="buyer-progress-card" style="display:none">
         <h3>开发进度</h3>
         <div id="buyer-stage-progress"></div>
         <div id="buyer-stage-detail"></div>
       </div>
 
-      <div class="detail-card">
-        <div class="timeline" id="detail-timeline">
-          <h3>进度追踪</h3>
-          <div id="timeline-list"></div>
+      <!-- Code Repo Panel -->
+      <div class="repo-panel" id="repo-panel" style="display:none">
+        <div class="repo-header">
+          <h3>📦 代码版本管理</h3>
+          <div class="repo-status" id="repo-status"></div>
+        </div>
+        <div class="repo-tabs">
+          <div class="repo-tab active" onclick="switchRepoTab('commits')">版本历史</div>
+          <div class="repo-tab" onclick="switchRepoTab('diff')">版本对比</div>
+          <div class="repo-tab" onclick="switchRepoTab('tree')">文件树</div>
+        </div>
+        <div id="repo-commits"></div>
+        <div id="repo-diff" style="display:none">
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <select id="diff-from" style="flex:1" onchange="loadDiffView()"></select>
+            <span style="color:var(--text3);line-height:40px">→</span>
+            <select id="diff-to" style="flex:1" onchange="loadDiffView()"></select>
+          </div>
+          <div id="diff-results"></div>
+        </div>
+        <div id="repo-tree" style="display:none">
+          <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
+            <select id="tree-ref" style="flex:1" onchange="loadTreeView()"></select>
+          </div>
+          <div id="tree-results"></div>
         </div>
       </div>
     </div>
@@ -532,30 +588,17 @@ async function loadOrderDetail(orderId) {
   // Developer action panel
   renderActionPanel(o);
 
-  // Buyer progress view
+  // Buyer progress view (stages synced from developer)
   loadBuyerProgress(o);
 
-  // Progress timeline
-  const progress = res.data.progress;
-  const tl = document.getElementById('timeline-list');
-  if (!progress.length) {
-    tl.innerHTML = '<div class="timeline-empty">暂无进度更新</div>';
-  } else {
-    tl.innerHTML = progress.map(p => `
-      <div class="timeline-item">
-        <div class="t-title">${esc(p.title || '进度更新')}</div>
-        <div class="t-content">${esc(p.content)}</div>
-        <div class="t-time">${formatTime(p.createdAt)}</div>
-      </div>
-    `).join('');
-  }
+  // Code repo panel
+  loadRepoInfo(orderId);
 }
 
 // ─── Action Panel (Developer) ──────────────────────
 function renderActionPanel(order) {
   const panel = document.getElementById('action-panel');
   const buttons = document.getElementById('action-buttons');
-  const form = document.getElementById('progress-form');
 
   if (currentUser.role !== 'developer') {
     panel.style.display = 'none';
@@ -566,18 +609,14 @@ function renderActionPanel(order) {
 
   if (order.status === 'pending') {
     buttons.innerHTML = '<button class="btn-primary" onclick="claimOrder()">接此订单</button>';
-    form.style.display = 'none';
     return;
   }
 
   if (order.developerId !== currentUser.id) {
     buttons.innerHTML = '<span style="color:var(--text3);font-size:14px">已被其他开发者接单</span>';
-    form.style.display = 'none';
     return;
   }
 
-  // Developer is the owner - show stage workflow
-  form.style.display = 'none';
   loadStages(order.id);
 }
 
@@ -818,18 +857,6 @@ async function loadBuyerProgress(order) {
   detail.innerHTML = detailHtml || '<div style="color:var(--text3);font-size:14px;text-align:center;padding:20px">开发者尚未开始</div>';
 }
 
-// ─── Submit Progress ───────────────────────────────
-async function submitProgress() {
-  const title = document.getElementById('progress-title').value.trim();
-  const content = document.getElementById('progress-content').value.trim();
-  if (!content) return alert('请填写进度内容');
-  const res = await api('POST', '/api/orders/' + currentOrderId + '/progress', { title, content });
-  if (!res.success) return alert(res.error);
-  document.getElementById('progress-title').value = '';
-  document.getElementById('progress-content').value = '';
-  loadOrderDetail(currentOrderId);
-}
-
 // ─── Helpers ───────────────────────────────────────
 function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
@@ -844,6 +871,211 @@ function formatTime(t) {
   return d.toLocaleDateString('zh-CN') + ' ' + d.toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' });
 }
 
+// ═══════════════════════════════════════════════════════
+//  Code Repo Functions
+// ═══════════════════════════════════════════════════════
+
+let repoData = null;
+let repoCommits = [];
+let currentRepoTab = 'commits';
+
+async function loadRepoInfo(orderId) {
+  const panel = document.getElementById('repo-panel');
+  const res = await api('GET', '/api/repos/' + orderId);
+  if (!res.success || !res.data) {
+    panel.style.display = 'none';
+    return;
+  }
+  repoData = res.data;
+  panel.style.display = '';
+  document.getElementById('repo-status').innerHTML = `
+    <span><span class="label">分支</span> <span class="value">${esc(repoData.currentBranch)}</span></span>
+    <span><span class="label">最新版本</span> <span class="value">${esc(repoData.currentRef || '-')}</span></span>
+    <span><span class="label">提交次数</span> <span class="value">${repoData.totalCommits}</span></span>
+    <span><span class="label">分支数</span> <span class="value">${repoData.totalBranches}</span></span>
+  `;
+  loadCommits(orderId);
+}
+
+async function loadCommits(orderId, branch) {
+  let path = '/api/repos/' + orderId + '/commits';
+  if (branch) path += '?branch=' + branch;
+  const res = await api('GET', path);
+  if (!res.success) return;
+  repoCommits = res.data.commits || [];
+  renderCommits();
+  populateVersionSelects();
+}
+
+function renderCommits() {
+  const el = document.getElementById('repo-commits');
+  if (!repoCommits.length) {
+    el.innerHTML = '<div class="repo-empty">暂无提交记录</div>';
+    return;
+  }
+  el.innerHTML = '<div class="version-list">' + repoCommits.map(c => `
+    <div class="version-item" id="v-${c.ref}" onclick="toggleVersion('${c.ref}')">
+      <div class="v-top">
+        <span class="v-ref">${esc(c.ref)}</span>
+        <div class="v-actions">
+          <button class="btn-ghost btn-sm" onclick="event.stopPropagation(); showRollbackConfirm('${c.ref}')">⏪ 回退</button>
+        </div>
+      </div>
+      <div class="v-message">${esc(c.message)}</div>
+      <div class="v-meta">
+        <span>${esc(c.authorName)}</span>
+        <span>${c.fileCount} 个文件</span>
+        <span>${formatTime(c.createdAt)}</span>
+        ${c.parentRef ? '<span>← ' + esc(c.parentRef) + '</span>' : '<span>初始提交</span>'}
+      </div>
+      <div class="v-files" id="v-files-${c.ref}" style="display:none">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:6px">加载中...</div>
+      </div>
+    </div>
+  `).join('') + '</div>';
+}
+
+async function toggleVersion(ref) {
+  const item = document.getElementById('v-' + ref);
+  const filesEl = document.getElementById('v-files-' + ref);
+  const expanded = item.classList.toggle('expanded');
+  if (expanded && filesEl.style.display === 'none') {
+    filesEl.style.display = '';
+    filesEl.innerHTML = '<div style="font-size:12px;color:var(--text3)">加载中...</div>';
+    // Load file tree for this version
+    const orderId = currentOrderId;
+    const res = await api('GET', '/api/repos/' + orderId + '/tree?ref=' + ref);
+    if (res.success && res.data && res.data.files) {
+      if (res.data.files.length === 0) {
+        filesEl.innerHTML = '<div style="font-size:12px;color:var(--text3)">（无文件）</div>';
+      } else {
+        filesEl.innerHTML = res.data.files.map(f => `
+          <div class="v-file">
+            <span class="file-icon">${f.action === 'delete' ? '🗑️' : '📄'}</span>
+            <span class="file-path">${esc(f.path)}</span>
+            <span class="file-size">${f.size ? formatBytes(f.size) : '-'}</span>
+          </div>
+        `).join('');
+      }
+    } else {
+      filesEl.innerHTML = '<div style="font-size:12px;color:var(--text3)">加载失败</div>';
+    }
+  } else if (!expanded) {
+    filesEl.style.display = 'none';
+  }
+}
+
+function showRollbackConfirm(ref) {
+  if (!confirm('确定要回退到 ' + ref + ' 吗？\n\n这将在当前版本基础上创建一个新提交，把文件恢复到 ' + ref + ' 的状态。\n历史记录不会被删除，之后还可以回退回来。')) return;
+  doRollback(ref);
+}
+
+async function doRollback(ref) {
+  const btn = event?.target || {};
+  btn.disabled = true;
+  btn.textContent = '回退中...';
+  const res = await api('POST', '/api/repos/' + currentOrderId + '/rollback', { ref });
+  btn.disabled = false;
+  btn.textContent = '⏪ 回退';
+  if (!res.success) return alert('回退失败: ' + (res.error || '未知错误'));
+  alert('✅ 已创建 ' + res.data.newRef + '，回退到 ' + ref + ' 完成！\n\nAI 工具会收到目标版本的所有文件内容，请确保开发者已同步。');
+  loadRepoInfo(currentOrderId);
+}
+
+function populateVersionSelects() {
+  const fromEl = document.getElementById('diff-from');
+  const toEl = document.getElementById('diff-to');
+  const treeRefEl = document.getElementById('tree-ref');
+  if (!fromEl) return;
+  const options = repoCommits.map(c => `<option value="${c.ref}">${c.ref}: ${esc(c.message.slice(0, 40))}</option>`).join('');
+  fromEl.innerHTML = '<option value="">选择起始版本</option>' + options;
+  toEl.innerHTML = '<option value="">选择目标版本</option>' + options;
+  treeRefEl.innerHTML = '<option value="">最新版本（当前分支）</option>' + options;
+  // Default select last two
+  if (repoCommits.length >= 2) {
+    fromEl.value = repoCommits[repoCommits.length - 2].ref;
+    toEl.value = repoCommits[0].ref;
+    loadDiffView();
+  } else if (repoCommits.length === 1) {
+    toEl.value = repoCommits[0].ref;
+  }
+}
+
+async function loadDiffView() {
+  const from = document.getElementById('diff-from').value;
+  const to = document.getElementById('diff-to').value;
+  const el = document.getElementById('diff-results');
+  if (!from || !to) {
+    el.innerHTML = '<div class="repo-empty">请选择两个版本进行对比</div>';
+    return;
+  }
+  el.innerHTML = '<div class="repo-empty">加载中...</div>';
+  const res = await api('GET', `/api/repos/${currentOrderId}/diff?from=${from}&to=${to}`);
+  if (!res.success || !res.data) {
+    el.innerHTML = '<div class="repo-empty">加载失败</div>';
+    return;
+  }
+  const changes = res.data.changes || [];
+  if (!changes.length) {
+    el.innerHTML = '<div class="repo-empty">两个版本之间没有差异</div>';
+    return;
+  }
+  el.innerHTML = '<div style="font-size:13px;color:var(--text2);margin-bottom:8px">从 <strong>' + from + '</strong> 到 <strong>' + to + '</strong> 共 ' + changes.length + ' 处变化</div>' +
+    '<div class="diff-list">' + changes.map(c => `
+      <div class="diff-item">
+        <span class="diff-action ${c.action}">${c.action}</span>
+        <span class="diff-path">${esc(c.path)}</span>
+        <span class="diff-hash">${c.beforeRef ? c.beforeRef.slice(0, 8) : ''} ${c.afterRef ? '→ ' + c.afterRef.slice(0, 8) : ''}</span>
+      </div>
+    `).join('') + '</div>';
+}
+
+async function loadTreeView() {
+  const ref = document.getElementById('tree-ref').value;
+  const el = document.getElementById('tree-results');
+  el.innerHTML = '<div class="repo-empty">加载中...</div>';
+  let path = '/api/repos/' + currentOrderId + '/tree';
+  if (ref) path += '?ref=' + ref;
+  const res = await api('GET', path);
+  if (!res.success || !res.data) {
+    el.innerHTML = '<div class="repo-empty">暂无文件</div>';
+    return;
+  }
+  const files = res.data.files || [];
+  if (!files.length) {
+    el.innerHTML = '<div class="repo-empty">该版本没有文件</div>';
+    return;
+  }
+  el.innerHTML = '<div style="font-size:13px;color:var(--text2);margin-bottom:8px">' + esc(res.data.ref) + ': ' + esc(res.data.message) + ' — ' + files.length + ' 个文件</div>' +
+    '<div class="repo-tree">' + files.map(f => `
+      <div class="tree-entry">
+        <span>${f.action === 'delete' ? '🗑️' : '📄'}</span>
+        <span class="entry-path">${esc(f.path)}</span>
+        <span class="entry-size">${f.size ? formatBytes(f.size) : '-'}</span>
+      </div>
+    `).join('') + '</div>';
+}
+
+function switchRepoTab(tab) {
+  currentRepoTab = tab;
+  document.querySelectorAll('.repo-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.repo-tab').forEach(t => {
+    if (t.textContent.includes(tab === 'commits' ? '版本历史' : tab === 'diff' ? '版本对比' : '文件树')) t.classList.add('active');
+  });
+  document.getElementById('repo-commits').style.display = tab === 'commits' ? '' : 'none';
+  document.getElementById('repo-diff').style.display = tab === 'diff' ? '' : 'none';
+  document.getElementById('repo-tree').style.display = tab === 'tree' ? '' : 'none';
+  if (tab === 'diff') loadDiffView();
+  if (tab === 'tree') loadTreeView();
+}
+
+function formatBytes(bytes) {
+  if (!bytes || bytes === 0) return '0 B';
+  const units = ['B', 'KB', 'MB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return (bytes / Math.pow(1024, i)).toFixed(i > 0 ? 1 : 0) + ' ' + units[i];
+}
+
 // ─── Init ──────────────────────────────────────────
 (function init() {
   const sid = localStorage.getItem('sid');
@@ -854,6 +1086,7 @@ function formatTime(t) {
     currentUser = { sid, id, name, role };
     enterApp();
   }
+  console.log('[AI Code Platform] v0.3.0 loaded — 代码仓库面板已就绪');
 })();
 </script>
 </body>
