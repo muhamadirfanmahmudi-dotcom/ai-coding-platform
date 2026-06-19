@@ -19,6 +19,10 @@ orderRoutes.post('/', (req: Request, res: Response) => {
     res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
     return;
   }
+  if (user.role !== 'buyer') {
+    res.status(403).json({ success: false, error: '只有买家可以创建订单' } as ApiResponse);
+    return;
+  }
 
   try {
     const { title, description, userInfo, problem, features, antiFeatures, successCriteria } = req.body as CreateOrderRequest;

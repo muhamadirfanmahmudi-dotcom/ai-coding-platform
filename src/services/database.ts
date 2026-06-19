@@ -516,6 +516,15 @@ class Database {
     return this.getCommit(params.id)!;
   }
 
+  updateCommitMessage(commitId: string, message: string, description?: string) {
+    if (description !== undefined) {
+      this.db.run(`UPDATE code_commits SET message = ?, description = ? WHERE id = ?`, [message, description, commitId]);
+    } else {
+      this.db.run(`UPDATE code_commits SET message = ? WHERE id = ?`, [message, commitId]);
+    }
+    this.save();
+  }
+
   getCommit(id: string) {
     const stmt = this.db.prepare(`SELECT * FROM code_commits WHERE id = ?`);
     stmt.bind([id]);

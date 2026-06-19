@@ -139,9 +139,6 @@ tailwind.config = {
     <div class="flex items-center gap-3">
       <span id="user-role-badge"></span>
       <span id="user-name" class="text-sm text-on-surface-variant font-medium"></span>
-      <button onclick="doLogout()" class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-primary/5 active:scale-95 transition-all">
-        <span class="material-symbols-outlined text-lg">logout</span>
-      </button>
     </div>
   </header>
 
@@ -156,7 +153,6 @@ tailwind.config = {
             <span>创建新订单</span>
           </button>
         </div>
-        <div id="main-tabs" class="flex gap-2 overflow-x-auto pb-2 no-scrollbar"></div>
       </section>
       <div id="order-list" class="space-y-3 mt-4"></div>
     </div>
@@ -199,68 +195,153 @@ tailwind.config = {
     </div>
 
     <!-- ─── Detail View ─── -->
-    <div id="detail-view" style="display:none" class="anim-slide-up space-y-5">
-      <div onclick="showMain()" class="flex items-center gap-1.5 text-on-surface-variant text-sm cursor-pointer mb-5 hover:text-on-surface transition-colors">
-        <span class="material-symbols-outlined text-base">arrow_back</span>
-        <span>返回</span>
-      </div>
-
-      <!-- Order Info Card -->
-      <div class="glass-panel rounded-lg p-6 shadow-[0_16px_32px_-12px_rgba(30,41,59,0.08)]">
-        <div class="flex items-start justify-between mb-4">
-          <h2 id="detail-title" class="font-display text-xl font-bold text-on-surface flex-1"></h2>
-          <span id="detail-status" class="text-xs font-mono font-medium px-3 py-1 rounded-full"></span>
+    <div id="detail-view" style="display:none" class="anim-slide-up space-y-4">
+      <!-- ══ Page: Main Menu (3 options) ══ -->
+      <div id="detail-page-menu" class="space-y-4">
+        <div onclick="showMain()" class="flex items-center gap-1.5 text-on-surface-variant text-sm cursor-pointer hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined text-base">arrow_back</span>
+          <span>返回</span>
         </div>
-        <div id="detail-developer" style="display:none" class="mb-4 p-3 bg-secondary/5 rounded-xl border border-secondary/10">
-          <div class="text-xs font-mono text-on-surface-variant uppercase tracking-wider mb-1">接单开发者</div>
-          <div id="detail-dev-name" class="text-sm font-medium text-on-surface"></div>
+        <div id="detail-menu" class="space-y-3"></div>
+      </div>
+
+      <!-- ══ Page: 订单详情 ══ -->
+      <div id="detail-page-info" style="display:none" class="space-y-4">
+        <div onclick="showDetailPage('menu')" class="flex items-center gap-1.5 text-on-surface-variant text-sm cursor-pointer hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined text-base">arrow_back</span>
+          <span>返回</span>
         </div>
-        <div class="space-y-3">
-          <div><div class="text-xs font-mono text-on-surface-variant uppercase tracking-wider mb-0.5">用户是谁</div><div id="detail-userinfo" class="text-sm text-on-surface leading-relaxed"></div></div>
-          <div><div class="text-xs font-mono text-on-surface-variant uppercase tracking-wider mb-0.5">解决什么问题</div><div id="detail-problem" class="text-sm text-on-surface leading-relaxed"></div></div>
-          <div><div class="text-xs font-mono text-on-surface-variant uppercase tracking-wider mb-0.5">核心功能</div><div id="detail-features" class="text-sm text-on-surface leading-relaxed"></div></div>
-          <div><div class="text-xs font-mono text-on-surface-variant uppercase tracking-wider mb-0.5">不做什么</div><div id="detail-anti" class="text-sm text-on-surface leading-relaxed"></div></div>
-          <div><div class="text-xs font-mono text-on-surface-variant uppercase tracking-wider mb-0.5">成功标准</div><div id="detail-success" class="text-sm text-on-surface leading-relaxed"></div></div>
-          <div><div class="text-xs font-mono text-on-surface-variant uppercase tracking-wider mb-0.5">创建时间</div><div id="detail-time" class="text-sm text-on-surface"></div></div>
+        <div class="glass-panel rounded-lg p-6 shadow-[0_16px_32px_-12px_rgba(30,41,59,0.08)]">
+          <div class="flex items-start justify-between mb-4">
+            <h2 id="detail-title" class="font-display text-lg font-bold text-on-surface flex-1"></h2>
+            <span id="detail-status" class="text-xs font-mono font-medium px-3 py-1 rounded-full shrink-0 ml-3"></span>
+          </div>
+          <div id="detail-developer" style="display:none" class="mb-3 text-xs text-on-surface-variant">
+            接单开发者：<span id="detail-dev-name" class="font-medium text-on-surface"></span>
+          </div>
+          <div class="space-y-3">
+            <div><div class="text-xs font-mono text-on-surface-variant uppercase tracking-wider mb-0.5">用户是谁</div><div id="detail-userinfo" class="text-sm text-on-surface leading-relaxed"></div></div>
+            <div><div class="text-xs font-mono text-on-surface-variant uppercase tracking-wider mb-0.5">解决什么问题</div><div id="detail-problem" class="text-sm text-on-surface leading-relaxed"></div></div>
+            <div><div class="text-xs font-mono text-on-surface-variant uppercase tracking-wider mb-0.5">核心功能</div><div id="detail-features" class="text-sm text-on-surface leading-relaxed"></div></div>
+            <div><div class="text-xs font-mono text-on-surface-variant uppercase tracking-wider mb-0.5">不做什么</div><div id="detail-anti" class="text-sm text-on-surface leading-relaxed"></div></div>
+            <div><div class="text-xs font-mono text-on-surface-variant uppercase tracking-wider mb-0.5">成功标准</div><div id="detail-success" class="text-sm text-on-surface leading-relaxed"></div></div>
+            <div><div class="text-xs font-mono text-on-surface-variant uppercase tracking-wider mb-0.5">创建时间</div><div id="detail-time" class="text-sm text-on-surface"></div></div>
+          </div>
         </div>
       </div>
 
-      <!-- Developer Action Panel -->
-      <div id="action-panel" style="display:none" class="glass-panel rounded-lg p-6 shadow-[0_16px_32px_-12px_rgba(30,41,59,0.08)]">
-        <h3 class="font-display text-lg font-bold text-on-surface mb-4">开发流程</h3>
-        <div id="action-buttons"></div>
+      <!-- ══ Page: 开发进度 / 开发进度 ══ -->
+      <div id="detail-page-flow" style="display:none" class="space-y-4">
+        <div onclick="showDetailPage('menu')" class="flex items-center gap-1.5 text-on-surface-variant text-sm cursor-pointer hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined text-base">arrow_back</span>
+          <span>返回</span>
+        </div>
+        <div id="action-panel" class="glass-panel rounded-lg p-6 shadow-[0_16px_32px_-12px_rgba(30,41,59,0.08)]">
+          <h3 class="font-display text-lg font-bold text-on-surface mb-4">开发进度</h3>
+          <div id="action-buttons"></div>
+        </div>
+        <div id="buyer-progress-card" style="display:none" class="glass-panel rounded-lg p-6 shadow-[0_16px_32px_-12px_rgba(30,41,59,0.08)]">
+          <h3 class="font-display text-lg font-bold text-on-surface mb-4">开发进度</h3>
+          <div id="buyer-stage-progress"></div>
+          <div id="buyer-stage-detail" class="space-y-4 mt-4"></div>
+        </div>
       </div>
 
-      <!-- Buyer Progress View -->
-      <div id="buyer-progress-card" style="display:none" class="glass-panel rounded-lg p-6 shadow-[0_16px_32px_-12px_rgba(30,41,59,0.08)]">
-        <h3 class="font-display text-lg font-bold text-on-surface mb-4">开发进度</h3>
-        <div id="buyer-stage-progress"></div>
-        <div id="buyer-stage-detail" class="space-y-4 mt-4"></div>
+      <!-- ══ Page: 版本管理 (sub-menu) ══ -->
+      <div id="detail-page-repo" style="display:none" class="space-y-4">
+        <div onclick="showDetailPage('menu')" class="flex items-center gap-1.5 text-on-surface-variant text-sm cursor-pointer hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined text-base">arrow_back</span>
+          <span>返回</span>
+        </div>
+        <div id="repo-sub-menu" class="space-y-3">
+          <div class="text-center py-6 text-sm text-outline">加载中...</div>
+        </div>
       </div>
 
-      <!-- Code Repo Panel — 动态渲染，见 loadRepoInfo() -->
-      <div id="repo-panel" style="display:none" class="glass-panel rounded-lg overflow-hidden shadow-[0_16px_32px_-12px_rgba(30,41,59,0.08)]">
-        <div id="repo-panel-content"></div>
+      <!-- ══ Page: 提交代码 ══ -->
+      <div id="detail-page-repo-commit" style="display:none" class="space-y-4">
+        <div onclick="showDetailPage('repo')" class="flex items-center gap-1.5 text-on-surface-variant text-sm cursor-pointer hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined text-base">arrow_back</span>
+          <span>返回</span>
+        </div>
+        <div id="repo-commit-form" class="glass-panel rounded-lg p-6 shadow-[0_16px_32px_-12px_rgba(30,41,59,0.08)]">
+          <h3 class="font-display text-lg font-bold text-on-surface mb-4">提交代码</h3>
+          <div id="commit-form"></div>
+        </div>
+      </div>
+
+      <!-- ══ Page: 版本历史 ══ -->
+      <div id="detail-page-repo-commits" style="display:none" class="space-y-4">
+        <div onclick="showDetailPage('repo')" class="flex items-center gap-1.5 text-on-surface-variant text-sm cursor-pointer hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined text-base">arrow_back</span>
+          <span>返回</span>
+        </div>
+        <div id="repo-commits-list" class="glass-panel rounded-lg p-6 shadow-[0_16px_32px_-12px_rgba(30,41,59,0.08)]">
+          <h3 class="font-display text-lg font-bold text-on-surface mb-4">版本历史</h3>
+          <div id="repo-commits"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Profile View ─── -->
+    <div id="profile-view" style="display:none" class="anim-slide-up space-y-5">
+      <div class="glass-panel rounded-lg p-8 shadow-[0_16px_32px_-12px_rgba(30,41,59,0.08)]">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center">
+            <span class="material-symbols-outlined text-3xl text-on-primary-container">person</span>
+          </div>
+          <div>
+            <h2 id="profile-name" class="font-display text-xl font-bold text-on-surface"></h2>
+            <span id="profile-role" class="text-xs font-mono font-medium px-2.5 py-0.5 rounded-full mt-1 inline-block"></span>
+          </div>
+        </div>
+        <div class="border-t border-outline-variant/20 pt-6 mt-2">
+          <button onclick="doLogout()" class="w-full py-3 bg-error-container text-on-error-container rounded-full text-sm font-semibold active:scale-95 transition-all flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-red-500/10">
+            <span class="material-symbols-outlined text-base">logout</span>
+            退出登录
+          </button>
+        </div>
       </div>
     </div>
   </main>
 
+  <!-- File Viewer Modal -->
+  <div id="file-viewer" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4" style="display:none" onclick="if(event.target===this)closeFileViewer()">
+    <div class="bg-white rounded-xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-outline-variant/20 bg-white">
+        <span id="file-viewer-path" class="text-sm font-mono font-medium text-on-surface truncate"></span>
+        <button onclick="closeFileViewer()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-all">
+          <span class="material-symbols-outlined text-sm">close</span>
+        </button>
+      </div>
+      <div class="flex-1 flex overflow-hidden bg-[#1e1e2e]">
+        <div class="select-none text-right px-3 py-4 text-xs font-mono text-[#585b70] leading-[1.65] border-r border-[#313244] overflow-hidden min-w-[3rem]">
+          <pre id="file-viewer-lines" class="leading-[1.65] m-0">1</pre>
+        </div>
+        <div class="flex-1 overflow-auto" id="file-scroll-wrapper">
+          <pre id="file-viewer-content" class="p-4 text-xs sm:text-sm font-mono text-[#cdd6f4] leading-[1.65] whitespace-pre m-0"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- BottomNavBar -->
-  <nav class="fixed bottom-0 w-full z-50 bg-white/70 backdrop-blur-[40px] border-t border-white/50 shadow-[0_-8px_24px_-12px_rgba(30,41,59,0.04)] flex justify-around items-center px-4 py-2 max-w-3xl mx-auto">
-    <button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-secondary-container/20 rounded-full transition-all active:scale-90" onclick="switchTab('hall', this)">
-      <span class="material-symbols-outlined">storefront</span>
+  <nav class="fixed bottom-0 w-full z-50 bg-white/70 backdrop-blur-[40px] border-t border-white/50 shadow-[0_-8px_24px_-12px_rgba(30,41,59,0.04)] flex justify-around items-center px-4 py-1 max-w-3xl mx-auto">
+    <button class="nav-btn flex flex-col items-center justify-center text-on-surface-variant p-1.5 hover:bg-secondary-container/20 rounded-xl transition-all active:scale-90" onclick="switchTab('hall', this)" id="nav-hall">
+      <span class="material-symbols-outlined text-xl">storefront</span>
+      <span class="nav-label text-[10px] mt-0.5">抢单大厅</span>
     </button>
-    <button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-secondary-container/20 rounded-full transition-all active:scale-90" onclick="switchTab('mine', this)" id="nav-mine" style="display:none">
-      <span class="material-symbols-outlined">folder_open</span>
+    <button class="nav-btn flex flex-col items-center justify-center text-on-surface-variant p-1.5 hover:bg-secondary-container/20 rounded-xl transition-all active:scale-90" onclick="switchTab('mine', this)" id="nav-mine" style="display:none">
+      <span class="material-symbols-outlined text-xl">folder_open</span>
+      <span class="nav-label text-[10px] mt-0.5">我的订单</span>
     </button>
-    <button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-secondary-container/20 rounded-full transition-all active:scale-90" onclick="showCreate()" id="nav-create" style="display:none">
-      <span class="material-symbols-outlined">add_circle</span>
+    <button class="nav-btn flex flex-col items-center justify-center text-on-surface-variant p-1.5 hover:bg-secondary-container/20 rounded-xl transition-all active:scale-90" onclick="switchTab('developer', this)" id="nav-developer" style="display:none">
+      <span class="material-symbols-outlined text-xl">code</span>
+      <span class="nav-label text-[10px] mt-0.5">我接的单</span>
     </button>
-    <button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-secondary-container/20 rounded-full transition-all active:scale-90" onclick="switchTab('developer', this)" id="nav-developer" style="display:none">
-      <span class="material-symbols-outlined">code</span>
-    </button>
-    <button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-secondary-container/20 rounded-full transition-all active:scale-90" onclick="doLogout()">
-      <span class="material-symbols-outlined">person</span>
+    <button class="nav-btn flex flex-col items-center justify-center text-on-surface-variant p-1.5 hover:bg-secondary-container/20 rounded-xl transition-all active:scale-90" onclick="showProfile()">
+      <span class="material-symbols-outlined text-xl">person</span>
+      <span class="nav-label text-[10px] mt-0.5">个人信息</span>
     </button>
   </nav>
 </div>
@@ -371,40 +452,33 @@ function enterApp() {
   } else {
     badge.innerHTML = '<span class="text-xs font-mono font-medium px-2.5 py-0.5 rounded-full bg-primary/10 text-primary">买家</span>';
   }
-  renderTabs();
+  renderNav();
   showMain();
 }
 
-function renderTabs() {
-  const tabsEl = document.getElementById('main-tabs');
+function renderNav() {
   const createBtn = document.getElementById('btn-create');
   const navMine = document.getElementById('nav-mine');
-  const navCreate = document.getElementById('nav-create');
   const navDev = document.getElementById('nav-developer');
   if (currentUser.role === 'developer') {
-    tabsEl.innerHTML = `
-      <button class="tab flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-full text-sm font-medium whitespace-nowrap active:scale-95 transition-transform" onclick="switchTab('hall', this)">
-        <span class="material-symbols-outlined text-sm">storefront</span>抢单大厅
-      </button>
-      <button class="tab flex items-center gap-2 px-4 py-2 glass-panel text-on-surface-variant rounded-full text-sm font-medium whitespace-nowrap active:scale-95 transition-transform" onclick="switchTab('developer', this)">
-        <span class="material-symbols-outlined text-sm">code</span>我接的单
-      </button>`;
     createBtn.style.display = 'none';
     navMine.style.display = 'none';
-    navCreate.style.display = 'none';
     navDev.style.display = '';
   } else {
-    tabsEl.innerHTML = `
-      <button class="tab flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-full text-sm font-medium whitespace-nowrap active:scale-95 transition-transform" onclick="switchTab('hall', this)">
-        <span class="material-symbols-outlined text-sm">storefront</span>抢单大厅
-      </button>
-      <button class="tab flex items-center gap-2 px-4 py-2 glass-panel text-on-surface-variant rounded-full text-sm font-medium whitespace-nowrap active:scale-95 transition-transform" onclick="switchTab('mine', this)">
-        <span class="material-symbols-outlined text-sm">folder_open</span>我的订单
-      </button>`;
     createBtn.style.display = '';
     navMine.style.display = '';
-    navCreate.style.display = '';
     navDev.style.display = 'none';
+  }
+  // 高亮当前的底部导航按钮
+  const tabMap = { hall: 'nav-hall', mine: 'nav-mine', developer: 'nav-developer' };
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.remove('text-primary');
+    b.querySelector('.nav-label')?.classList.remove('font-medium');
+  });
+  const activeBtn = document.getElementById(tabMap[currentTab]);
+  if (activeBtn) {
+    activeBtn.classList.add('text-primary');
+    activeBtn.querySelector('.nav-label')?.classList.add('font-medium');
   }
 }
 
@@ -412,15 +486,22 @@ function showMain() {
   document.getElementById('main-view').style.display = 'block';
   document.getElementById('create-view').style.display = 'none';
   document.getElementById('detail-view').style.display = 'none';
+  document.getElementById('profile-view').style.display = 'none';
   currentOrderId = null;
   currentOrder = null;
   loadOrders();
 }
 
 function showCreate() {
+  // 开发者不能创建订单
+  if (currentUser?.role === 'developer') {
+    showMain();
+    return;
+  }
   document.getElementById('main-view').style.display = 'none';
   document.getElementById('create-view').style.display = 'block';
   document.getElementById('detail-view').style.display = 'none';
+  document.getElementById('profile-view').style.display = 'none';
   ['order-userinfo','order-problem','order-features','order-anti','order-success'].forEach(id => {
     document.getElementById(id).value = '';
   });
@@ -430,24 +511,55 @@ function showDetail(orderId) {
   document.getElementById('main-view').style.display = 'none';
   document.getElementById('create-view').style.display = 'none';
   document.getElementById('detail-view').style.display = 'block';
+  document.getElementById('profile-view').style.display = 'none';
   currentOrderId = orderId;
   loadOrderDetail(orderId);
 }
 
 function switchTab(tab, el) {
   currentTab = tab;
-  document.querySelectorAll('#main-tabs .tab').forEach(t => {
-    t.classList.remove('bg-primary','text-on-primary');
-    t.classList.add('glass-panel','text-on-surface-variant');
+  // 切换到主视图（从详情/个人信息页返回）
+  document.getElementById('main-view').style.display = 'block';
+  document.getElementById('create-view').style.display = 'none';
+  document.getElementById('detail-view').style.display = 'none';
+  document.getElementById('profile-view').style.display = 'none';
+  // 高亮底部导航按钮
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.remove('text-primary');
+    const label = b.querySelector('.nav-label');
+    if (label) label.classList.remove('font-medium');
   });
-  if (!el) el = document.querySelector('#main-tabs .tab:first-child');
   if (el) {
-    el.classList.remove('glass-panel','text-on-surface-variant');
-    el.classList.add('bg-primary','text-on-primary');
+    el.classList.add('text-primary');
+    const label = el.querySelector('.nav-label');
+    if (label) label.classList.add('font-medium');
   }
   const titles = { hall: '抢单大厅', mine: '我的订单', developer: '我接的单' };
   document.getElementById('view-title').textContent = titles[tab] || '';
   loadOrders();
+}
+
+function showProfile() {
+  document.getElementById('main-view').style.display = 'none';
+  document.getElementById('create-view').style.display = 'none';
+  document.getElementById('detail-view').style.display = 'none';
+  document.getElementById('profile-view').style.display = 'block';
+  document.getElementById('view-title').textContent = '个人信息';
+  document.getElementById('profile-name').textContent = currentUser.name;
+  const roleEl = document.getElementById('profile-role');
+  if (currentUser.role === 'developer') {
+    roleEl.textContent = '开发者';
+    roleEl.className = 'text-xs font-mono font-medium px-2.5 py-0.5 rounded-full bg-secondary/10 text-secondary';
+  } else {
+    roleEl.textContent = '买家';
+    roleEl.className = 'text-xs font-mono font-medium px-2.5 py-0.5 rounded-full bg-primary/10 text-primary';
+  }
+  // 取消所有底部导航的高亮
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.remove('text-primary');
+    const label = b.querySelector('.nav-label');
+    if (label) label.classList.remove('font-medium');
+  });
 }
 
 async function loadOrders() {
@@ -526,11 +638,48 @@ async function loadOrderDetail(orderId) {
   const devEl = document.getElementById('detail-developer');
   if (o.developerId) { devEl.style.display = ''; document.getElementById('detail-dev-name').textContent = o.developerName || o.developerId; }
   else { devEl.style.display = 'none'; }
+  renderDetailMenu(o);
   renderActionPanel(o);
-  // 开发者通过"开发流程"看进度，无需重复的"开发进度"面板
   if (currentUser.role !== 'developer') loadBuyerProgress(o);
-  else document.getElementById('buyer-progress-card').style.display = 'none';
   loadRepoInfo(orderId);
+  showDetailPage('menu');
+}
+
+function renderDetailMenu(order) {
+  const menuEl = document.getElementById('detail-menu');
+  const isDev = currentUser.role === 'developer';
+  const hasFlow = isDev || (order.developerId && !isDev);
+  const hasRepo = isDev && order.developerId === currentUser.id;
+
+  const items = [
+    { key: 'info', label: '订单详情', icon: 'description', show: true },
+    { key: 'flow', label: isDev ? '开发进度' : '开发进度', icon: isDev ? 'sync_alt' : 'progress_activity', show: hasFlow },
+    { key: 'repo', label: '版本管理', icon: 'folder_open', show: hasRepo },
+  ];
+
+  menuEl.innerHTML = items.filter(i => i.show).map(item => `
+    <div onclick="showDetailPage('${item.key}')" class="glass-panel p-4 rounded-lg cursor-pointer active:scale-[0.98] transition-all hover:shadow-[0_4px_16px_-8px_rgba(30,41,59,0.1)] flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+        <span class="material-symbols-outlined text-primary">${item.icon}</span>
+      </div>
+      <div>
+        <div class="font-semibold text-on-surface text-sm">${item.label}</div>
+      </div>
+      <span class="material-symbols-outlined ml-auto text-on-surface-variant">chevron_right</span>
+    </div>
+  `).join('');
+}
+
+function showDetailPage(page) {
+  // 所有 detail-page-* 隐藏
+  const pages = ['detail-page-menu', 'detail-page-info', 'detail-page-flow', 'detail-page-repo', 'detail-page-repo-commit', 'detail-page-repo-commits'];
+  pages.forEach(p => { const el = document.getElementById(p); if (el) el.style.display = 'none'; });
+  const target = document.getElementById('detail-page-' + page);
+  if (target) target.style.display = '';
+  // 进入提交代码页面时渲染表单
+  if (page === 'repo-commit') renderCommitForm();
+  // 进入版本历史页面时加载数据
+  if (page === 'repo-commits' && currentOrderId) loadCommits(currentOrderId);
 }
 
 function renderActionPanel(order) {
@@ -787,19 +936,15 @@ function formatTime(t) { if (!t) return ''; const d = new Date(t + 'Z'); return 
 
 let repoData = null;
 let repoCommits = [];
-let currentRepoTab = 'commits';
 
 async function loadRepoInfo(orderId) {
-  const panel = document.getElementById('repo-panel');
-  // 买家不显示代码版本管理
-  if (currentUser?.role !== 'developer') { panel.style.display = 'none'; return; }
+  // 买家不显示版本管理
+  if (currentUser?.role !== 'developer') return;
   const res = await api('GET', '/api/repos/' + orderId);
-  const repoContent = document.getElementById('repo-panel-content');
+  const subMenu = document.getElementById('repo-sub-menu');
   if (!res.success || !res.data) {
-    // 仓库未初始化，显示初始化按钮
-    panel.style.display = '';
-    repoContent.innerHTML = `
-      <div class="p-5 text-center">
+    subMenu.innerHTML = `
+      <div class="glass-panel p-6 rounded-lg text-center">
         <span class="material-symbols-outlined text-4xl text-outline-variant mb-3 block">folder</span>
         <p class="text-sm text-on-surface-variant mb-4">代码版本仓库尚未初始化</p>
         <button onclick="initCurrentRepo()" class="px-5 py-2.5 bg-primary text-on-primary rounded-full text-sm font-semibold active:scale-95 transition-all hover:shadow-lg hover:shadow-primary/20">初始化仓库</button>
@@ -807,50 +952,27 @@ async function loadRepoInfo(orderId) {
     return;
   }
   repoData = res.data;
-  panel.style.display = '';
-  repoContent.innerHTML = `
-    <div class="px-5 py-4 border-b border-white/50 bg-white/30">
-      <div class="flex items-center justify-between mb-3">
-        <span class="flex items-center gap-2 text-sm font-semibold text-on-surface">
-          <span class="material-symbols-outlined text-primary text-base">folder_open</span>
-          代码版本管理
-        </span>
+  subMenu.innerHTML = `
+    <div onclick="showDetailPage('repo-commit')" class="glass-panel p-4 rounded-lg cursor-pointer active:scale-[0.98] transition-all hover:shadow-[0_4px_16px_-8px_rgba(30,41,59,0.1)] flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+        <span class="material-symbols-outlined text-primary">upload</span>
       </div>
-      <div id="repo-status" class="flex gap-4 text-xs text-on-surface-variant flex-wrap"></div>
+      <div>
+        <div class="font-semibold text-on-surface text-sm">提交代码</div>
+        <div class="text-xs text-outline">上传代码文件或粘贴关键代码片段</div>
+      </div>
+      <span class="material-symbols-outlined ml-auto text-on-surface-variant">chevron_right</span>
     </div>
-    <div class="flex gap-1 px-3 pt-3 bg-white/20">
-      ${currentUser?.role === 'developer'
-        ? '<div class="repo-tab px-4 py-2 rounded-full text-xs font-medium text-on-surface cursor-pointer transition-all active:scale-95 bg-primary text-on-primary" onclick="switchRepoTab(\'commit\', this)">提交代码</div>'
-        : ''}
-      <div class="repo-tab px-4 py-2 rounded-full text-xs font-medium text-on-surface cursor-pointer transition-all active:scale-95 ${currentUser?.role === 'developer' ? '' : 'bg-primary text-on-primary'}" onclick="switchRepoTab('commits', this)">版本历史</div>
-      <div class="repo-tab px-4 py-2 rounded-full text-xs font-medium text-on-surface-variant cursor-pointer transition-all active:scale-95 hover:bg-primary/5" onclick="switchRepoTab('diff', this)">版本对比</div>
-      <div class="repo-tab px-4 py-2 rounded-full text-xs font-medium text-on-surface-variant cursor-pointer transition-all active:scale-95 hover:bg-primary/5" onclick="switchRepoTab('tree', this)">文件树</div>
-    </div>
-    <div class="p-4">
-      <div id="repo-commit" style="display:none">
-        <div id="commit-form" class="space-y-4"></div>
+    <div onclick="showDetailPage('repo-commits')" class="glass-panel p-4 rounded-lg cursor-pointer active:scale-[0.98] transition-all hover:shadow-[0_4px_16px_-8px_rgba(30,41,59,0.1)] flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+        <span class="material-symbols-outlined text-primary">history</span>
       </div>
-      <div id="repo-commits"></div>
-      <div id="repo-diff" style="display:none">
-        <div class="flex gap-2 mb-3">
-          <select id="diff-from" class="flex-1 px-3 py-2 bg-white/50 border border-white/60 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30" onchange="loadDiffView()"></select>
-          <span class="text-on-surface-variant text-sm leading-8">→</span>
-          <select id="diff-to" class="flex-1 px-3 py-2 bg-white/50 border border-white/60 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30" onchange="loadDiffView()"></select>
-        </div>
-        <div id="diff-results"></div>
+      <div>
+        <div class="font-semibold text-on-surface text-sm">版本历史</div>
+        <div class="text-xs text-outline">查看提交记录和文件变更</div>
       </div>
-      <div id="repo-tree" style="display:none">
-        <div class="mb-3">
-          <select id="tree-ref" class="w-full px-3 py-2 bg-white/50 border border-white/60 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30" onchange="loadTreeView()"></select>
-        </div>
-        <div id="tree-results"></div>
-      </div>
+      <span class="material-symbols-outlined ml-auto text-on-surface-variant">chevron_right</span>
     </div>`;
-  document.getElementById('repo-status').innerHTML = `
-    <span class="flex items-center gap-1"><span class="text-outline">分支</span> <span class="font-medium text-on-surface">${esc(repoData.currentBranch)}</span></span>
-    <span class="flex items-center gap-1"><span class="text-outline">版本</span> <span class="font-medium text-on-surface">${esc(repoData.currentRef || '-')}</span></span>
-    <span class="flex items-center gap-1"><span class="text-outline">提交</span> <span class="font-medium text-on-surface">${repoData.totalCommits}</span></span>`;
-  loadCommits(orderId);
 }
 
 async function initCurrentRepo() {
@@ -863,18 +985,28 @@ async function initCurrentRepo() {
 // ─── 提交代码表单 ─────────────────────────────────────
 let commitFileCount = 1;
 
+let currentFileMode = null;
+
+function selectFileMode(mode) {
+  currentFileMode = mode;
+  document.querySelectorAll('.file-mode-btn').forEach(b => {
+    b.classList.remove('bg-primary', 'text-on-primary', 'shadow-sm');
+    b.classList.add('text-on-surface-variant', 'bg-surface-container');
+  });
+  const activeBtn = document.querySelector(`.file-mode-btn[data-mode="${mode}"]`);
+  if (activeBtn) {
+    activeBtn.classList.remove('text-on-surface-variant', 'bg-surface-container');
+    activeBtn.classList.add('bg-primary', 'text-on-primary', 'shadow-sm');
+  }
+  if (mode === 'folder') document.getElementById('folder-picker').click();
+  else if (mode === 'file') document.getElementById('file-picker').click();
+  else if (mode === 'manual') addCommitFileEntry();
+}
+
 function renderCommitForm() {
   const el = document.getElementById('commit-form');
+  currentFileMode = null;
   el.innerHTML = `
-    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 text-xs text-blue-700 leading-relaxed mb-4">
-      <strong>💡 如何提交代码？</strong>
-      <ol class="list-decimal ml-4 mt-2 space-y-1">
-        <li>点击 <strong>"选择文件夹"</strong> 上传你的工程目录，文件会自动读入</li>
-        <li>给这个版本起个名字，方便以后识别</li>
-        <li>也可以手动 <strong>"+ 添加文件"</strong>，粘贴代码片段</li>
-        <li>点击提交即可</li>
-      </ol>
-    </div>
     <div>
       <label class="block text-xs font-medium text-on-surface-variant mb-1.5 font-mono uppercase tracking-wider">代码版本名称</label>
       <input id="commit-message" type="text" placeholder="例如：v1-登录功能" class="w-full px-4 py-3 bg-white/50 border border-white/60 rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"/>
@@ -884,21 +1016,24 @@ function renderCommitForm() {
       <textarea id="commit-description" rows="3" placeholder="简单描述这个版本做了什么改动..." class="w-full px-4 py-3 bg-white/50 border border-white/60 rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none"></textarea>
     </div>
     <div>
-      <div class="flex items-center justify-between mb-1.5">
-        <label class="block text-xs font-medium text-on-surface-variant font-mono uppercase tracking-wider">文件列表</label>
-        <div class="flex gap-2">
-          <button onclick="document.getElementById('folder-picker').click()" class="text-xs bg-surface-container text-on-surface px-3 py-1.5 rounded-full hover:bg-surface-container-high transition-all">
-            📁 选择文件夹（保留目录结构）
-          </button>
-          <button onclick="document.getElementById('file-picker').click()" class="text-xs text-on-surface-variant hover:text-primary transition-all">
-            或选单个文件
-          </button>
-          <button onclick="addCommitFileEntry()" class="text-xs text-primary font-medium hover:underline">+ 手动添加</button>
-        </div>
+      <label class="block text-xs font-medium text-on-surface-variant mb-1.5 font-mono uppercase tracking-wider">选择添加方式</label>
+      <div class="flex gap-2 mb-4">
+        <button class="file-mode-btn flex-1 flex flex-col items-center gap-1 px-3 py-3 rounded-xl text-xs font-medium transition-all active:scale-95 text-on-surface-variant bg-surface-container" data-mode="folder" onclick="selectFileMode('folder')">
+          <span class="material-symbols-outlined text-xl">folder</span>
+          <span>选择文件夹</span>
+        </button>
+        <button class="file-mode-btn flex-1 flex flex-col items-center gap-1 px-3 py-3 rounded-xl text-xs font-medium transition-all active:scale-95 text-on-surface-variant bg-surface-container" data-mode="file" onclick="selectFileMode('file')">
+          <span class="material-symbols-outlined text-xl">description</span>
+          <span>选择单个文件</span>
+        </button>
+        <button class="file-mode-btn flex-1 flex flex-col items-center gap-1 px-3 py-3 rounded-xl text-xs font-medium transition-all active:scale-95 text-on-surface-variant bg-surface-container" data-mode="manual" onclick="selectFileMode('manual')">
+          <span class="material-symbols-outlined text-xl">code</span>
+          <span>添加关键代码</span>
+        </button>
       </div>
       <input id="folder-picker" type="file" webkitdirectory multiple style="display:none" onchange="handleFolderPicked(this)"/>
       <input id="file-picker" type="file" multiple style="display:none" onchange="handleFilePicked(this)"/>
-      <div id="commit-files" class="space-y-3"></div>
+      <div id="commit-files" class="space-y-3" style="display:none"></div>
     </div>
     <button onclick="submitCommit()" class="w-full py-3 bg-primary text-on-primary rounded-full text-sm font-semibold active:scale-95 transition-all hover:shadow-lg hover:shadow-primary/20">
       <span class="material-symbols-outlined text-base align-middle mr-1">upload</span>
@@ -907,7 +1042,6 @@ function renderCommitForm() {
     <div id="commit-error" class="text-xs text-center min-h-5"></div>
   `;
   commitFileCount = 1;
-  addCommitFileEntry();
 }
 
 function handleFilePicked(input) {
@@ -992,6 +1126,7 @@ function handleFolderPicked(input) {
 
 function addCommitFileEntry(path, content) {
   const container = document.getElementById('commit-files');
+  container.style.display = ''; // 显示文件列表容器
   const idx = commitFileCount++;
   const div = document.createElement('div');
   div.className = 'p-3 bg-white/30 rounded-xl border border-white/40';
@@ -1065,7 +1200,6 @@ async function loadCommits(orderId, branch) {
   if (!res.success) return;
   repoCommits = res.data.commits || [];
   renderCommits();
-  populateVersionSelects();
 }
 
 function renderCommits() {
@@ -1076,17 +1210,24 @@ function renderCommits() {
   }
   el.innerHTML = '<div class="space-y-2">' + repoCommits.map(c => `
     <div class="p-4 bg-white/30 rounded-xl border border-white/40 cursor-pointer hover:bg-white/50 transition-all active:scale-[0.98]" onclick="toggleVersion('${c.ref}')">
-      <div class="flex items-center justify-between mb-1">
-        <span class="text-sm font-bold text-primary font-mono">${esc(c.ref)}</span>
-        <button class="text-[10px] text-on-surface-variant hover:text-primary px-2 py-0.5 rounded-full hover:bg-primary/5 transition-all" onclick="event.stopPropagation();showRollbackConfirm('${c.ref}')">⏪ 回退</button>
-      </div>
-      <p class="text-sm text-on-surface mb-1">${esc(c.message)}</p>
-      ${c.description ? `<p class="text-xs text-outline mb-1 italic">${esc(c.description)}</p>` : ''}
-      <div class="flex items-center gap-3 text-[10px] text-outline">
-        <span>${esc(c.authorName)}</span>
-        <span>${c.fileCount} 个文件</span>
-        <span>${formatTime(c.createdAt)}</span>
-        ${c.parentRef ? '<span>← ' + esc(c.parentRef) + '</span>' : '<span>初始提交</span>'}
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-bold text-primary truncate" title="${esc(c.message)}">${esc(c.message)}</span>
+            <button class="shrink-0 w-5 h-5 flex items-center justify-center rounded text-outline hover:text-primary hover:bg-primary/5 transition-all" onclick="event.stopPropagation();renameCommit('${c.ref}')">
+              <span class="material-symbols-outlined text-xs">edit</span>
+            </button>
+          </div>
+          ${c.description ? `<p class="text-xs text-outline mt-0.5 italic">${esc(c.description)}</p>` : ''}
+          <div class="flex items-center gap-2 mt-1.5 text-[10px] text-outline flex-wrap">
+            <span>${esc(c.authorName)}</span>
+            <span>·</span>
+            <span>${formatTime(c.createdAt)}</span>
+            <span>·</span>
+            <span>${c.fileCount} 个文件</span>
+            <span class="font-mono text-on-surface-variant/60">${esc(c.ref)}</span>
+          </div>
+        </div>
       </div>
       <div id="v-files-${c.ref}" class="hidden mt-3 pt-3 border-t border-outline-variant/20 text-xs text-outline">加载中...</div>
     </div>
@@ -1097,97 +1238,92 @@ async function toggleVersion(ref) {
   const filesEl = document.getElementById('v-files-' + ref);
   if (filesEl.classList.contains('hidden')) {
     filesEl.classList.remove('hidden');
+    filesEl.innerHTML = '<div class="text-center py-4 text-sm text-outline">加载中...</div>';
     const res = await api('GET', '/api/repos/' + currentOrderId + '/tree?ref=' + ref);
     if (res.success && res.data?.files?.length) {
-      filesEl.innerHTML = res.data.files.map(f => `<div class="flex items-center gap-2 py-1"><span class="material-symbols-outlined text-sm ${f.action === 'delete' ? 'text-red-400' : 'text-outline'}">${f.action === 'delete' ? 'delete' : 'description'}</span><span class="text-on-surface">${esc(f.path)}</span><span class="text-outline ml-auto">${f.size ? formatBytes(f.size) : ''}</span></div>`).join('');
+      const tree = buildFileTree(res.data.files);
+      filesEl.innerHTML = '<div class="divide-y divide-outline-variant/10">' + renderTreeNodes(tree, 0, ref) + '</div>';
     } else {
-      filesEl.innerHTML = '<span class="text-outline">（无文件）</span>';
+      filesEl.innerHTML = '<div class="text-center py-4 text-sm text-outline">该版本没有文件</div>';
     }
   } else {
     filesEl.classList.add('hidden');
   }
 }
 
-function showRollbackConfirm(ref) {
-  if (!confirm('确定要回退到 ' + ref + ' 吗？\n\n这将创建一个新提交恢复到 ' + ref + ' 的状态。历史不会丢失。')) return;
-  doRollback(ref);
-}
-
-async function doRollback(ref) {
-  const res = await api('POST', '/api/repos/' + currentOrderId + '/rollback', { ref });
-  if (!res.success) return alert('回退失败: ' + (res.error || '未知错误'));
-  alert('✅ 已创建 ' + res.data.newRef + '，回退到 ' + ref + ' 完成！');
-  loadRepoInfo(currentOrderId);
-}
-
-function populateVersionSelects() {
-  const fromEl = document.getElementById('diff-from');
-  const toEl = document.getElementById('diff-to');
-  const treeRefEl = document.getElementById('tree-ref');
-  if (!fromEl) return;
-  const options = repoCommits.map(c => `<option value="${c.ref}">${c.ref}: ${esc(c.message.slice(0, 40))}</option>`).join('');
-  fromEl.innerHTML = '<option value="">选择起始版本</option>' + options;
-  toEl.innerHTML = '<option value="">选择目标版本</option>' + options;
-  treeRefEl.innerHTML = '<option value="">最新版本</option>' + options;
-  if (repoCommits.length >= 2) { fromEl.value = repoCommits[repoCommits.length - 2].ref; toEl.value = repoCommits[0].ref; loadDiffView(); }
-  else if (repoCommits.length === 1) { toEl.value = repoCommits[0].ref; }
-}
-
-async function loadDiffView() {
-  const from = document.getElementById('diff-from').value;
-  const to = document.getElementById('diff-to').value;
-  const el = document.getElementById('diff-results');
-  if (!from || !to) { el.innerHTML = '<div class="text-center py-6 text-sm text-outline">请选择两个版本进行对比</div>'; return; }
-  el.innerHTML = '<div class="text-center py-6 text-sm text-outline">加载中...</div>';
-  const res = await api('GET', `/api/repos/${currentOrderId}/diff?from=${from}&to=${to}`);
-  if (!res.success || !res.data) { el.innerHTML = '<div class="text-center py-6 text-sm text-outline">加载失败</div>'; return; }
-  const changes = res.data.changes || [];
-  if (!changes.length) { el.innerHTML = '<div class="text-center py-6 text-sm text-outline">两个版本之间没有差异</div>'; return; }
-  el.innerHTML = '<div class="text-xs text-on-surface-variant mb-2">从 <strong>' + from + '</strong> 到 <strong>' + to + '</strong> 共 ' + changes.length + ' 处变化</div>' +
-    '<div class="space-y-1">' + changes.map(c => {
-      const aColors = { add:'bg-green-50 text-green-600', modify:'bg-blue-50 text-blue-600', delete:'bg-red-50 text-red-600' };
-      return `<div class="flex items-center gap-2 py-2 px-3 bg-white/30 rounded-lg text-xs">
-        <span class="font-mono font-bold px-2 py-0.5 rounded ${aColors[c.action] || ''}">${c.action}</span>
-        <span class="text-on-surface font-mono">${esc(c.path)}</span>
-      </div>`;
-    }).join('') + '</div>';
-}
-
-async function loadTreeView() {
-  const ref = document.getElementById('tree-ref').value;
-  const el = document.getElementById('tree-results');
-  el.innerHTML = '<div class="text-center py-6 text-sm text-outline">加载中...</div>';
-  let path = '/api/repos/' + currentOrderId + '/tree';
-  if (ref) path += '?ref=' + ref;
-  const res = await api('GET', path);
-  if (!res.success || !res.data) { el.innerHTML = '<div class="text-center py-6 text-sm text-outline">暂无文件</div>'; return; }
-  const files = res.data.files || [];
-  if (!files.length) { el.innerHTML = '<div class="text-center py-6 text-sm text-outline">该版本没有文件</div>'; return; }
-  el.innerHTML = '<div class="text-xs text-on-surface-variant mb-2">' + esc(res.data.ref) + ': ' + esc(res.data.message) + ' — ' + files.length + ' 个文件</div>' +
-    '<div class="space-y-1">' + files.map(f => `
-      <div class="flex items-center gap-2 py-2 px-3 bg-white/30 rounded-lg text-xs">
-        <span class="material-symbols-outlined text-sm ${f.action === 'delete' ? 'text-red-400' : 'text-outline'}">${f.action === 'delete' ? 'delete' : 'description'}</span>
-        <span class="text-on-surface font-mono flex-1">${esc(f.path)}</span>
-        <span class="text-outline">${f.size ? formatBytes(f.size) : ''}</span>
-      </div>
-    `).join('') + '</div>';
-}
-
-function switchRepoTab(tab, el) {
-  currentRepoTab = tab;
-  document.querySelectorAll('.repo-tab').forEach(t => {
-    t.classList.remove('bg-primary','text-on-primary');
-    t.classList.add('text-on-surface-variant');
+function renameCommit(ref) {
+  const commit = repoCommits.find(c => c.ref === ref);
+  if (!commit) return;
+  const newName = prompt('修改版本名称：', commit.message);
+  if (!newName || newName.trim() === commit.message) return;
+  api('PUT', '/api/repos/' + currentOrderId + '/commits/' + ref, { message: newName.trim() }).then(res => {
+    if (!res.success) return alert('修改失败: ' + (res.error || '未知错误'));
+    loadCommits(currentOrderId);
   });
-  if (!el) el = document.querySelector('.repo-tab:first-child');
-  if (el) { el.classList.remove('text-on-surface-variant'); el.classList.add('bg-primary','text-on-primary'); }
-  document.getElementById('repo-commit').style.display = tab === 'commit' ? '' : 'none';
-  document.getElementById('repo-commits').style.display = tab === 'commits' ? '' : 'none';
-  document.getElementById('repo-diff').style.display = tab === 'diff' ? '' : 'none';
-  document.getElementById('repo-tree').style.display = tab === 'tree' ? '' : 'none';
-  if (tab === 'diff') loadDiffView();
-  if (tab === 'tree') loadTreeView();
-  if (tab === 'commit') renderCommitForm();
+}
+
+function buildFileTree(files) {
+  const root = { name: '/', dirs: {}, files: [] };
+  for (const f of files) {
+    const parts = f.path.replace(/\\/g, '/').split('/');
+    let node = root;
+    for (let i = 0; i < parts.length - 1; i++) {
+      if (!node.dirs[parts[i]]) {
+        node.dirs[parts[i]] = { name: parts[i], dirs: {}, files: [] };
+      }
+      node = node.dirs[parts[i]];
+    }
+    node.files.push(f);
+  }
+  return root;
+}
+
+function renderTreeNodes(node, depth, ref) {
+  let html = '';
+  const indent = 12 + depth * 20;
+
+  const dirNames = Object.keys(node.dirs).sort();
+  const fileList = [...node.files].sort((a, b) => a.path.localeCompare(b.path));
+
+  for (const name of dirNames) {
+    const dir = node.dirs[name];
+    const childCount = Object.keys(dir.dirs).length + dir.files.length;
+    html += `<div class="tree-folder-row" data-depth="${depth}">
+      <div class="flex items-center gap-2 py-2 px-3 hover:bg-white/40 cursor-pointer transition-all text-xs select-none" style="padding-left:${indent}px" onclick="event.stopPropagation();toggleTreeDir(this)">
+        <span class="material-symbols-outlined text-sm text-amber-500 tree-icon">folder</span>
+        <span class="text-on-surface font-medium">${esc(name)}</span>
+        <span class="text-outline text-[10px] ml-auto">${childCount} 项</span>
+      </div>
+      <div class="tree-children hidden">
+        ${renderTreeNodes(dir, depth + 1, ref)}
+      </div>
+    </div>`;
+  }
+
+  for (const f of fileList) {
+    const icon = f.action === 'delete' ? 'delete' : 'description';
+    const iconColor = f.action === 'delete' ? 'text-red-400' : 'text-blue-400';
+    const fileName = f.path.replace(/\\/g, '/').split('/').pop();
+    const safePath = f.path.replace(/'/g, "\\'");
+    const clickAttr = ref ? `onclick="event.stopPropagation();showFileContent('${safePath}', '${ref}')"` : '';
+    html += `<div class="flex items-center gap-2 py-2 px-3 hover:bg-white/40 transition-all text-xs ${ref ? 'cursor-pointer' : ''}" style="padding-left:${indent}px" ${clickAttr}>
+      <span class="material-symbols-outlined text-sm ${iconColor}">${icon}</span>
+      <span class="text-on-surface font-mono flex-1 truncate" title="${esc(f.path)}">${esc(fileName)}</span>
+      <span class="text-outline text-[10px]">${f.size ? formatBytes(f.size) : ''}</span>
+    </div>`;
+  }
+
+  return html;
+}
+
+function toggleTreeDir(el) {
+  const children = el.nextElementSibling;
+  if (children && children.classList.contains('tree-children')) {
+    const isHidden = children.classList.contains('hidden');
+    children.classList.toggle('hidden');
+    const icon = el.querySelector('.tree-icon');
+    if (icon) icon.textContent = isHidden ? 'folder_open' : 'folder';
+  }
 }
 
 function formatBytes(bytes) {
@@ -1195,6 +1331,31 @@ function formatBytes(bytes) {
   const units = ['B', 'KB', 'MB'];
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
   return (bytes / Math.pow(1024, i)).toFixed(i > 0 ? 1 : 0) + ' ' + units[i];
+}
+
+function closeFileViewer() {
+  document.getElementById('file-viewer').style.display = 'none';
+}
+
+async function showFileContent(path, ref) {
+  const viewer = document.getElementById('file-viewer');
+  document.getElementById('file-viewer-path').textContent = path;
+  document.getElementById('file-viewer-content').textContent = '加载中...';
+  document.getElementById('file-viewer-lines').textContent = '1';
+  viewer.style.display = 'flex';
+  const res = await api('GET', '/api/repos/' + currentOrderId + '/file?path=' + encodeURIComponent(path) + '&ref=' + encodeURIComponent(ref));
+  if (res.success && res.data?.content) {
+    const lines = res.data.content.split('\n');
+    document.getElementById('file-viewer-content').textContent = res.data.content;
+    document.getElementById('file-viewer-lines').textContent = lines.map((_, i) => i + 1).join('\n');
+    // 同步滚动：代码滚动时行号跟随
+    const wrapper = document.getElementById('file-scroll-wrapper');
+    const lineNumbers = document.getElementById('file-viewer-lines');
+    wrapper.onscroll = () => { lineNumbers.parentElement.scrollTop = wrapper.scrollTop; };
+  } else {
+    document.getElementById('file-viewer-content').textContent = '// 无法加载文件内容';
+    document.getElementById('file-viewer-lines').textContent = '1';
+  }
 }
 
 (function init() {

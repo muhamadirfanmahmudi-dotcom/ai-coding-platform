@@ -15,9 +15,6 @@ import type {
   BranchResponse,
   CreateBranchRequest,
   CheckoutRequest,
-  RollbackRequest,
-  RollbackResponse,
-  DiffResponse,
   ApiSpecResponse,
 } from '../models';
 
@@ -509,84 +506,48 @@ repoRoutes.get('/:orderId/file', (req: Request, res: Response) => {
   }
 });
 
-// ─── POST /api/repos/:orderId/rollback ── 回退版本 ────
-repoRoutes.post('/:orderId/rollback', (req: Request, res: Response) => {
+// ─── PUT /api/repos/:orderId/commits/:ref ── 修改版本名称 ─
+repoRoutes.put('/:orderId/commits/:ref', (req: Request, res: Response) => {
   try {
     const user = (req as any).currentUser;
+    if (user.role !== 'developer') {
+      res.status(403).json({ success: false, error: '只有开发者可以操作' } as ApiResponse);
+      return;
+    }
     const order = db.getOrderById(paramOrderId(req));
     if (!order) {
       res.status(404).json({ success: false, error: '订单不存在' } as ApiResponse);
       return;
     }
     if (order.developerId !== user.id) {
-      res.status(403).json({ success: false, error: '只有开发者可以回退' } as ApiResponse);
+      res.status(403).json({ success: false, error: '无权操作' } as ApiResponse);
       return;
     }
 
     const repo = db.getRepoByOrderId(paramOrderId(req));
     if (!repo) {
-      res.status(400).json({ success: false, error: '请先初始化仓库' } as ApiResponse);
+      res.status(400).json({ success: false, error: '仓库不存在' } as ApiResponse);
       return;
     }
 
-    const { ref: targetRef } = req.body as RollbackRequest;
-    if (!targetRef) {
-      res.status(400).json({ success: false, error: '请指定目标版本 (ref)' } as ApiResponse);
+    const ref = Array.isArray(req.params.ref) ? req.params.ref[0] : req.params.ref;
+    const commit = db.getCommitByRef(repo.id, ref);
+    if (!commit) {
+      res.status(404).json({ success: false, error: '版本不存在' } as ApiResponse);
       return;
     }
 
-    const targetCommit = db.getCommitByRef(repo.id, targetRef);
-    if (!targetCommit) {
-      res.status(404).json({ success: false, error: `版本 ${targetRef} 不存在` } as ApiResponse);
+    const { message, description } = req.body as { message?: string; description?: string };
+    if (!message || !message.trim()) {
+      res.status(400).json({ success: false, error: '版本名称不能为空' } as ApiResponse);
       return;
     }
 
-    const branch = db.getBranch(repo.id, repo.defaultBranch);
-    if (!branch) {
-      res.status(500).json({ success: false, error: '分支异常' } as ApiResponse);
-      return;
-    }
+    db.updateCommitMessage(commit.id, message.trim(), description !== undefined ? description : commit.description);
 
-    // Get files at target commit
-    const targetTree = db.getTreeAtCommit(targetCommit.id);
-
-    // Create new commit that restores target files
-    const newCommitId = uuid();
-    const newCommit = db.createCommit({
-      id: newCommitId,
-      repoId: repo.id,
-      message: `rollback to ${targetRef}`,
-      parentId: branch.headCommitId || undefined,
-    });
-
-    const rollbackFiles: { path: string; content: string }[] = [];
-
-    for (const file of targetTree) {
-      const blob = db.getBlob(file.fileHash);
-      const content = blob ? encodeContent(blob) : '';
-      db.addCommitFile({
-        commitId: newCommit.id,
-        filePath: file.filePath,
-        fileHash: file.fileHash,
-        fileSize: file.fileSize,
-        action: 'modify',
-      });
-      rollbackFiles.push({ path: file.filePath, content });
-    }
-
-    // Update branch head
-    db.updateBranchHead(repo.id, repo.defaultBranch, newCommit.id);
-
-    const data: RollbackResponse = {
-      newRef: newCommit.ref,
-      message: newCommit.message,
-      targetRef,
-      files: rollbackFiles,
-    };
-
-    res.json({ success: true, data } as ApiResponse<RollbackResponse>);
+    res.json({ success: true, data: { ref, message: message.trim() } } as ApiResponse);
   } catch (err: any) {
-    console.error('[Repos] Rollback error:', err.message);
+    console.error('[Repos] Rename commit error:', err.message);
     res.status(500).json({ success: false, error: '服务器错误' } as ApiResponse);
   }
 });
@@ -735,56 +696,4 @@ repoRoutes.post('/:orderId/checkout', (req: Request, res: Response) => {
   }
 });
 
-// ─── GET /api/repos/:orderId/diff ── 版本差异 ─────────
-repoRoutes.get('/:orderId/diff', (req: Request, res: Response) => {
-  try {
-    const user = (req as any).currentUser;
-    const order = db.getOrderById(paramOrderId(req));
-    if (!order) {
-      res.status(404).json({ success: false, error: '订单不存在' } as ApiResponse);
-      return;
-    }
-    if (order.buyerId !== user.id && order.developerId !== user.id) {
-      res.status(403).json({ success: false, error: '无权访问' } as ApiResponse);
-      return;
-    }
 
-    const repo = db.getRepoByOrderId(paramOrderId(req));
-    if (!repo) {
-      res.status(400).json({ success: false, error: '仓库不存在' } as ApiResponse);
-      return;
-    }
-
-    const fromRef = req.query.from as string;
-    const toRef = req.query.to as string;
-    if (!fromRef || !toRef) {
-      res.status(400).json({ success: false, error: '请指定 ?from=v1&to=v2' } as ApiResponse);
-      return;
-    }
-
-    const fromCommit = db.getCommitByRef(repo.id, fromRef);
-    const toCommit = db.getCommitByRef(repo.id, toRef);
-    if (!fromCommit || !toCommit) {
-      res.status(404).json({ success: false, error: '版本不存在' } as ApiResponse);
-      return;
-    }
-
-    const changes = db.diffCommits(fromCommit.id, toCommit.id);
-
-    const data: DiffResponse = {
-      fromRef,
-      toRef,
-      changes: changes.map(c => ({
-        path: c.path,
-        action: c.action as any,
-        beforeRef: c.beforeHash ? c.beforeHash.slice(0, 8) : null,
-        afterRef: c.afterHash ? c.afterHash.slice(0, 8) : null,
-      })),
-    };
-
-    res.json({ success: true, data } as ApiResponse<DiffResponse>);
-  } catch (err: any) {
-    console.error('[Repos] Diff error:', err.message);
-    res.status(500).json({ success: false, error: '服务器错误' } as ApiResponse);
-  }
-});
