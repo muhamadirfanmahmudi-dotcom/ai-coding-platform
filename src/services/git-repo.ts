@@ -32,7 +32,7 @@ export class GitRepoManager {
       fs.mkdirSync(REPOS_ROOT, { recursive: true });
     }
 
-    execSync(`git init --bare "${repoPath}"`, { stdio: 'ignore' });
+    execSync(`git init --bare "${repoPath}"`, { stdio: 'ignore', timeout: 30000 });
 
     const infoDir = path.join(repoPath, 'info');
     if (!fs.existsSync(infoDir)) {
@@ -65,7 +65,7 @@ echo "Syncing to database for order: ${orderId}"
       return;
     }
     try {
-      execSync(`git update-server-info`, { cwd: repoPath, stdio: 'ignore' });
+      execSync(`git update-server-info`, { cwd: repoPath, stdio: 'ignore', timeout: 15000 });
     } catch (err) {
       console.error(`[Git] update-server-info failed for ${orderId}:`, err);
     }
@@ -177,7 +177,7 @@ echo "Syncing to database for order: ${orderId}"
 
       const logOutput = execSync(
         'git log --all --format="%H|%s|%ai|%P" --reverse',
-        { cwd: repoPath, encoding: 'utf-8' }
+        { cwd: repoPath, encoding: 'utf-8', timeout: 15000 }
       ).trim();
 
       if (!logOutput) {
@@ -204,7 +204,7 @@ echo "Syncing to database for order: ${orderId}"
 
         const filesOutput = execSync(
           `git diff-tree --no-commit-id -r ${hash}`,
-          { cwd: repoPath, encoding: 'utf-8' }
+          { cwd: repoPath, encoding: 'utf-8', timeout: 10000 }
         ).trim();
 
         if (filesOutput) {
@@ -230,7 +230,7 @@ echo "Syncing to database for order: ${orderId}"
 
         const branchesOutput = execSync(
           `git branch --contains ${hash}`,
-          { cwd: repoPath, encoding: 'utf-8' }
+          { cwd: repoPath, encoding: 'utf-8', timeout: 10000 }
         ).trim();
 
         const branchNames = branchesOutput.split('\n')

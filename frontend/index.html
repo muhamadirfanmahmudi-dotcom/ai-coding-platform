@@ -1,375 +1,268 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI 代写平台 v0.3.0</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Forge - 代写平台</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "primary": "#b7004f",
+        "primary-container": "#e40a65",
+        "on-primary": "#ffffff",
+        "on-primary-container": "#fffbff",
+        "secondary": "#4648d4",
+        "secondary-container": "#6063ee",
+        "on-secondary": "#ffffff",
+        "on-secondary-container": "#fffbff",
+        "tertiary": "#a12e70",
+        "tertiary-container": "#c0488a",
+        "on-tertiary-container": "#fffbff",
+        "surface": "#f9f9ff",
+        "surface-variant": "#d8e3fb",
+        "surface-container": "#e7eeff",
+        "surface-container-low": "#f0f3ff",
+        "surface-container-high": "#dee8ff",
+        "surface-container-highest": "#d8e3fb",
+        "surface-dim": "#cfdaf2",
+        "on-surface": "#111c2d",
+        "on-surface-variant": "#5b3f44",
+        "outline": "#8f6f74",
+        "outline-variant": "#e4bdc3",
+        "error": "#ba1a1a",
+        "error-container": "#ffdad6",
+        "on-error": "#ffffff",
+        "on-error-container": "#93000a",
+        "background": "#f9f9ff",
+        "on-background": "#111c2d",
+        "inverse-surface": "#263143",
+        "inverse-on-surface": "#ecf1ff",
+      },
+      borderRadius: { DEFAULT: "1rem", lg: "2rem", xl: "3rem", full: "9999px" },
+      fontFamily: {
+        "display": ["Plus Jakarta Sans"],
+        "body": ["Inter"],
+        "mono": ["JetBrains Mono"],
+      },
+    },
+  },
+}
+</script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#0a0a0a;--surface:#1a1a1a;--surface2:#242424;--surface3:#2a2a2a;
-  --border:#333;--text:#f5f5f7;--text2:#a1a1a6;--text3:#6e6e73;
-  --blue:#007aff;--blue2:#0056cc;--green:#34c759;--orange:#ff9500;--red:#ff3b30;--purple:#af52de;
-  --radius:12px;--radius2:8px;
-}
-body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;animation:fadeIn .5s ease}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-
-a{color:var(--blue);text-decoration:none}
-button{font-family:inherit;cursor:pointer;border:none;border-radius:var(--radius2);padding:10px 20px;font-size:14px;font-weight:500;transition:all .2s}
-input,textarea,select{font-family:inherit;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius2);padding:12px 16px;color:var(--text);font-size:14px;width:100%;outline:none;transition:border-color .2s}
-input:focus,textarea:focus,select:focus{border-color:var(--blue)}
-textarea{resize:vertical;min-height:80px}
-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a1a1a6' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
-select option{background:var(--surface2);color:var(--text)}
-
-.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue2)}
-.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{background:var(--surface3)}
-.btn-danger{background:var(--red);color:#fff}.btn-danger:hover{opacity:.85}
-.btn-success{background:var(--green);color:#fff}.btn-success:hover{opacity:.85}
-.btn-sm{padding:6px 14px;font-size:13px}
-.btn-ghost{background:transparent;color:var(--text2)}.btn-ghost:hover{color:var(--text);background:var(--surface2)}
-
-/* ─── Auth Page ─────────────────────────────────── */
-.auth-page{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
-.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;width:100%;max-width:400px;animation:slideUp .5s ease}
-@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.auth-card h1{font-size:24px;font-weight:700;text-align:center;margin-bottom:8px}
-.auth-card .subtitle{text-align:center;color:var(--text2);font-size:14px;margin-bottom:32px}
-.auth-tabs{display:flex;gap:4px;background:var(--surface2);border-radius:var(--radius2);padding:4px;margin-bottom:24px}
-.auth-tab{flex:1;text-align:center;padding:8px;border-radius:6px;font-size:14px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .2s}
-.auth-tab.active{background:var(--surface);color:var(--text)}
-.form-group{margin-bottom:16px}
-.form-group label{display:block;font-size:13px;color:var(--text2);margin-bottom:6px;font-weight:500}
-.auth-card .btn-primary{width:100%;padding:12px;font-size:15px;margin-top:8px}
-.auth-card .error{color:var(--red);font-size:13px;text-align:center;margin-top:12px;min-height:20px}
-
-/* ─── Role Selector ──────────────────────────────── */
-.role-selector{display:flex;gap:8px;margin-bottom:16px}
-.role-btn{flex:1;padding:12px;border-radius:var(--radius2);border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center}
-.role-btn.active{border-color:var(--blue);color:var(--text);background:rgba(0,122,255,.1)}
-.role-btn .role-icon{font-size:24px;margin-bottom:4px}
-.role-btn .role-name{font-size:13px}
-
-/* ─── App Layout ────────────────────────────────── */
-.app-page{display:none;min-height:100vh}
-.navbar{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);background:rgba(10,10,10,.8);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100}
-.navbar .logo{font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px}
-.navbar .logo span{color:var(--blue)}
-.navbar .user-info{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--text2)}
-.navbar .role-badge{padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
-.role-buyer{background:rgba(0,122,255,.15);color:var(--blue)}
-.role-developer{background:rgba(175,82,222,.15);color:var(--purple)}
-.container{max-width:900px;margin:0 auto;padding:24px}
-
-/* ─── Header ────────────────────────────────────── */
-.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
-.page-header h2{font-size:20px;font-weight:600}
-
-/* ─── Tabs ──────────────────────────────────────── */
-.tabs{display:flex;gap:4px;background:var(--surface);border-radius:var(--radius);padding:4px;margin-bottom:24px}
-.tab{flex:1;text-align:center;padding:10px;border-radius:var(--radius2);font-size:14px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .2s}
-.tab.active{background:var(--surface2);color:var(--text)}
-.tab:hover:not(.active){color:var(--text)}
-
-/* ─── Order Cards ───────────────────────────────── */
-.order-list{display:flex;flex-direction:column;gap:12px}
-.order-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:all .2s}
-.order-card:hover{border-color:var(--blue);transform:translateY(-1px)}
-.order-card .top{display:flex;align-items:start;justify-content:space-between;margin-bottom:8px}
-.order-card .title{font-size:16px;font-weight:600;flex:1}
-.order-card .desc{color:var(--text2);font-size:14px;line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.order-card .meta{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text3)}
-.order-card .time{color:var(--text3)}
-
-/* ─── Status Badge ──────────────────────────────── */
-.status{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500}
-.status-pending{background:rgba(255,149,0,.15);color:var(--orange)}
-.status-claimed{background:rgba(0,122,255,.15);color:var(--blue)}
-.status-in_progress{background:rgba(175,82,222,.15);color:var(--purple)}
-.status-reviewing{background:rgba(255,204,0,.15);color:#ffcc00}
-.status-completed{background:rgba(52,199,89,.15);color:var(--green)}
-.status-cancelled{background:rgba(255,59,48,.15);color:var(--red)}
-
-/* ─── Create Order Form ─────────────────────────── */
-.form-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px}
-.form-card h2{font-size:20px;font-weight:600;margin-bottom:24px}
-.form-card .form-group{margin-bottom:20px}
-.form-card .form-group label{font-size:14px;color:var(--text);margin-bottom:8px;font-weight:500}
-.form-card .form-group .hint{font-size:12px;color:var(--text3);margin-top:4px}
-.form-actions{display:flex;gap:12px;margin-top:24px}
-
-/* ─── Order Detail ──────────────────────────────── */
-.detail-back{display:flex;align-items:center;gap:6px;color:var(--text2);font-size:14px;cursor:pointer;margin-bottom:20px;transition:color .2s}
-.detail-back:hover{color:var(--text)}
-.detail-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:20px}
-.detail-card h2{font-size:20px;font-weight:600;margin-bottom:16px}
-.detail-card h3{font-size:16px;font-weight:600;margin-bottom:12px}
-.detail-field{margin-bottom:16px}
-.detail-field .label{font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-.detail-field .value{font-size:14px;color:var(--text);line-height:1.6;white-space:pre-wrap}
-
-/* ─── Action Panel (Developer) ──────────────────── */
-.action-panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:20px}
-.action-panel h3{font-size:16px;font-weight:600;margin-bottom:16px}
-.status-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-
-
-/* ─── Stage Workflow ─────────────────────────────── */
-.stage-progress{display:flex;gap:0;margin-bottom:24px;position:relative}
-.stage-step{flex:1;text-align:center;position:relative;padding:12px 8px}
-.stage-step .stage-dot{width:32px;height:32px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:14px;font-weight:600;color:var(--text3);transition:all .3s}
-.stage-step.completed .stage-dot{background:var(--green);border-color:var(--green);color:#fff}
-.stage-step.active .stage-dot{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 0 0 4px rgba(0,122,255,.2)}
-.stage-step .stage-name{font-size:12px;color:var(--text3);font-weight:500}
-.stage-step.active .stage-name{color:var(--blue)}
-.stage-step.completed .stage-name{color:var(--green)}
-.stage-connector{position:absolute;top:28px;left:calc(50% + 16px);right:calc(-50% + 16px);height:2px;background:var(--border)}
-.stage-step.completed .stage-connector{background:var(--green)}
-
-.stage-form{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:16px}
-.stage-form h4{font-size:16px;font-weight:600;margin-bottom:4px}
-.stage-form .stage-desc{color:var(--text2);font-size:13px;margin-bottom:16px;line-height:1.5}
-.stage-form .form-group{margin-bottom:14px}
-.stage-form .form-group label{display:block;font-size:13px;color:var(--text);margin-bottom:6px;font-weight:500}
-.stage-form .form-group textarea{min-height:60px}
-.stage-actions{display:flex;gap:8px;margin-top:16px}
-.stage-status{font-size:13px;padding:4px 12px;border-radius:12px;font-weight:500}
-.stage-status.pending{background:rgba(255,149,0,.15);color:var(--orange)}
-.stage-status.in_progress{background:rgba(0,122,255,.15);color:var(--blue)}
-.stage-status.completed{background:rgba(52,199,89,.15);color:var(--green)}
-
-/* ─── Empty State ───────────────────────────────── */
-.empty{text-align:center;padding:60px 0;color:var(--text3)}
-.empty .icon{font-size:48px;margin-bottom:12px}
-.empty p{font-size:14px}
-
-/* ─── Responsive ────────────────────────────────── */
-@media(max-width:640px){
-  .container{padding:16px}
-  .auth-card{padding:24px}
-  .form-card{padding:20px}
-  .detail-card{padding:20px}
-  .action-panel{padding:20px}
-}
-
-/* ─── Code Repo Panel ────────────────────────────── */
-.repo-panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px}
-.repo-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:8px}
-.repo-header h3{font-size:16px;font-weight:600}
-.repo-status{display:flex;gap:16px;font-size:13px;color:var(--text2)}
-.repo-status span{display:flex;align-items:center;gap:4px}
-.repo-status .label{color:var(--text3)}
-.repo-status .value{color:var(--text);font-weight:500}
-.repo-tabs{display:flex;gap:4px;background:var(--surface2);border-radius:var(--radius2);padding:4px;margin-bottom:16px}
-.repo-tab{flex:1;text-align:center;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .2s}
-.repo-tab.active{background:var(--surface);color:var(--text)}
-.repo-empty{text-align:center;padding:32px 0;color:var(--text3);font-size:14px}
-
-/* Version Timeline */
-.version-list{display:flex;flex-direction:column;gap:8px}
-.version-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius2);padding:14px 16px;cursor:pointer;transition:all .2s}
-.version-item:hover{border-color:var(--blue)}
-.version-item.expanded{border-color:var(--blue);background:rgba(0,122,255,.05)}
-.version-item .v-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
-.version-item .v-ref{font-size:14px;font-weight:600;color:var(--blue)}
-.version-item .v-actions{display:flex;gap:6px}
-.version-item .v-message{font-size:13px;color:var(--text);margin-bottom:4px}
-.version-item .v-meta{display:flex;gap:12px;font-size:12px;color:var(--text3)}
-.version-item .v-files{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
-.version-item .v-file{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:13px;color:var(--text2)}
-.version-item .v-file .file-icon{color:var(--text3)}
-.version-item .v-file .file-path{color:var(--text)}
-.version-item .v-file .file-size{color:var(--text3);font-size:11px;margin-left:auto}
-
-/* File Tree */
-.repo-tree{margin-top:12px}
-.repo-tree .tree-entry{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;border-bottom:1px solid var(--surface2)}
-.repo-tree .tree-entry:last-child{border-bottom:none}
-.repo-tree .entry-path{color:var(--text);font-family:monospace}
-.repo-tree .entry-size{color:var(--text3);font-size:11px;margin-left:auto}
-
-/* Diff */
-.diff-list{margin-top:12px}
-.diff-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--surface2);font-size:13px}
-.diff-item:last-child{border-bottom:none}
-.diff-action{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;text-transform:uppercase}
-.diff-action.add{background:rgba(52,199,89,.15);color:var(--green)}
-.diff-action.modify{background:rgba(0,122,255,.15);color:var(--blue)}
-.diff-action.delete{background:rgba(255,59,48,.15);color:var(--red)}
-.diff-path{color:var(--text);font-family:monospace}
-.diff-hash{color:var(--text3);font-size:11px}
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  .glass-panel { background: rgba(255,255,255,0.7); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); border: 1px solid rgba(255,255,255,0.5); }
+  body { background-color: #f9f9ff; color: #111c2d; overflow-x: hidden; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(183,0,79,0.1); border-radius: 10px; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  .anim-slide-up { animation: slideUp .5s ease; }
+  .anim-fade-in { animation: fadeIn .4s ease; }
 </style>
 </head>
-<body>
+<body class="font-body text-base">
 
-<!-- ═══════════════ Auth Page ═══════════════ -->
-<div class="auth-page" id="auth-page">
-  <div class="auth-card">
-    <h1>AI 代写平台</h1>
-    <p class="subtitle">发布需求，让开发者帮你搞定</p>
-    <div class="auth-tabs">
-      <div class="auth-tab active" onclick="switchAuthTab('login')">登录</div>
-      <div class="auth-tab" onclick="switchAuthTab('register')">注册</div>
+<!-- ═══════════ Auth Page ═══════════ -->
+<div id="auth-page" class="min-h-screen flex items-center justify-center px-4">
+  <div class="glass-panel rounded-lg p-10 w-full max-w-md anim-slide-up shadow-[0_16px_32px_-12px_rgba(30,41,59,0.08)]">
+    <div class="text-center mb-8">
+      <h1 class="font-display text-3xl font-extrabold tracking-tight text-primary">AI Forge</h1>
+      <p class="text-on-surface-variant text-sm mt-2">发布需求，让开发者帮你搞定</p>
+    </div>
+    <div class="flex gap-1 bg-surface-container rounded-xl p-1 mb-6">
+      <div class="auth-tab flex-1 text-center py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-all active:scale-95 bg-surface-container-low text-on-surface shadow-sm" onclick="switchAuthTab('login', this)">登录</div>
+      <div class="auth-tab flex-1 text-center py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-all active:scale-95 text-on-surface-variant" onclick="switchAuthTab('register', this)">注册</div>
     </div>
     <div id="login-form">
-      <div class="role-selector">
-        <div class="role-btn active" onclick="selectRole('buyer', this)">
-          <div class="role-icon">&#128100;</div>
-          <div class="role-name">我是买家</div>
+      <div class="flex gap-3 mb-5">
+        <div class="role-btn active flex-1 p-3 rounded-xl border border-outline-variant/30 bg-surface-container-low text-center cursor-pointer transition-all active:scale-95 hover:bg-surface-container" onclick="selectRole('buyer', this)">
+          <span class="material-symbols-outlined text-2xl text-primary">person</span>
+          <div class="text-xs font-medium text-on-surface mt-1">我是买家</div>
         </div>
-        <div class="role-btn" onclick="selectRole('developer', this)">
-          <div class="role-icon">&#128187;</div>
-          <div class="role-name">我是开发者</div>
+        <div class="role-btn flex-1 p-3 rounded-xl border border-outline-variant/30 bg-surface-container-low text-center cursor-pointer transition-all active:scale-95 hover:bg-surface-container" onclick="selectRole('developer', this)">
+          <span class="material-symbols-outlined text-2xl text-secondary">code</span>
+          <div class="text-xs font-medium text-on-surface mt-1">我是开发者</div>
         </div>
       </div>
-      <div class="form-group">
-        <label>邮箱</label>
-        <input type="email" id="login-email" placeholder="请输入邮箱">
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-on-surface-variant mb-1.5 font-mono uppercase tracking-wider">邮箱</label>
+          <input type="email" id="login-email" placeholder="请输入邮箱" class="w-full px-4 py-3 bg-white/50 border border-white/60 rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"/>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-on-surface-variant mb-1.5 font-mono uppercase tracking-wider">密码</label>
+          <input type="password" id="login-password" placeholder="请输入密码" class="w-full px-4 py-3 bg-white/50 border border-white/60 rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"/>
+        </div>
       </div>
-      <div class="form-group">
-        <label>密码</label>
-        <input type="password" id="login-password" placeholder="请输入密码">
-      </div>
-      <button class="btn-primary" onclick="doLogin()">登录</button>
+      <button onclick="doLogin()" class="w-full mt-6 py-3 bg-primary text-on-primary rounded-full font-semibold text-sm active:scale-95 transition-all hover:shadow-lg hover:shadow-primary/20">登录</button>
     </div>
     <div id="register-form" style="display:none">
-      <div class="form-group">
-        <label>用户名</label>
-        <input type="text" id="reg-name" placeholder="请输入用户名">
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-on-surface-variant mb-1.5 font-mono uppercase tracking-wider">用户名</label>
+          <input type="text" id="reg-name" placeholder="请输入用户名" class="w-full px-4 py-3 bg-white/50 border border-white/60 rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"/>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-on-surface-variant mb-1.5 font-mono uppercase tracking-wider">邮箱</label>
+          <input type="email" id="reg-email" placeholder="请输入邮箱" class="w-full px-4 py-3 bg-white/50 border border-white/60 rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"/>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-on-surface-variant mb-1.5 font-mono uppercase tracking-wider">密码</label>
+          <input type="password" id="reg-password" placeholder="请输入密码" class="w-full px-4 py-3 bg-white/50 border border-white/60 rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"/>
+        </div>
       </div>
-      <div class="form-group">
-        <label>邮箱</label>
-        <input type="email" id="reg-email" placeholder="请输入邮箱">
-      </div>
-      <div class="form-group">
-        <label>密码</label>
-        <input type="password" id="reg-password" placeholder="请输入密码">
-      </div>
-      <button class="btn-primary" onclick="doRegister()">注册</button>
+      <button onclick="doRegister()" class="w-full mt-6 py-3 bg-primary text-on-primary rounded-full font-semibold text-sm active:scale-95 transition-all hover:shadow-lg hover:shadow-primary/20">注册</button>
     </div>
-    <div class="error" id="auth-error"></div>
+    <div id="auth-error" class="text-center text-xs mt-4 min-h-5"></div>
   </div>
 </div>
 
-<!-- ═══════════════ App Page ═══════════════ -->
-<div class="app-page" id="app-page">
-  <nav class="navbar">
-    <div class="logo"><span>&#9889;</span> AI 代写平台</div>
-    <div class="user-info">
-      <span id="user-role-badge"></span>
-      <span id="user-name"></span>
-      <button class="btn-ghost btn-sm" onclick="doLogout()">退出</button>
+<!-- ═══════════ App Page ═══════════ -->
+<div id="app-page" style="display:none" class="min-h-screen">
+  <!-- TopAppBar -->
+  <header class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-[40px] border-b border-white/50 shadow-[0_16px_32px_-12px_rgba(30,41,59,0.04)] flex justify-between items-center px-6 py-3">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center">
+        <span class="material-symbols-outlined text-on-primary-container text-lg">bolt</span>
+      </div>
+      <h1 class="font-display text-lg font-bold tracking-tight text-primary">AI Forge</h1>
     </div>
-  </nav>
+    <div class="flex items-center gap-3">
+      <span id="user-role-badge"></span>
+      <span id="user-name" class="text-sm text-on-surface-variant font-medium"></span>
+      <button onclick="doLogout()" class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-primary/5 active:scale-95 transition-all">
+        <span class="material-symbols-outlined text-lg">logout</span>
+      </button>
+    </div>
+  </header>
 
-  <div class="container">
+  <main class="pt-20 pb-24 px-4 max-w-3xl mx-auto space-y-6">
     <!-- ─── Main View ─── -->
     <div id="main-view">
-      <div class="page-header">
-        <h2 id="view-title">抢单大厅</h2>
-        <button class="btn-primary" id="btn-create" onclick="showCreate()">+ 创建新订单</button>
-      </div>
-      <div class="tabs" id="main-tabs"></div>
-      <div class="order-list" id="order-list"></div>
+      <section class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 id="view-title" class="font-display text-2xl font-bold text-on-surface">抢单大厅</h2>
+          <button id="btn-create" onclick="showCreate()" class="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-full text-sm font-semibold active:scale-95 transition-all hover:shadow-lg hover:shadow-primary/20">
+            <span class="material-symbols-outlined text-sm">add</span>
+            <span>创建新订单</span>
+          </button>
+        </div>
+        <div id="main-tabs" class="flex gap-2 overflow-x-auto pb-2 no-scrollbar"></div>
+      </section>
+      <div id="order-list" class="space-y-3 mt-4"></div>
     </div>
 
     <!-- ─── Create View ─── -->
-    <div id="create-view" style="display:none">
-      <div class="detail-back" onclick="showMain()">&#8592; 返回</div>
-      <div class="form-card">
-        <h2>创建新订单</h2>
-        <div class="form-group">
-          <label>用户是谁</label>
-          <textarea id="order-userinfo" placeholder="你的项目的目标用户是谁？例如：大学生、小商户、开发者等"></textarea>
+    <div id="create-view" style="display:none" class="anim-slide-up">
+      <div onclick="showMain()" class="flex items-center gap-1.5 text-on-surface-variant text-sm cursor-pointer mb-5 hover:text-on-surface transition-colors">
+        <span class="material-symbols-outlined text-base">arrow_back</span>
+        <span>返回</span>
+      </div>
+      <div class="glass-panel rounded-lg p-8 shadow-[0_16px_32px_-12px_rgba(30,41,59,0.08)]">
+        <h2 class="font-display text-xl font-bold text-on-surface mb-6">创建新订单</h2>
+        <div class="space-y-5">
+          <div>
+            <label class="block text-xs font-medium text-on-surface-variant mb-1.5 font-mono uppercase tracking-wider">用户是谁</label>
+            <textarea id="order-userinfo" rows="2" placeholder="你的项目的目标用户是谁？" class="w-full px-4 py-3 bg-white/50 border border-white/60 rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-on-surface-variant mb-1.5 font-mono uppercase tracking-wider">解决什么问题</label>
+            <textarea id="order-problem" rows="3" placeholder="你的项目要解决什么问题？" class="w-full px-4 py-3 bg-white/50 border border-white/60 rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-on-surface-variant mb-1.5 font-mono uppercase tracking-wider">核心功能（≤5）</label>
+            <textarea id="order-features" rows="2" placeholder="列出核心功能点" class="w-full px-4 py-3 bg-white/50 border border-white/60 rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-on-surface-variant mb-1.5 font-mono uppercase tracking-wider">不做什么</label>
+            <textarea id="order-anti" rows="2" placeholder="明确不需要的功能" class="w-full px-4 py-3 bg-white/50 border border-white/60 rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-on-surface-variant mb-1.5 font-mono uppercase tracking-wider">成功标准</label>
+            <textarea id="order-success" rows="2" placeholder="怎样算完成" class="w-full px-4 py-3 bg-white/50 border border-white/60 rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none"></textarea>
+          </div>
         </div>
-        <div class="form-group">
-          <label>解决什么问题</label>
-          <textarea id="order-problem" placeholder="你的项目要解决什么问题？"></textarea>
-        </div>
-        <div class="form-group">
-          <label>核心功能（≤5）</label>
-          <textarea id="order-features" placeholder="列出核心功能点，最多5个"></textarea>
-        </div>
-        <div class="form-group">
-          <label>不做什么</label>
-          <textarea id="order-anti" placeholder="明确不需要的功能或方向"></textarea>
-        </div>
-        <div class="form-group">
-          <label>成功标准</label>
-          <textarea id="order-success" placeholder="怎样算完成"></textarea>
-        </div>
-        <div class="form-actions">
-          <button class="btn-secondary" onclick="showMain()">取消</button>
-          <button class="btn-primary" onclick="submitOrder()">提交订单</button>
+        <div class="flex gap-3 mt-8">
+          <button onclick="showMain()" class="px-6 py-2.5 rounded-full text-sm font-medium text-on-surface-variant glass-panel active:scale-95 transition-all">取消</button>
+          <button onclick="submitOrder()" class="px-6 py-2.5 bg-primary text-on-primary rounded-full text-sm font-semibold active:scale-95 transition-all hover:shadow-lg hover:shadow-primary/20">提交订单</button>
         </div>
       </div>
     </div>
 
     <!-- ─── Detail View ─── -->
-    <div id="detail-view" style="display:none">
-      <div class="detail-back" onclick="showMain()">&#8592; 返回</div>
-      <div class="detail-card">
-        <div class="top" style="display:flex;align-items:start;justify-content:space-between;margin-bottom:16px">
-          <h2 id="detail-title"></h2>
-          <span class="status" id="detail-status"></span>
+    <div id="detail-view" style="display:none" class="anim-slide-up space-y-5">
+      <div onclick="showMain()" class="flex items-center gap-1.5 text-on-surface-variant text-sm cursor-pointer mb-5 hover:text-on-surface transition-colors">
+        <span class="material-symbols-outlined text-base">arrow_back</span>
+        <span>返回</span>
+      </div>
+
+      <!-- Order Info Card -->
+      <div class="glass-panel rounded-lg p-6 shadow-[0_16px_32px_-12px_rgba(30,41,59,0.08)]">
+        <div class="flex items-start justify-between mb-4">
+          <h2 id="detail-title" class="font-display text-xl font-bold text-on-surface flex-1"></h2>
+          <span id="detail-status" class="text-xs font-mono font-medium px-3 py-1 rounded-full"></span>
         </div>
-        <div id="detail-developer" style="display:none" class="detail-field">
-          <div class="label">接单开发者</div>
-          <div class="value" id="detail-dev-name"></div>
+        <div id="detail-developer" style="display:none" class="mb-4 p-3 bg-secondary/5 rounded-xl border border-secondary/10">
+          <div class="text-xs font-mono text-on-surface-variant uppercase tracking-wider mb-1">接单开发者</div>
+          <div id="detail-dev-name" class="text-sm font-medium text-on-surface"></div>
         </div>
-        <div class="detail-field"><div class="label">用户是谁</div><div class="value" id="detail-userinfo"></div></div>
-        <div class="detail-field"><div class="label">解决什么问题</div><div class="value" id="detail-problem"></div></div>
-        <div class="detail-field"><div class="label">核心功能</div><div class="value" id="detail-features"></div></div>
-        <div class="detail-field"><div class="label">不做什么</div><div class="value" id="detail-anti"></div></div>
-        <div class="detail-field"><div class="label">成功标准</div><div class="value" id="detail-success"></div></div>
-        <div class="detail-field"><div class="label">创建时间</div><div class="value" id="detail-time"></div></div>
+        <div class="space-y-3">
+          <div><div class="text-xs font-mono text-on-surface-variant uppercase tracking-wider mb-0.5">用户是谁</div><div id="detail-userinfo" class="text-sm text-on-surface leading-relaxed"></div></div>
+          <div><div class="text-xs font-mono text-on-surface-variant uppercase tracking-wider mb-0.5">解决什么问题</div><div id="detail-problem" class="text-sm text-on-surface leading-relaxed"></div></div>
+          <div><div class="text-xs font-mono text-on-surface-variant uppercase tracking-wider mb-0.5">核心功能</div><div id="detail-features" class="text-sm text-on-surface leading-relaxed"></div></div>
+          <div><div class="text-xs font-mono text-on-surface-variant uppercase tracking-wider mb-0.5">不做什么</div><div id="detail-anti" class="text-sm text-on-surface leading-relaxed"></div></div>
+          <div><div class="text-xs font-mono text-on-surface-variant uppercase tracking-wider mb-0.5">成功标准</div><div id="detail-success" class="text-sm text-on-surface leading-relaxed"></div></div>
+          <div><div class="text-xs font-mono text-on-surface-variant uppercase tracking-wider mb-0.5">创建时间</div><div id="detail-time" class="text-sm text-on-surface"></div></div>
+        </div>
       </div>
 
       <!-- Developer Action Panel -->
-      <div class="action-panel" id="action-panel" style="display:none">
-        <h3>操作</h3>
+      <div id="action-panel" style="display:none" class="glass-panel rounded-lg p-6 shadow-[0_16px_32px_-12px_rgba(30,41,59,0.08)]">
+        <h3 class="font-display text-lg font-bold text-on-surface mb-4">开发流程</h3>
         <div id="action-buttons"></div>
       </div>
 
-      <!-- Buyer View: Development Progress (synced from developer stages) -->
-      <div class="detail-card" id="buyer-progress-card" style="display:none">
-        <h3>开发进度</h3>
+      <!-- Buyer Progress View -->
+      <div id="buyer-progress-card" style="display:none" class="glass-panel rounded-lg p-6 shadow-[0_16px_32px_-12px_rgba(30,41,59,0.08)]">
+        <h3 class="font-display text-lg font-bold text-on-surface mb-4">开发进度</h3>
         <div id="buyer-stage-progress"></div>
-        <div id="buyer-stage-detail"></div>
+        <div id="buyer-stage-detail" class="space-y-4 mt-4"></div>
       </div>
 
-      <!-- Code Repo Panel -->
-      <div class="repo-panel" id="repo-panel" style="display:none">
-        <div class="repo-header">
-          <h3>📦 代码版本管理</h3>
-          <div class="repo-status" id="repo-status"></div>
-        </div>
-        <div class="repo-tabs">
-          <div class="repo-tab active" onclick="switchRepoTab('commits')">版本历史</div>
-          <div class="repo-tab" onclick="switchRepoTab('diff')">版本对比</div>
-          <div class="repo-tab" onclick="switchRepoTab('tree')">文件树</div>
-        </div>
-        <div id="repo-commits"></div>
-        <div id="repo-diff" style="display:none">
-          <div style="display:flex;gap:8px;margin-bottom:12px">
-            <select id="diff-from" style="flex:1" onchange="loadDiffView()"></select>
-            <span style="color:var(--text3);line-height:40px">→</span>
-            <select id="diff-to" style="flex:1" onchange="loadDiffView()"></select>
-          </div>
-          <div id="diff-results"></div>
-        </div>
-        <div id="repo-tree" style="display:none">
-          <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
-            <select id="tree-ref" style="flex:1" onchange="loadTreeView()"></select>
-          </div>
-          <div id="tree-results"></div>
-        </div>
+      <!-- Code Repo Panel — 动态渲染，见 loadRepoInfo() -->
+      <div id="repo-panel" style="display:none" class="glass-panel rounded-lg overflow-hidden shadow-[0_16px_32px_-12px_rgba(30,41,59,0.08)]">
+        <div id="repo-panel-content"></div>
       </div>
     </div>
-  </div>
+  </main>
+
+  <!-- BottomNavBar -->
+  <nav class="fixed bottom-0 w-full z-50 bg-white/70 backdrop-blur-[40px] border-t border-white/50 shadow-[0_-8px_24px_-12px_rgba(30,41,59,0.04)] flex justify-around items-center px-4 py-2 max-w-3xl mx-auto">
+    <button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-secondary-container/20 rounded-full transition-all active:scale-90" onclick="switchTab('hall', this)">
+      <span class="material-symbols-outlined">storefront</span>
+    </button>
+    <button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-secondary-container/20 rounded-full transition-all active:scale-90" onclick="switchTab('mine', this)" id="nav-mine" style="display:none">
+      <span class="material-symbols-outlined">folder_open</span>
+    </button>
+    <button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-secondary-container/20 rounded-full transition-all active:scale-90" onclick="showCreate()" id="nav-create" style="display:none">
+      <span class="material-symbols-outlined">add_circle</span>
+    </button>
+    <button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-secondary-container/20 rounded-full transition-all active:scale-90" onclick="switchTab('developer', this)" id="nav-developer" style="display:none">
+      <span class="material-symbols-outlined">code</span>
+    </button>
+    <button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-secondary-container/20 rounded-full transition-all active:scale-90" onclick="doLogout()">
+      <span class="material-symbols-outlined">person</span>
+    </button>
+  </nav>
 </div>
 
 <script>
@@ -380,26 +273,49 @@ let currentOrderId = null;
 let currentOrder = null;
 let selectedRole = 'buyer';
 
-// ─── API Helper ────────────────────────────────────
 async function api(method, path, body) {
   const headers = { 'Content-Type': 'application/json' };
   if (currentUser?.sid) headers['Authorization'] = 'Bearer ' + currentUser.sid;
   const opts = { method, headers };
   if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(API + path, opts);
-  return res.json();
+  // 30 秒超时：防止服务端卡死时前端无限等待
+  const controller = new AbortController();
+  opts.signal = controller.signal;
+  const timer = setTimeout(() => controller.abort(), 30000);
+  try {
+    const res = await fetch(API + path, opts);
+    clearTimeout(timer);
+    return res.json();
+  } catch (err) {
+    clearTimeout(timer);
+    if (err.name === 'AbortError') {
+      console.error('[API] 请求超时:', method, path);
+      return { success: false, error: '请求超时，请检查服务端是否正常运行' };
+    }
+    console.error('[API] 网络错误:', err);
+    return { success: false, error: '网络错误，请检查连接' };
+  }
 }
 
-// ─── Auth ──────────────────────────────────────────
 function selectRole(role, el) {
   selectedRole = role;
-  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
+  document.querySelectorAll('.role-btn').forEach(b => {
+    b.classList.remove('active','bg-primary/10','border-primary');
+    b.classList.add('bg-surface-container-low','border-outline-variant/30');
+  });
+  el.classList.add('active','bg-primary/10','border-primary');
+  el.classList.remove('bg-surface-container-low','border-outline-variant/30');
 }
 
-function switchAuthTab(tab) {
-  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-  event.target.classList.add('active');
+function switchAuthTab(tab, el) {
+  document.querySelectorAll('.auth-tab').forEach(t => {
+    t.classList.remove('bg-surface-container-low','text-on-surface','shadow-sm');
+    t.classList.add('text-on-surface-variant');
+  });
+  if (el) {
+    el.classList.add('bg-surface-container-low','text-on-surface','shadow-sm');
+    el.classList.remove('text-on-surface-variant');
+  }
   document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
   document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
   document.getElementById('auth-error').textContent = '';
@@ -427,23 +343,20 @@ async function doRegister() {
   const res = await api('POST', '/api/users/register', { name, email, password });
   if (!res.success) return showAuthError(res.error);
   document.getElementById('auth-error').textContent = '注册成功，请登录';
-  document.getElementById('auth-error').style.color = 'var(--green)';
+  document.getElementById('auth-error').style.color = '#34c759';
   switchAuthTab('login');
   document.querySelectorAll('.auth-tab')[0].click();
 }
 
 function showAuthError(msg) {
   const el = document.getElementById('auth-error');
-  el.style.color = 'var(--red)';
+  el.style.color = '#ba1a1a';
   el.textContent = msg;
 }
 
 function doLogout() {
   currentUser = null;
-  localStorage.removeItem('sid');
-  localStorage.removeItem('userId');
-  localStorage.removeItem('userName');
-  localStorage.removeItem('userRole');
+  ['sid','userId','userName','userRole'].forEach(k => localStorage.removeItem(k));
   document.getElementById('auth-page').style.display = 'flex';
   document.getElementById('app-page').style.display = 'none';
 }
@@ -452,36 +365,49 @@ function enterApp() {
   document.getElementById('auth-page').style.display = 'none';
   document.getElementById('app-page').style.display = 'block';
   document.getElementById('user-name').textContent = currentUser.name;
-  const roleBadge = document.getElementById('user-role-badge');
+  const badge = document.getElementById('user-role-badge');
   if (currentUser.role === 'developer') {
-    roleBadge.innerHTML = '<span class="role-badge role-developer">开发者</span>';
+    badge.innerHTML = '<span class="text-xs font-mono font-medium px-2.5 py-0.5 rounded-full bg-secondary/10 text-secondary">开发者</span>';
   } else {
-    roleBadge.innerHTML = '<span class="role-badge role-buyer">买家</span>';
+    badge.innerHTML = '<span class="text-xs font-mono font-medium px-2.5 py-0.5 rounded-full bg-primary/10 text-primary">买家</span>';
   }
   renderTabs();
   showMain();
 }
 
-// ─── Tabs ──────────────────────────────────────────
 function renderTabs() {
   const tabsEl = document.getElementById('main-tabs');
   const createBtn = document.getElementById('btn-create');
+  const navMine = document.getElementById('nav-mine');
+  const navCreate = document.getElementById('nav-create');
+  const navDev = document.getElementById('nav-developer');
   if (currentUser.role === 'developer') {
     tabsEl.innerHTML = `
-      <div class="tab active" onclick="switchTab('hall')">抢单大厅</div>
-      <div class="tab" onclick="switchTab('developer')">我接的单</div>
-    `;
+      <button class="tab flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-full text-sm font-medium whitespace-nowrap active:scale-95 transition-transform" onclick="switchTab('hall', this)">
+        <span class="material-symbols-outlined text-sm">storefront</span>抢单大厅
+      </button>
+      <button class="tab flex items-center gap-2 px-4 py-2 glass-panel text-on-surface-variant rounded-full text-sm font-medium whitespace-nowrap active:scale-95 transition-transform" onclick="switchTab('developer', this)">
+        <span class="material-symbols-outlined text-sm">code</span>我接的单
+      </button>`;
     createBtn.style.display = 'none';
+    navMine.style.display = 'none';
+    navCreate.style.display = 'none';
+    navDev.style.display = '';
   } else {
     tabsEl.innerHTML = `
-      <div class="tab active" onclick="switchTab('hall')">抢单大厅</div>
-      <div class="tab" onclick="switchTab('mine')">我的订单</div>
-    `;
+      <button class="tab flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-full text-sm font-medium whitespace-nowrap active:scale-95 transition-transform" onclick="switchTab('hall', this)">
+        <span class="material-symbols-outlined text-sm">storefront</span>抢单大厅
+      </button>
+      <button class="tab flex items-center gap-2 px-4 py-2 glass-panel text-on-surface-variant rounded-full text-sm font-medium whitespace-nowrap active:scale-95 transition-transform" onclick="switchTab('mine', this)">
+        <span class="material-symbols-outlined text-sm">folder_open</span>我的订单
+      </button>`;
     createBtn.style.display = '';
+    navMine.style.display = '';
+    navCreate.style.display = '';
+    navDev.style.display = 'none';
   }
 }
 
-// ─── Views ─────────────────────────────────────────
 function showMain() {
   document.getElementById('main-view').style.display = 'block';
   document.getElementById('create-view').style.display = 'none';
@@ -508,42 +434,62 @@ function showDetail(orderId) {
   loadOrderDetail(orderId);
 }
 
-// ─── Tab Switch ────────────────────────────────────
-function switchTab(tab) {
+function switchTab(tab, el) {
   currentTab = tab;
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  event.target.classList.add('active');
+  document.querySelectorAll('#main-tabs .tab').forEach(t => {
+    t.classList.remove('bg-primary','text-on-primary');
+    t.classList.add('glass-panel','text-on-surface-variant');
+  });
+  if (!el) el = document.querySelector('#main-tabs .tab:first-child');
+  if (el) {
+    el.classList.remove('glass-panel','text-on-surface-variant');
+    el.classList.add('bg-primary','text-on-primary');
+  }
   const titles = { hall: '抢单大厅', mine: '我的订单', developer: '我接的单' };
   document.getElementById('view-title').textContent = titles[tab] || '';
   loadOrders();
 }
 
-// ─── Load Orders ───────────────────────────────────
 async function loadOrders() {
   const paths = { hall: '/api/orders/hall', mine: '/api/orders/mine', developer: '/api/orders/developer' };
   const res = await api('GET', paths[currentTab]);
   const list = document.getElementById('order-list');
   if (!res.success || !res.data.length) {
     const msgs = { hall: '大厅暂无订单', mine: '你还没有创建过订单', developer: '你还没有接过单' };
-    list.innerHTML = '<div class="empty"><div class="icon">&#128203;</div><p>' + msgs[currentTab] + '</p></div>';
+    const icons = { hall: 'inbox', mine: 'note_add', developer: 'code_off' };
+    list.innerHTML = `<div class="text-center py-16 text-on-surface-variant">
+      <span class="material-symbols-outlined text-5xl text-outline-variant mb-3 block">${icons[currentTab]}</span>
+      <p class="text-sm">${msgs[currentTab]}</p>
+    </div>`;
     return;
   }
   list.innerHTML = res.data.map(o => `
-    <div class="order-card" onclick="showDetail('${o.id}')">
-      <div class="top">
-        <div class="title">${esc(o.title)}</div>
-        <span class="status status-${o.status}">${statusText(o.status)}</span>
+    <div class="glass-panel p-5 rounded-lg cursor-pointer active:scale-[0.98] transition-all hover:shadow-[0_8px_24px_-8px_rgba(30,41,59,0.12)]" onclick="showDetail('${o.id}')">
+      <div class="flex items-start justify-between mb-2">
+        <div class="font-semibold text-on-surface flex-1">${esc(o.title)}</div>
+        <span class="status-pill text-xs font-mono font-medium px-3 py-0.5 rounded-full shrink-0 ml-3" data-status="${o.status}">${statusText(o.status)}</span>
       </div>
-      <div class="desc">${esc(o.problem || o.description)}</div>
-      <div class="meta">
-        <span>${esc(o.userInfo ? '👤 ' + o.userInfo.slice(0, 30) : '')}</span>
-        <span class="time">${formatTime(o.createdAt)}</span>
+      <p class="text-sm text-on-surface-variant leading-relaxed line-clamp-2 mb-3">${esc(o.problem || o.description)}</p>
+      <div class="flex items-center justify-between text-xs text-outline">
+        <span>${esc(o.userInfo ? o.userInfo.slice(0, 30) : '')}</span>
+        <span>${formatTime(o.createdAt)}</span>
       </div>
     </div>
   `).join('');
+  document.querySelectorAll('.status-pill').forEach(el => {
+    const s = el.dataset.status;
+    const colors = {
+      pending: 'bg-amber-50 text-amber-700',
+      claimed: 'bg-blue-50 text-blue-700',
+      in_progress: 'bg-purple-50 text-purple-700',
+      reviewing: 'bg-yellow-50 text-yellow-700',
+      completed: 'bg-green-50 text-green-700',
+      cancelled: 'bg-red-50 text-red-700',
+    };
+    el.classList.add(colors[s] || 'bg-gray-100 text-gray-600');
+  });
 }
 
-// ─── Submit Order ──────────────────────────────────
 async function submitOrder() {
   const problem = document.getElementById('order-problem').value.trim();
   if (!problem) return alert('请填写解决什么问题');
@@ -560,121 +506,63 @@ async function submitOrder() {
   showMain();
 }
 
-// ─── Load Order Detail ─────────────────────────────
 async function loadOrderDetail(orderId) {
   const res = await api('GET', '/api/orders/' + orderId);
   if (!res.success) return alert(res.error);
   const o = res.data.order;
   currentOrder = o;
   document.getElementById('detail-title').textContent = o.title;
-  document.getElementById('detail-status').className = 'status status-' + o.status;
-  document.getElementById('detail-status').textContent = statusText(o.status);
+  const statusEl = document.getElementById('detail-status');
+  statusEl.textContent = statusText(o.status);
+  statusEl.className = 'text-xs font-mono font-medium px-3 py-1 rounded-full';
+  const sColors = { pending:'bg-amber-50 text-amber-700', claimed:'bg-blue-50 text-blue-700', in_progress:'bg-purple-50 text-purple-700', reviewing:'bg-yellow-50 text-yellow-700', completed:'bg-green-50 text-green-700', cancelled:'bg-red-50 text-red-700' };
+  statusEl.classList.add(...(sColors[o.status] || 'bg-gray-100 text-gray-600').split(' '));
   document.getElementById('detail-userinfo').textContent = o.userInfo || '未填写';
   document.getElementById('detail-problem').textContent = o.problem || '未填写';
   document.getElementById('detail-features').textContent = o.features || '未填写';
   document.getElementById('detail-anti').textContent = o.antiFeatures || '未填写';
   document.getElementById('detail-success').textContent = o.successCriteria || '未填写';
   document.getElementById('detail-time').textContent = formatTime(o.createdAt);
-
-  // Show developer name if claimed
   const devEl = document.getElementById('detail-developer');
-  if (o.developerId) {
-    devEl.style.display = '';
-    document.getElementById('detail-dev-name').textContent = o.developerName || o.developerId;
-  } else {
-    devEl.style.display = 'none';
-  }
-
-  // Developer action panel
+  if (o.developerId) { devEl.style.display = ''; document.getElementById('detail-dev-name').textContent = o.developerName || o.developerId; }
+  else { devEl.style.display = 'none'; }
   renderActionPanel(o);
-
-  // Buyer progress view (stages synced from developer)
   loadBuyerProgress(o);
-
-  // Code repo panel
   loadRepoInfo(orderId);
 }
 
-// ─── Action Panel (Developer) ──────────────────────
 function renderActionPanel(order) {
   const panel = document.getElementById('action-panel');
   const buttons = document.getElementById('action-buttons');
-
-  if (currentUser.role !== 'developer') {
-    panel.style.display = 'none';
-    return;
-  }
-
+  if (currentUser.role !== 'developer') { panel.style.display = 'none'; return; }
   panel.style.display = '';
-
   if (order.status === 'pending') {
-    buttons.innerHTML = '<button class="btn-primary" onclick="claimOrder()">接此订单</button>';
+    buttons.innerHTML = '<button onclick="claimOrder()" class="px-5 py-2.5 bg-primary text-on-primary rounded-full text-sm font-semibold active:scale-95 transition-all hover:shadow-lg hover:shadow-primary/20">接此订单</button>';
     return;
   }
-
   if (order.developerId !== currentUser.id) {
-    buttons.innerHTML = '<span style="color:var(--text3);font-size:14px">已被其他开发者接单</span>';
+    buttons.innerHTML = '<span class="text-sm text-outline">已被其他开发者接单</span>';
     return;
   }
-
   loadStages(order.id);
 }
 
 const STAGE_CONFIG = [
-  {
-    key: 'requirement', name: '需求分析', emoji: '🟢',
-    desc: '明确要做什么产品、给谁用、解决什么问题',
-    completeBtn: '完成需求分析',
+  { key:'requirement', name:'需求分析', color:'text-green-600', bg:'bg-green-50', desc:'明确要做什么产品、给谁用、解决什么问题', completeBtn:'完成需求分析',
     fields: [
-      { label: '1. 产品名称', placeholder: 'XXX系统' },
-      { label: '2. 产品目标', placeholder: '解决什么问题' },
-      { label: '3. 用户群体', placeholder: '谁会用' },
-      { label: '4. 核心问题', placeholder: '用户痛点是什么' },
-      { label: '5. 核心功能范围（MVP）', placeholder: '功能1\n功能2\n功能3' },
-      { label: '6. 非目标（不做什么）', placeholder: '不做移动端（可选）\n不做复杂权限' },
-      { label: '7. 成功标准', placeholder: '能正常运行\n能完成核心流程' },
-    ]
-  },
-  {
-    key: 'design', name: '系统设计', emoji: '🟡',
-    desc: '把需求变成工程蓝图：模块拆分、数据库设计、API设计、页面结构',
-    fields: [
-      { label: '模块拆分', placeholder: '系统包含哪些模块？各自负责什么？' },
-      { label: '数据库设计', placeholder: '需要哪些表？字段有哪些？' },
-      { label: 'API设计', placeholder: '需要哪些接口？请求/响应格式？' },
-      { label: '页面结构', placeholder: '有哪些页面？页面间如何跳转？' },
-    ]
-  },
-  {
-    key: 'techstack', name: '技术选型', emoji: '🟠',
-    desc: '决定用什么工具做：前端、后端、数据库、部署方式',
-    fields: [
-      { label: '前端技术', placeholder: 'React / Vue / 其他？为什么选这个？' },
-      { label: '后端技术', placeholder: 'Node / Python / 其他？为什么选这个？' },
-      { label: '数据库', placeholder: 'MySQL / MongoDB / SQLite？为什么选这个？' },
-      { label: '部署方案', placeholder: 'Vercel / Docker / 服务器？' },
-    ]
-  },
-  {
-    key: 'implementation', name: '开发阶段', emoji: '🔵',
-    desc: '真正写代码，按模块逐步开发',
-    fields: [
-      { label: '开发计划', placeholder: '按什么顺序开发？先做什么模块？' },
-      { label: '当前进度', placeholder: '目前完成了哪些模块？' },
-      { label: '技术难点', placeholder: '遇到了什么技术问题？如何解决的？' },
-      { label: '代码结构', placeholder: '项目目录结构是怎样的？' },
-    ]
-  },
-  {
-    key: 'testing', name: '测试阶段', emoji: '🟣',
-    desc: '检查系统是否可用：单元测试、集成测试、用户测试',
-    fields: [
-      { label: '测试类型', placeholder: '做了哪些测试？单元/集成/用户测试？' },
-      { label: '测试结果', placeholder: '测试通过了吗？有什么问题？' },
-      { label: '边界情况', placeholder: '是否测试了边界情况？异常输入？' },
-      { label: 'Bug列表', placeholder: '发现了哪些bug？修复了吗？' },
-    ]
-  },
+      { label:'1. 产品名称', placeholder:'XXX系统' }, { label:'2. 产品目标', placeholder:'解决什么问题' },
+      { label:'3. 用户群体', placeholder:'谁会用' }, { label:'4. 核心问题', placeholder:'用户痛点是什么' },
+      { label:'5. 核心功能范围（MVP）', placeholder:'功能1\n功能2\n功能3' }, { label:'6. 非目标（不做什么）', placeholder:'不做移动端' },
+      { label:'7. 成功标准', placeholder:'能正常运行' },
+    ]},
+  { key:'design', name:'系统设计', color:'text-amber-600', bg:'bg-amber-50', desc:'把需求变成工程蓝图：模块拆分、数据库设计、API设计',
+    fields: [{ label:'模块拆分', placeholder:'系统包含哪些模块？' }, { label:'数据库设计', placeholder:'需要哪些表？' }, { label:'API设计', placeholder:'需要哪些接口？' }, { label:'页面结构', placeholder:'有哪些页面？' }]},
+  { key:'techstack', name:'技术选型', color:'text-orange-600', bg:'bg-orange-50', desc:'决定用什么工具做：前端、后端、数据库、部署',
+    fields: [{ label:'前端技术', placeholder:'React / Vue？' }, { label:'后端技术', placeholder:'Node / Python？' }, { label:'数据库', placeholder:'MySQL / SQLite？' }, { label:'部署方案', placeholder:'Vercel / Docker？' }]},
+  { key:'implementation', name:'开发阶段', color:'text-blue-600', bg:'bg-blue-50', desc:'真正写代码，按模块逐步开发',
+    fields: [{ label:'开发计划', placeholder:'按什么顺序开发？' }, { label:'当前进度', placeholder:'完成了哪些？' }, { label:'技术难点', placeholder:'遇到了什么问题？' }, { label:'代码结构', placeholder:'目录结构？' }]},
+  { key:'testing', name:'测试阶段', color:'text-purple-600', bg:'bg-purple-50', desc:'检查系统是否可用：单元测试、集成测试',
+    fields: [{ label:'测试类型', placeholder:'做了哪些测试？' }, { label:'测试结果', placeholder:'通过了吗？' }, { label:'边界情况', placeholder:'边界情况？' }, { label:'Bug列表', placeholder:'发现了哪些bug？' }]},
 ];
 
 let currentStages = [];
@@ -687,59 +575,55 @@ async function loadStages(orderId) {
 }
 
 function renderStages() {
-  const panel = document.getElementById('action-panel');
   const buttons = document.getElementById('action-buttons');
-
-  let html = '<div class="stage-progress">';
+  let html = '<div class="flex gap-1 mb-6 overflow-x-auto no-scrollbar">';
   STAGE_CONFIG.forEach((cfg, i) => {
     const stage = currentStages.find(s => s.stage === cfg.key);
     const status = stage ? stage.status : 'pending';
-    const cls = status === 'completed' ? 'completed' : (status === 'in_progress' ? 'active' : '');
-    html += `<div class="stage-step ${cls}">
-      <div class="stage-dot">${status === 'completed' ? '✓' : (i + 1)}</div>
-      <div class="stage-name">${cfg.emoji} ${cfg.name}</div>
-      ${i < STAGE_CONFIG.length - 1 ? '<div class="stage-connector"></div>' : ''}
+    const dotClass = status === 'completed' ? 'bg-green-500 text-white border-green-500' :
+                     status === 'in_progress' ? 'bg-primary text-white border-primary shadow-[0_0_0_4px_rgba(183,0,79,0.15)]' :
+                     'bg-surface-container text-outline border-outline-variant/50';
+    html += `<div class="flex-1 text-center min-w-[60px]">
+      <div class="w-8 h-8 rounded-full border-2 flex items-center justify-center mx-auto mb-1.5 text-xs font-bold transition-all ${dotClass}">
+        ${status === 'completed' ? '<span class="material-symbols-outlined text-sm">check</span>' : (i+1)}
+      </div>
+      <div class="text-[10px] font-medium ${status === 'completed' ? 'text-green-600' : status === 'in_progress' ? 'text-primary' : 'text-outline'}">${cfg.name}</div>
     </div>`;
   });
   html += '</div>';
 
-  // Find current active stage (first non-completed)
-  // If currentStages is empty, show first stage as active
   let activeStage = STAGE_CONFIG.find(cfg => {
     const s = currentStages.find(x => x.stage === cfg.key);
     return s && s.status !== 'completed';
   });
-
-  // If no active stage found but currentStages is empty, default to first stage
-  if (!activeStage && currentStages.length === 0) {
-    activeStage = STAGE_CONFIG[0];
-  }
+  if (!activeStage && currentStages.length === 0) activeStage = STAGE_CONFIG[0];
 
   if (activeStage) {
     const stage = currentStages.find(s => s.stage === activeStage.key);
     const cfg = activeStage;
     let savedContent = {};
-    try { savedContent = stage?.content ? JSON.parse(stage.content) : {}; } catch(e) { savedContent = {}; }
+    try { savedContent = stage?.content ? JSON.parse(stage.content) : {}; } catch(e) {}
 
-    html += `<div class="stage-form">
-      <h4>${cfg.emoji} ${cfg.name}</h4>
-      <div class="stage-desc">${cfg.desc}</div>`;
+    html += `<div class="bg-white/30 rounded-xl p-5 border border-white/40">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="text-sm font-bold text-on-surface">${cfg.name}</span>
+        <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${stage?.status === 'completed' ? 'bg-green-50 text-green-600' : stage?.status === 'in_progress' ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-500'}">${stage?.status === 'completed' ? '已完成' : stage?.status === 'in_progress' ? '进行中' : '待开始'}</span>
+      </div>
+      <p class="text-xs text-on-surface-variant mb-4">${cfg.desc}</p>`;
 
     cfg.fields.forEach((f, i) => {
-      html += `<div class="form-group">
-        <label>${f.label}</label>
-        <textarea id="field-${cfg.key}-${i}" placeholder="${f.placeholder}">${esc(savedContent[f.label] || '')}</textarea>
+      html += `<div class="mb-3">
+        <label class="block text-xs font-medium text-on-surface-variant mb-1">${f.label}</label>
+        <textarea id="field-${cfg.key}-${i}" rows="2" placeholder="${f.placeholder}" class="w-full px-3 py-2 bg-white/50 border border-white/60 rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none">${esc(savedContent[f.label] || '')}</textarea>
       </div>`;
     });
 
-    html += `<div class="stage-actions">
-        <span class="stage-status ${stage?.status || 'pending'}">${stage?.status === 'completed' ? '已完成' : (stage?.status === 'in_progress' ? '进行中' : '待开始')}</span>
-        ${stage?.status !== 'completed' ? `<button class="btn-primary btn-sm" onclick="saveStage('${cfg.key}')">保存</button>` : ''}
-        ${stage?.status !== 'completed' ? `<button class="btn-success btn-sm" onclick="completeStage('${cfg.key}')">${cfg.completeBtn || '完成本阶段'}</button>` : ''}
-      </div>
-    </div>`;
+    html += `<div class="flex gap-2 mt-4">
+      ${stage?.status !== 'completed' ? `<button onclick="saveStage('${cfg.key}')" class="px-4 py-2 bg-surface-container text-on-surface rounded-full text-xs font-medium active:scale-95 transition-all">保存</button>` : ''}
+      ${stage?.status !== 'completed' ? `<button onclick="completeStage('${cfg.key}')" class="px-4 py-2 bg-green-500 text-white rounded-full text-xs font-semibold active:scale-95 transition-all hover:shadow-lg hover:shadow-green-500/20">${cfg.completeBtn}</button>` : ''}
+    </div></div>`;
   } else {
-    html += '<div style="text-align:center;padding:20px;color:var(--green);font-size:16px">🎉 所有阶段已完成！等待买家验收</div>';
+    html += '<div class="text-center py-6"><span class="material-symbols-outlined text-4xl text-green-500 mb-2 block">celebration</span><p class="text-sm font-medium text-on-surface">所有阶段已完成！等待买家验收</p></div>';
   }
 
   buttons.innerHTML = html;
@@ -752,8 +636,7 @@ async function saveStage(stageKey) {
     const el = document.getElementById(`field-${stageKey}-${i}`);
     if (el) content[f.label] = el.value.trim();
   });
-  const hasContent = Object.values(content).some(v => v);
-  if (!hasContent) return alert('请至少填写一项内容');
+  if (!Object.values(content).some(v => v)) return alert('请至少填写一项内容');
   const res = await api('PUT', '/api/orders/' + currentOrderId + '/stages/' + stageKey, { content: JSON.stringify(content) });
   if (!res.success) return alert(res.error);
   loadStages(currentOrderId);
@@ -766,19 +649,15 @@ async function completeStage(stageKey) {
     const el = document.getElementById(`field-${stageKey}-${i}`);
     if (el) content[f.label] = el.value.trim();
   });
-  const hasContent = Object.values(content).some(v => v);
-  if (!hasContent) return alert('请先填写内容');
+  if (!Object.values(content).some(v => v)) return alert('请先填写内容');
   const res = await api('PUT', '/api/orders/' + currentOrderId + '/stages/' + stageKey, { content: JSON.stringify(content) });
   if (!res.success) return alert(res.error);
   const res2 = await api('POST', '/api/orders/' + currentOrderId + '/stages/' + stageKey + '/complete');
   if (!res2.success) return alert(res2.error);
-  if (res2.data?.allCompleted) {
-    alert('所有阶段已完成！订单已进入验收状态');
-  }
+  if (res2.data?.allCompleted) alert('所有阶段已完成！订单已进入验收状态');
   loadStages(currentOrderId);
 }
 
-// ─── Claim Order ───────────────────────────────────
 async function claimOrder() {
   if (!confirm('确定要接这个订单吗？')) return;
   const res = await api('POST', '/api/orders/' + currentOrderId + '/claim');
@@ -786,7 +665,6 @@ async function claimOrder() {
   loadOrderDetail(currentOrderId);
 }
 
-// ─── Update Status ─────────────────────────────────
 async function updateStatus(status) {
   const labels = { in_progress: '开始开发', reviewing: '提交验收', completed: '确认完成' };
   if (!confirm('确定要' + (labels[status] || '更新状态') + '吗？')) return;
@@ -795,85 +673,56 @@ async function updateStatus(status) {
   loadOrderDetail(currentOrderId);
 }
 
-// ─── Buyer Progress View ────────────────────────────
 async function loadBuyerProgress(order) {
   const card = document.getElementById('buyer-stage-progress');
   const detail = document.getElementById('buyer-stage-detail');
   const cardEl = document.getElementById('buyer-progress-card');
-
-  if (!order.developerId) {
-    cardEl.style.display = 'none';
-    return;
-  }
-
+  if (!order.developerId) { cardEl.style.display = 'none'; return; }
   const res = await api('GET', '/api/orders/' + order.id + '/stages');
-  if (!res.success || !res.data.length) {
-    cardEl.style.display = 'none';
-    return;
-  }
-
+  if (!res.success || !res.data.length) { cardEl.style.display = 'none'; return; }
   cardEl.style.display = '';
   const stages = res.data;
 
-  let html = '<div class="stage-progress">';
+  let html = '<div class="flex gap-1 mb-4 overflow-x-auto no-scrollbar">';
   STAGE_CONFIG.forEach((cfg, i) => {
     const stage = stages.find(s => s.stage === cfg.key);
     const status = stage ? stage.status : 'pending';
-    const cls = status === 'completed' ? 'completed' : (status === 'in_progress' ? 'active' : '');
-    html += `<div class="stage-step ${cls}">
-      <div class="stage-dot">${status === 'completed' ? '✓' : (i + 1)}</div>
-      <div class="stage-name">${cfg.emoji} ${cfg.name}</div>
-      ${i < STAGE_CONFIG.length - 1 ? '<div class="stage-connector"></div>' : ''}
+    const dotClass = status === 'completed' ? 'bg-green-500 text-white border-green-500' :
+                     status === 'in_progress' ? 'bg-primary text-white border-primary shadow-[0_0_0_4px_rgba(183,0,79,0.15)]' :
+                     'bg-surface-container text-outline border-outline-variant/50';
+    html += `<div class="flex-1 text-center min-w-[60px]">
+      <div class="w-8 h-8 rounded-full border-2 flex items-center justify-center mx-auto mb-1.5 text-xs font-bold transition-all ${dotClass}">
+        ${status === 'completed' ? '<span class="material-symbols-outlined text-sm">check</span>' : (i+1)}
+      </div>
+      <div class="text-[10px] font-medium ${status === 'completed' ? 'text-green-600' : status === 'in_progress' ? 'text-primary' : 'text-outline'}">${cfg.name}</div>
     </div>`;
   });
   html += '</div>';
   card.innerHTML = html;
 
-  // Show completed/in-progress stage details
   let detailHtml = '';
   STAGE_CONFIG.forEach(cfg => {
     const stage = stages.find(s => s.stage === cfg.key);
     if (!stage || stage.status === 'pending') return;
-
     let content = {};
-    try { content = stage.content ? JSON.parse(stage.content) : {}; } catch(e) { content = {}; }
-
-    detailHtml += `<div class="stage-form" style="margin-top:16px">
-      <h4>${cfg.emoji} ${cfg.name} <span class="stage-status ${stage.status}">${stage.status === 'completed' ? '已完成' : '进行中'}</span></h4>`;
-
+    try { content = stage.content ? JSON.parse(stage.content) : {}; } catch(e) {}
+    detailHtml += `<div class="bg-white/30 rounded-xl p-4 border border-white/40">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-sm font-bold text-on-surface">${cfg.name}</span>
+        <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${stage.status === 'completed' ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'}">${stage.status === 'completed' ? '已完成' : '进行中'}</span>
+      </div>`;
     cfg.fields.forEach(f => {
       const val = content[f.label] || '';
-      if (val) {
-        detailHtml += `<div class="detail-field">
-          <div class="label">${f.label}</div>
-          <div class="value">${esc(val)}</div>
-        </div>`;
-      }
+      if (val) detailHtml += `<div class="mb-2"><div class="text-[10px] font-mono text-on-surface-variant uppercase tracking-wider mb-0.5">${f.label}</div><div class="text-sm text-on-surface leading-relaxed">${esc(val)}</div></div>`;
     });
-
     detailHtml += '</div>';
   });
-
-  detail.innerHTML = detailHtml || '<div style="color:var(--text3);font-size:14px;text-align:center;padding:20px">开发者尚未开始</div>';
+  detail.innerHTML = detailHtml || '<div class="text-center py-4 text-sm text-outline">开发者尚未开始</div>';
 }
 
-// ─── Helpers ───────────────────────────────────────
 function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-
-function statusText(s) {
-  const map = { pending:'待接单', claimed:'已接单', in_progress:'开发中', reviewing:'验收中', completed:'已完成', cancelled:'已取消' };
-  return map[s] || s;
-}
-
-function formatTime(t) {
-  if (!t) return '';
-  const d = new Date(t + 'Z');
-  return d.toLocaleDateString('zh-CN') + ' ' + d.toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' });
-}
-
-// ═══════════════════════════════════════════════════════
-//  Code Repo Functions
-// ═══════════════════════════════════════════════════════
+function statusText(s) { return { pending:'待接单', claimed:'已接单', in_progress:'开发中', reviewing:'验收中', completed:'已完成', cancelled:'已取消' }[s] || s; }
+function formatTime(t) { if (!t) return ''; const d = new Date(t + 'Z'); return d.toLocaleDateString('zh-CN') + ' ' + d.toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' }); }
 
 let repoData = null;
 let repoCommits = [];
@@ -882,19 +731,259 @@ let currentRepoTab = 'commits';
 async function loadRepoInfo(orderId) {
   const panel = document.getElementById('repo-panel');
   const res = await api('GET', '/api/repos/' + orderId);
+  const repoContent = document.getElementById('repo-panel-content');
   if (!res.success || !res.data) {
-    panel.style.display = 'none';
+    // 仓库未初始化：开发者看到初始化按钮，买家看到等待提示
+    panel.style.display = '';
+    repoContent.innerHTML = `
+      <div class="p-5 text-center">
+        <span class="material-symbols-outlined text-4xl text-outline-variant mb-3 block">folder</span>
+        <p class="text-sm text-on-surface-variant mb-4">代码版本仓库尚未初始化</p>
+        ${currentUser?.role === 'developer'
+          ? '<button onclick="initCurrentRepo()" class="px-5 py-2.5 bg-primary text-on-primary rounded-full text-sm font-semibold active:scale-95 transition-all hover:shadow-lg hover:shadow-primary/20">初始化仓库</button>'
+          : '<p class="text-xs text-outline">等待开发者初始化</p>'}
+      </div>`;
     return;
   }
   repoData = res.data;
   panel.style.display = '';
+  repoContent.innerHTML = `
+    <div class="px-5 py-4 border-b border-white/50 bg-white/30">
+      <div class="flex items-center justify-between mb-3">
+        <span class="flex items-center gap-2 text-sm font-semibold text-on-surface">
+          <span class="material-symbols-outlined text-primary text-base">folder_open</span>
+          代码版本管理
+        </span>
+      </div>
+      <div id="repo-status" class="flex gap-4 text-xs text-on-surface-variant flex-wrap"></div>
+    </div>
+    <div class="flex gap-1 px-3 pt-3 bg-white/20">
+      ${currentUser?.role === 'developer'
+        ? '<div class="repo-tab px-4 py-2 rounded-full text-xs font-medium text-on-surface cursor-pointer transition-all active:scale-95 bg-primary text-on-primary" onclick="switchRepoTab(\'commit\', this)">提交代码</div>'
+        : ''}
+      <div class="repo-tab px-4 py-2 rounded-full text-xs font-medium text-on-surface cursor-pointer transition-all active:scale-95 ${currentUser?.role === 'developer' ? '' : 'bg-primary text-on-primary'}" onclick="switchRepoTab('commits', this)">版本历史</div>
+      <div class="repo-tab px-4 py-2 rounded-full text-xs font-medium text-on-surface-variant cursor-pointer transition-all active:scale-95 hover:bg-primary/5" onclick="switchRepoTab('diff', this)">版本对比</div>
+      <div class="repo-tab px-4 py-2 rounded-full text-xs font-medium text-on-surface-variant cursor-pointer transition-all active:scale-95 hover:bg-primary/5" onclick="switchRepoTab('tree', this)">文件树</div>
+    </div>
+    <div class="p-4">
+      <div id="repo-commit" style="display:none">
+        <div id="commit-form" class="space-y-4"></div>
+      </div>
+      <div id="repo-commits"></div>
+      <div id="repo-diff" style="display:none">
+        <div class="flex gap-2 mb-3">
+          <select id="diff-from" class="flex-1 px-3 py-2 bg-white/50 border border-white/60 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30" onchange="loadDiffView()"></select>
+          <span class="text-on-surface-variant text-sm leading-8">→</span>
+          <select id="diff-to" class="flex-1 px-3 py-2 bg-white/50 border border-white/60 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30" onchange="loadDiffView()"></select>
+        </div>
+        <div id="diff-results"></div>
+      </div>
+      <div id="repo-tree" style="display:none">
+        <div class="mb-3">
+          <select id="tree-ref" class="w-full px-3 py-2 bg-white/50 border border-white/60 rounded-xl text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30" onchange="loadTreeView()"></select>
+        </div>
+        <div id="tree-results"></div>
+      </div>
+    </div>`;
   document.getElementById('repo-status').innerHTML = `
-    <span><span class="label">分支</span> <span class="value">${esc(repoData.currentBranch)}</span></span>
-    <span><span class="label">最新版本</span> <span class="value">${esc(repoData.currentRef || '-')}</span></span>
-    <span><span class="label">提交次数</span> <span class="value">${repoData.totalCommits}</span></span>
-    <span><span class="label">分支数</span> <span class="value">${repoData.totalBranches}</span></span>
-  `;
+    <span class="flex items-center gap-1"><span class="text-outline">分支</span> <span class="font-medium text-on-surface">${esc(repoData.currentBranch)}</span></span>
+    <span class="flex items-center gap-1"><span class="text-outline">版本</span> <span class="font-medium text-on-surface">${esc(repoData.currentRef || '-')}</span></span>
+    <span class="flex items-center gap-1"><span class="text-outline">提交</span> <span class="font-medium text-on-surface">${repoData.totalCommits}</span></span>`;
   loadCommits(orderId);
+}
+
+async function initCurrentRepo() {
+  const res = await api('POST', '/api/repos/' + currentOrderId + '/init', {});
+  if (!res.success) return alert('初始化失败: ' + (res.error || '未知错误'));
+  alert('✅ 仓库初始化成功！现在可以提交代码了');
+  loadRepoInfo(currentOrderId);
+}
+
+// ─── 提交代码表单 ─────────────────────────────────────
+let commitFileCount = 1;
+
+function renderCommitForm() {
+  const el = document.getElementById('commit-form');
+  el.innerHTML = `
+    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 text-xs text-blue-700 leading-relaxed mb-4">
+      <strong>💡 如何提交代码？</strong>
+      <ol class="list-decimal ml-4 mt-2 space-y-1">
+        <li>点击下方 <strong>"从本机选择文件"</strong>，在工程目录里选中你要提交的文件（可多选）</li>
+        <li>文件会自动读入，<strong>文件路径</strong> 可以手动修改</li>
+        <li>也可以手动 <strong>"+ 添加文件"</strong>，粘贴代码片段</li>
+        <li>填写 <strong>提交说明</strong>，点击提交即可</li>
+      </ol>
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-on-surface-variant mb-1.5 font-mono uppercase tracking-wider">提交说明</label>
+      <input id="commit-message" type="text" placeholder="例如：实现了用户登录功能" class="w-full px-4 py-3 bg-white/50 border border-white/60 rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"/>
+    </div>
+    <div>
+      <div class="flex items-center justify-between mb-1.5">
+        <label class="block text-xs font-medium text-on-surface-variant font-mono uppercase tracking-wider">文件列表</label>
+        <div class="flex gap-2">
+          <button onclick="document.getElementById('folder-picker').click()" class="text-xs bg-surface-container text-on-surface px-3 py-1.5 rounded-full hover:bg-surface-container-high transition-all">
+            📁 选择文件夹（保留目录结构）
+          </button>
+          <button onclick="document.getElementById('file-picker').click()" class="text-xs text-on-surface-variant hover:text-primary transition-all">
+            或选单个文件
+          </button>
+          <button onclick="addCommitFileEntry()" class="text-xs text-primary font-medium hover:underline">+ 手动添加</button>
+        </div>
+      </div>
+      <input id="folder-picker" type="file" webkitdirectory multiple style="display:none" onchange="handleFolderPicked(this)"/>
+      <input id="file-picker" type="file" multiple style="display:none" onchange="handleFilePicked(this)"/>
+      <div id="commit-files" class="space-y-3"></div>
+    </div>
+    <button onclick="submitCommit()" class="w-full py-3 bg-primary text-on-primary rounded-full text-sm font-semibold active:scale-95 transition-all hover:shadow-lg hover:shadow-primary/20">
+      <span class="material-symbols-outlined text-base align-middle mr-1">upload</span>
+      提交代码
+    </button>
+    <div id="commit-error" class="text-xs text-center min-h-5"></div>
+  `;
+  commitFileCount = 1;
+  addCommitFileEntry();
+}
+
+function handleFilePicked(input) {
+  const files = input.files;
+  if (!files || !files.length) return;
+  for (const file of files) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const content = e.target.result;
+      addCommitFileEntry(file.name, content);
+    };
+    reader.readAsText(file);
+  }
+  input.value = '';
+}
+
+function handleFolderPicked(input) {
+  const files = input.files;
+  if (!files || !files.length) return;
+
+  // 提示用户
+  const msgEl = document.getElementById('commit-error');
+  msgEl.style.color = '#2563eb';
+  msgEl.textContent = '⏳ 正在读取文件（跳过 node_modules、.git 等目录）...';
+
+  // 跳过常见的大型/无关目录
+  const skipDirs = ['node_modules', '.git', '.mimocode', '.claude', 'dist', '.next', 'build', 'target', '__pycache__', '.vscode', 'vendor', '.DS_Store'];
+  const skipSuffix = ['.png', '.jpg', '.jpeg', '.gif', '.ico', '.svg', '.woff', '.woff2', '.eot', '.ttf', '.map'];
+
+  const sorted = Array.from(files)
+    .filter(f => {
+      const p = f.webkitRelativePath.replace(/\\/g, '/');
+      // 跳过黑名单目录中的文件
+      for (const dir of skipDirs) {
+        if (p.includes('/' + dir + '/') || p.startsWith(dir + '/')) return false;
+      }
+      // 跳过二进制/大文件后缀
+      for (const ext of skipSuffix) {
+        if (p.endsWith(ext)) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => a.webkitRelativePath.localeCompare(b.webkitRelativePath));
+
+  if (sorted.length === 0) {
+    msgEl.textContent = '⚠️ 所选文件夹中没有可读的代码文件';
+    input.value = '';
+    return;
+  }
+
+  msgEl.textContent = '⏳ 正在读取 ' + sorted.length + ' 个文件...';
+
+  // 分批处理，避免卡死 UI
+  let index = 0;
+  function readNextBatch() {
+    const batchSize = 5;
+    const end = Math.min(index + batchSize, sorted.length);
+    let completed = 0;
+    for (let i = index; i < end; i++) {
+      const file = sorted[i];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        addCommitFileEntry(file.webkitRelativePath.replace(/\\/g, '/'), e.target.result);
+        completed++;
+        if (i + completed >= end) {
+          index = end;
+          if (index < sorted.length) {
+            msgEl.textContent = '⏳ 正在读取... (' + index + '/' + sorted.length + ')';
+            setTimeout(readNextBatch, 50);
+          } else {
+            msgEl.textContent = '✅ 已加载 ' + sorted.length + ' 个文件';
+            setTimeout(() => { msgEl.textContent = ''; }, 3000);
+          }
+        }
+      };
+      reader.readAsText(file);
+    }
+  }
+  readNextBatch();
+  input.value = '';
+}
+
+function addCommitFileEntry(path, content) {
+  const container = document.getElementById('commit-files');
+  const idx = commitFileCount++;
+  const div = document.createElement('div');
+  div.className = 'p-3 bg-white/30 rounded-xl border border-white/40';
+  div.id = 'commit-file-' + idx;
+  div.innerHTML = `
+    <div class="flex items-center gap-2 mb-2">
+      <input id="cf-path-${idx}" type="text" placeholder="文件路径（如 src/index.ts）" value="${esc(path || '')}"
+        class="flex-1 px-3 py-2 bg-white/50 border border-white/60 rounded-xl text-xs font-mono text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"/>
+      <button onclick="this.closest('.p-3').remove()" class="w-7 h-7 flex items-center justify-center rounded-full text-outline hover:text-red-500 hover:bg-red-50 transition-all">
+        <span class="material-symbols-outlined text-sm">close</span>
+      </button>
+    </div>
+    <textarea id="cf-content-${idx}" rows="6" placeholder="粘贴文件内容..." class="w-full px-3 py-2 bg-white/50 border border-white/60 rounded-xl text-xs font-mono text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none">${esc(content || '')}</textarea>
+  `;
+  container.appendChild(div);
+}
+
+async function submitCommit() {
+  const message = document.getElementById('commit-message').value.trim();
+  if (!message) return showCommitError('请填写提交说明');
+
+  const fileEntries = document.querySelectorAll('[id^="commit-file-"]');
+  const files = [];
+  for (const entry of fileEntries) {
+    const idx = entry.id.replace('commit-file-', '');
+    const pathEl = document.getElementById('cf-path-' + idx);
+    const contentEl = document.getElementById('cf-content-' + idx);
+    if (pathEl && contentEl && pathEl.value.trim()) {
+      files.push({ path: pathEl.value.trim(), content: contentEl.value });
+    }
+  }
+  if (!files.length) return showCommitError('请至少添加一个文件');
+
+  const btn = document.querySelector('#commit-form button:last-of-type');
+  const origText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="material-symbols-outlined text-base align-middle mr-1">hourglass_top</span> 提交中...';
+
+  const res = await api('POST', '/api/repos/' + currentOrderId + '/commit', { message, files });
+  btn.disabled = false;
+  btn.innerHTML = origText;
+  if (!res.success) return showCommitError(res.error || '提交失败');
+
+  // 成功
+  document.getElementById('commit-error').textContent = '';
+  document.getElementById('commit-error').style.color = '';
+  alert('✅ 已创建 ' + res.data.ref + '：' + res.data.message);
+  // 清空表单
+  renderCommitForm();
+  // 刷新版本历史
+  loadRepoInfo(currentOrderId);
+}
+
+function showCommitError(msg) {
+  const el = document.getElementById('commit-error');
+  el.style.color = '#ba1a1a';
+  el.textContent = msg;
 }
 
 async function loadCommits(orderId, branch) {
@@ -910,75 +999,51 @@ async function loadCommits(orderId, branch) {
 function renderCommits() {
   const el = document.getElementById('repo-commits');
   if (!repoCommits.length) {
-    el.innerHTML = '<div class="repo-empty">暂无提交记录</div>';
+    el.innerHTML = '<div class="text-center py-8 text-sm text-outline"><span class="material-symbols-outlined text-3xl text-outline-variant mb-2 block">history</span>暂无提交记录</div>';
     return;
   }
-  el.innerHTML = '<div class="version-list">' + repoCommits.map(c => `
-    <div class="version-item" id="v-${c.ref}" onclick="toggleVersion('${c.ref}')">
-      <div class="v-top">
-        <span class="v-ref">${esc(c.ref)}</span>
-        <div class="v-actions">
-          <button class="btn-ghost btn-sm" onclick="event.stopPropagation(); showRollbackConfirm('${c.ref}')">⏪ 回退</button>
-        </div>
+  el.innerHTML = '<div class="space-y-2">' + repoCommits.map(c => `
+    <div class="p-4 bg-white/30 rounded-xl border border-white/40 cursor-pointer hover:bg-white/50 transition-all active:scale-[0.98]" onclick="toggleVersion('${c.ref}')">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-sm font-bold text-primary font-mono">${esc(c.ref)}</span>
+        <button class="text-[10px] text-on-surface-variant hover:text-primary px-2 py-0.5 rounded-full hover:bg-primary/5 transition-all" onclick="event.stopPropagation();showRollbackConfirm('${c.ref}')">⏪ 回退</button>
       </div>
-      <div class="v-message">${esc(c.message)}</div>
-      <div class="v-meta">
+      <p class="text-sm text-on-surface mb-2">${esc(c.message)}</p>
+      <div class="flex items-center gap-3 text-[10px] text-outline">
         <span>${esc(c.authorName)}</span>
         <span>${c.fileCount} 个文件</span>
         <span>${formatTime(c.createdAt)}</span>
         ${c.parentRef ? '<span>← ' + esc(c.parentRef) + '</span>' : '<span>初始提交</span>'}
       </div>
-      <div class="v-files" id="v-files-${c.ref}" style="display:none">
-        <div style="font-size:12px;color:var(--text3);margin-bottom:6px">加载中...</div>
-      </div>
+      <div id="v-files-${c.ref}" class="hidden mt-3 pt-3 border-t border-outline-variant/20 text-xs text-outline">加载中...</div>
     </div>
   `).join('') + '</div>';
 }
 
 async function toggleVersion(ref) {
-  const item = document.getElementById('v-' + ref);
   const filesEl = document.getElementById('v-files-' + ref);
-  const expanded = item.classList.toggle('expanded');
-  if (expanded && filesEl.style.display === 'none') {
-    filesEl.style.display = '';
-    filesEl.innerHTML = '<div style="font-size:12px;color:var(--text3)">加载中...</div>';
-    // Load file tree for this version
-    const orderId = currentOrderId;
-    const res = await api('GET', '/api/repos/' + orderId + '/tree?ref=' + ref);
-    if (res.success && res.data && res.data.files) {
-      if (res.data.files.length === 0) {
-        filesEl.innerHTML = '<div style="font-size:12px;color:var(--text3)">（无文件）</div>';
-      } else {
-        filesEl.innerHTML = res.data.files.map(f => `
-          <div class="v-file">
-            <span class="file-icon">${f.action === 'delete' ? '🗑️' : '📄'}</span>
-            <span class="file-path">${esc(f.path)}</span>
-            <span class="file-size">${f.size ? formatBytes(f.size) : '-'}</span>
-          </div>
-        `).join('');
-      }
+  if (filesEl.classList.contains('hidden')) {
+    filesEl.classList.remove('hidden');
+    const res = await api('GET', '/api/repos/' + currentOrderId + '/tree?ref=' + ref);
+    if (res.success && res.data?.files?.length) {
+      filesEl.innerHTML = res.data.files.map(f => `<div class="flex items-center gap-2 py-1"><span class="material-symbols-outlined text-sm ${f.action === 'delete' ? 'text-red-400' : 'text-outline'}">${f.action === 'delete' ? 'delete' : 'description'}</span><span class="text-on-surface">${esc(f.path)}</span><span class="text-outline ml-auto">${f.size ? formatBytes(f.size) : ''}</span></div>`).join('');
     } else {
-      filesEl.innerHTML = '<div style="font-size:12px;color:var(--text3)">加载失败</div>';
+      filesEl.innerHTML = '<span class="text-outline">（无文件）</span>';
     }
-  } else if (!expanded) {
-    filesEl.style.display = 'none';
+  } else {
+    filesEl.classList.add('hidden');
   }
 }
 
 function showRollbackConfirm(ref) {
-  if (!confirm('确定要回退到 ' + ref + ' 吗？\n\n这将在当前版本基础上创建一个新提交，把文件恢复到 ' + ref + ' 的状态。\n历史记录不会被删除，之后还可以回退回来。')) return;
+  if (!confirm('确定要回退到 ' + ref + ' 吗？\n\n这将创建一个新提交恢复到 ' + ref + ' 的状态。历史不会丢失。')) return;
   doRollback(ref);
 }
 
 async function doRollback(ref) {
-  const btn = event?.target || {};
-  btn.disabled = true;
-  btn.textContent = '回退中...';
   const res = await api('POST', '/api/repos/' + currentOrderId + '/rollback', { ref });
-  btn.disabled = false;
-  btn.textContent = '⏪ 回退';
   if (!res.success) return alert('回退失败: ' + (res.error || '未知错误'));
-  alert('✅ 已创建 ' + res.data.newRef + '，回退到 ' + ref + ' 完成！\n\nAI 工具会收到目标版本的所有文件内容，请确保开发者已同步。');
+  alert('✅ 已创建 ' + res.data.newRef + '，回退到 ' + ref + ' 完成！');
   loadRepoInfo(currentOrderId);
 }
 
@@ -990,83 +1055,66 @@ function populateVersionSelects() {
   const options = repoCommits.map(c => `<option value="${c.ref}">${c.ref}: ${esc(c.message.slice(0, 40))}</option>`).join('');
   fromEl.innerHTML = '<option value="">选择起始版本</option>' + options;
   toEl.innerHTML = '<option value="">选择目标版本</option>' + options;
-  treeRefEl.innerHTML = '<option value="">最新版本（当前分支）</option>' + options;
-  // Default select last two
-  if (repoCommits.length >= 2) {
-    fromEl.value = repoCommits[repoCommits.length - 2].ref;
-    toEl.value = repoCommits[0].ref;
-    loadDiffView();
-  } else if (repoCommits.length === 1) {
-    toEl.value = repoCommits[0].ref;
-  }
+  treeRefEl.innerHTML = '<option value="">最新版本</option>' + options;
+  if (repoCommits.length >= 2) { fromEl.value = repoCommits[repoCommits.length - 2].ref; toEl.value = repoCommits[0].ref; loadDiffView(); }
+  else if (repoCommits.length === 1) { toEl.value = repoCommits[0].ref; }
 }
 
 async function loadDiffView() {
   const from = document.getElementById('diff-from').value;
   const to = document.getElementById('diff-to').value;
   const el = document.getElementById('diff-results');
-  if (!from || !to) {
-    el.innerHTML = '<div class="repo-empty">请选择两个版本进行对比</div>';
-    return;
-  }
-  el.innerHTML = '<div class="repo-empty">加载中...</div>';
+  if (!from || !to) { el.innerHTML = '<div class="text-center py-6 text-sm text-outline">请选择两个版本进行对比</div>'; return; }
+  el.innerHTML = '<div class="text-center py-6 text-sm text-outline">加载中...</div>';
   const res = await api('GET', `/api/repos/${currentOrderId}/diff?from=${from}&to=${to}`);
-  if (!res.success || !res.data) {
-    el.innerHTML = '<div class="repo-empty">加载失败</div>';
-    return;
-  }
+  if (!res.success || !res.data) { el.innerHTML = '<div class="text-center py-6 text-sm text-outline">加载失败</div>'; return; }
   const changes = res.data.changes || [];
-  if (!changes.length) {
-    el.innerHTML = '<div class="repo-empty">两个版本之间没有差异</div>';
-    return;
-  }
-  el.innerHTML = '<div style="font-size:13px;color:var(--text2);margin-bottom:8px">从 <strong>' + from + '</strong> 到 <strong>' + to + '</strong> 共 ' + changes.length + ' 处变化</div>' +
-    '<div class="diff-list">' + changes.map(c => `
-      <div class="diff-item">
-        <span class="diff-action ${c.action}">${c.action}</span>
-        <span class="diff-path">${esc(c.path)}</span>
-        <span class="diff-hash">${c.beforeRef ? c.beforeRef.slice(0, 8) : ''} ${c.afterRef ? '→ ' + c.afterRef.slice(0, 8) : ''}</span>
-      </div>
-    `).join('') + '</div>';
+  if (!changes.length) { el.innerHTML = '<div class="text-center py-6 text-sm text-outline">两个版本之间没有差异</div>'; return; }
+  el.innerHTML = '<div class="text-xs text-on-surface-variant mb-2">从 <strong>' + from + '</strong> 到 <strong>' + to + '</strong> 共 ' + changes.length + ' 处变化</div>' +
+    '<div class="space-y-1">' + changes.map(c => {
+      const aColors = { add:'bg-green-50 text-green-600', modify:'bg-blue-50 text-blue-600', delete:'bg-red-50 text-red-600' };
+      return `<div class="flex items-center gap-2 py-2 px-3 bg-white/30 rounded-lg text-xs">
+        <span class="font-mono font-bold px-2 py-0.5 rounded ${aColors[c.action] || ''}">${c.action}</span>
+        <span class="text-on-surface font-mono">${esc(c.path)}</span>
+      </div>`;
+    }).join('') + '</div>';
 }
 
 async function loadTreeView() {
   const ref = document.getElementById('tree-ref').value;
   const el = document.getElementById('tree-results');
-  el.innerHTML = '<div class="repo-empty">加载中...</div>';
+  el.innerHTML = '<div class="text-center py-6 text-sm text-outline">加载中...</div>';
   let path = '/api/repos/' + currentOrderId + '/tree';
   if (ref) path += '?ref=' + ref;
   const res = await api('GET', path);
-  if (!res.success || !res.data) {
-    el.innerHTML = '<div class="repo-empty">暂无文件</div>';
-    return;
-  }
+  if (!res.success || !res.data) { el.innerHTML = '<div class="text-center py-6 text-sm text-outline">暂无文件</div>'; return; }
   const files = res.data.files || [];
-  if (!files.length) {
-    el.innerHTML = '<div class="repo-empty">该版本没有文件</div>';
-    return;
-  }
-  el.innerHTML = '<div style="font-size:13px;color:var(--text2);margin-bottom:8px">' + esc(res.data.ref) + ': ' + esc(res.data.message) + ' — ' + files.length + ' 个文件</div>' +
-    '<div class="repo-tree">' + files.map(f => `
-      <div class="tree-entry">
-        <span>${f.action === 'delete' ? '🗑️' : '📄'}</span>
-        <span class="entry-path">${esc(f.path)}</span>
-        <span class="entry-size">${f.size ? formatBytes(f.size) : '-'}</span>
+  if (!files.length) { el.innerHTML = '<div class="text-center py-6 text-sm text-outline">该版本没有文件</div>'; return; }
+  el.innerHTML = '<div class="text-xs text-on-surface-variant mb-2">' + esc(res.data.ref) + ': ' + esc(res.data.message) + ' — ' + files.length + ' 个文件</div>' +
+    '<div class="space-y-1">' + files.map(f => `
+      <div class="flex items-center gap-2 py-2 px-3 bg-white/30 rounded-lg text-xs">
+        <span class="material-symbols-outlined text-sm ${f.action === 'delete' ? 'text-red-400' : 'text-outline'}">${f.action === 'delete' ? 'delete' : 'description'}</span>
+        <span class="text-on-surface font-mono flex-1">${esc(f.path)}</span>
+        <span class="text-outline">${f.size ? formatBytes(f.size) : ''}</span>
       </div>
     `).join('') + '</div>';
 }
 
-function switchRepoTab(tab) {
+function switchRepoTab(tab, el) {
   currentRepoTab = tab;
-  document.querySelectorAll('.repo-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.repo-tab').forEach(t => {
-    if (t.textContent.includes(tab === 'commits' ? '版本历史' : tab === 'diff' ? '版本对比' : '文件树')) t.classList.add('active');
+    t.classList.remove('bg-primary','text-on-primary');
+    t.classList.add('text-on-surface-variant');
   });
+  if (!el) el = document.querySelector('.repo-tab:first-child');
+  if (el) { el.classList.remove('text-on-surface-variant'); el.classList.add('bg-primary','text-on-primary'); }
+  document.getElementById('repo-commit').style.display = tab === 'commit' ? '' : 'none';
   document.getElementById('repo-commits').style.display = tab === 'commits' ? '' : 'none';
   document.getElementById('repo-diff').style.display = tab === 'diff' ? '' : 'none';
   document.getElementById('repo-tree').style.display = tab === 'tree' ? '' : 'none';
   if (tab === 'diff') loadDiffView();
   if (tab === 'tree') loadTreeView();
+  if (tab === 'commit') renderCommitForm();
 }
 
 function formatBytes(bytes) {
@@ -1076,17 +1124,12 @@ function formatBytes(bytes) {
   return (bytes / Math.pow(1024, i)).toFixed(i > 0 ? 1 : 0) + ' ' + units[i];
 }
 
-// ─── Init ──────────────────────────────────────────
 (function init() {
   const sid = localStorage.getItem('sid');
   const id = localStorage.getItem('userId');
   const name = localStorage.getItem('userName');
   const role = localStorage.getItem('userRole');
-  if (sid) {
-    currentUser = { sid, id, name, role };
-    enterApp();
-  }
-  console.log('[AI Code Platform] v0.3.0 loaded — 代码仓库面板已就绪');
+  if (sid) { currentUser = { sid, id, name, role }; enterApp(); }
 })();
 </script>
 </body>
