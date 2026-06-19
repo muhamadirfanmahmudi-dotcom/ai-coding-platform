@@ -134,6 +134,11 @@ class Database {
       )
     `);
 
+    // Add description column if not exists (migration for existing DBs)
+    try {
+      this.db.run(`ALTER TABLE code_commits ADD COLUMN description TEXT DEFAULT ''`);
+    } catch {} // column already exists
+
     this.db.run(`
       CREATE TABLE IF NOT EXISTS code_files (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -496,6 +501,7 @@ class Database {
     id: string;
     repoId: string;
     message: string;
+    description?: string;
     parentId?: string;
   }) {
     // Generate ref (v1, v2, v3...)
@@ -503,8 +509,8 @@ class Database {
     const ref = `v${count}`;
 
     this.db.run(
-      `INSERT INTO code_commits (id, repo_id, ref, message, parent_id) VALUES (?, ?, ?, ?, ?)`,
-      [params.id, params.repoId, ref, params.message, params.parentId || null]
+      `INSERT INTO code_commits (id, repo_id, ref, message, description, parent_id) VALUES (?, ?, ?, ?, ?, ?)`,
+      [params.id, params.repoId, ref, params.message, params.description || '', params.parentId || null]
     );
     this.save();
     return this.getCommit(params.id)!;
@@ -797,6 +803,7 @@ function rowToCommit(row: any) {
     repoId: row.repo_id,
     ref: row.ref,
     message: row.message,
+    description: row.description || '',
     parentId: row.parent_id,
     createdAt: row.created_at,
   };

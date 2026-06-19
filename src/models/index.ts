@@ -93,6 +93,7 @@ export interface InitRepoRequest {
 /** 提交请求 */
 export interface CommitRequest {
   message: string;
+  description?: string;
   files: CommitFileEntry[];
 }
 
@@ -108,6 +109,7 @@ export interface CommitResponse {
   ref: string;
   id: string;
   message: string;
+  description?: string;
   branch: string;
   parentRef: string | null;
   authorId: string;

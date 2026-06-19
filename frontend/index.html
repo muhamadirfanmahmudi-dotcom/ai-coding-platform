@@ -527,7 +527,9 @@ async function loadOrderDetail(orderId) {
   if (o.developerId) { devEl.style.display = ''; document.getElementById('detail-dev-name').textContent = o.developerName || o.developerId; }
   else { devEl.style.display = 'none'; }
   renderActionPanel(o);
-  loadBuyerProgress(o);
+  // 开发者通过"开发流程"看进度，无需重复的"开发进度"面板
+  if (currentUser.role !== 'developer') loadBuyerProgress(o);
+  else document.getElementById('buyer-progress-card').style.display = 'none';
   loadRepoInfo(orderId);
 }
 
@@ -555,13 +557,13 @@ const STAGE_CONFIG = [
       { label:'5. 核心功能范围（MVP）', placeholder:'功能1\n功能2\n功能3' }, { label:'6. 非目标（不做什么）', placeholder:'不做移动端' },
       { label:'7. 成功标准', placeholder:'能正常运行' },
     ]},
-  { key:'design', name:'系统设计', color:'text-amber-600', bg:'bg-amber-50', desc:'把需求变成工程蓝图：模块拆分、数据库设计、API设计',
+  { key:'design', name:'系统设计', color:'text-amber-600', bg:'bg-amber-50', desc:'把需求变成工程蓝图：模块拆分、数据库设计、API设计', completeBtn:'完成系统设计',
     fields: [{ label:'模块拆分', placeholder:'系统包含哪些模块？' }, { label:'数据库设计', placeholder:'需要哪些表？' }, { label:'API设计', placeholder:'需要哪些接口？' }, { label:'页面结构', placeholder:'有哪些页面？' }]},
-  { key:'techstack', name:'技术选型', color:'text-orange-600', bg:'bg-orange-50', desc:'决定用什么工具做：前端、后端、数据库、部署',
+  { key:'techstack', name:'技术选型', color:'text-orange-600', bg:'bg-orange-50', desc:'决定用什么工具做：前端、后端、数据库、部署', completeBtn:'完成技术选型',
     fields: [{ label:'前端技术', placeholder:'React / Vue？' }, { label:'后端技术', placeholder:'Node / Python？' }, { label:'数据库', placeholder:'MySQL / SQLite？' }, { label:'部署方案', placeholder:'Vercel / Docker？' }]},
-  { key:'implementation', name:'开发阶段', color:'text-blue-600', bg:'bg-blue-50', desc:'真正写代码，按模块逐步开发',
+  { key:'implementation', name:'开发阶段', color:'text-blue-600', bg:'bg-blue-50', desc:'真正写代码，按模块逐步开发', completeBtn:'完成开发阶段',
     fields: [{ label:'开发计划', placeholder:'按什么顺序开发？' }, { label:'当前进度', placeholder:'完成了哪些？' }, { label:'技术难点', placeholder:'遇到了什么问题？' }, { label:'代码结构', placeholder:'目录结构？' }]},
-  { key:'testing', name:'测试阶段', color:'text-purple-600', bg:'bg-purple-50', desc:'检查系统是否可用：单元测试、集成测试',
+  { key:'testing', name:'测试阶段', color:'text-purple-600', bg:'bg-purple-50', desc:'检查系统是否可用：单元测试、集成测试', completeBtn:'完成测试阶段',
     fields: [{ label:'测试类型', placeholder:'做了哪些测试？' }, { label:'测试结果', placeholder:'通过了吗？' }, { label:'边界情况', placeholder:'边界情况？' }, { label:'Bug列表', placeholder:'发现了哪些bug？' }]},
 ];
 
@@ -576,57 +578,90 @@ async function loadStages(orderId) {
 
 function renderStages() {
   const buttons = document.getElementById('action-buttons');
-  let html = '<div class="flex gap-1 mb-6 overflow-x-auto no-scrollbar">';
+  if (typeof window._devActiveIdx === 'undefined') window._devActiveIdx = -1;
+
+  // ── 计算可访问的最大阶段索引 ─────────────────────────
+  // 已完成/进行中的阶段 + 第一个待开始的阶段可点击，后续的锁定
+  let maxAccessibleIdx = -1;
+  for (let i = 0; i < STAGE_CONFIG.length; i++) {
+    const s = currentStages.find(x => x.stage === STAGE_CONFIG[i].key);
+    if (!s || s.status === 'pending') {
+      maxAccessibleIdx = i; // 第一个未开始的阶段也可访问（即将要做的）
+      break;
+    }
+    maxAccessibleIdx = i; // 已完成或进行中的阶段
+  }
+  if (maxAccessibleIdx < 0) maxAccessibleIdx = STAGE_CONFIG.length - 1;
+
+  // ── 渲染圆点 ────────────────────────────────────────
+  let html = '<div id="dev-stage-area" class="flex gap-1 mb-6 overflow-x-auto no-scrollbar">';
   STAGE_CONFIG.forEach((cfg, i) => {
     const stage = currentStages.find(s => s.stage === cfg.key);
     const status = stage ? stage.status : 'pending';
-    const dotClass = status === 'completed' ? 'bg-green-500 text-white border-green-500' :
+    const locked = i > maxAccessibleIdx;
+    const dotClass = locked ? 'bg-gray-100 text-gray-300 border-gray-200' :
+                     status === 'completed' ? 'bg-green-500 text-white border-green-500' :
                      status === 'in_progress' ? 'bg-primary text-white border-primary shadow-[0_0_0_4px_rgba(183,0,79,0.15)]' :
                      'bg-surface-container text-outline border-outline-variant/50';
-    html += `<div class="flex-1 text-center min-w-[60px]">
+    const labelClass = locked ? 'text-gray-300' :
+                       status === 'completed' ? 'text-green-600' :
+                       status === 'in_progress' ? 'text-primary' : 'text-outline';
+    html += `<div class="flex-1 text-center min-w-[60px] ${locked ? '' : 'cursor-pointer active:scale-95 transition-transform'}" ${locked ? '' : `onclick="switchDevStage(${i})"`}>
       <div class="w-8 h-8 rounded-full border-2 flex items-center justify-center mx-auto mb-1.5 text-xs font-bold transition-all ${dotClass}">
-        ${status === 'completed' ? '<span class="material-symbols-outlined text-sm">check</span>' : (i+1)}
+        ${locked ? '<span class="material-symbols-outlined text-sm">lock</span>' : status === 'completed' ? '<span class="material-symbols-outlined text-sm">check</span>' : (i+1)}
       </div>
-      <div class="text-[10px] font-medium ${status === 'completed' ? 'text-green-600' : status === 'in_progress' ? 'text-primary' : 'text-outline'}">${cfg.name}</div>
+      <div class="text-[10px] font-medium ${labelClass}">${cfg.name}</div>
     </div>`;
   });
   html += '</div>';
 
-  let activeStage = STAGE_CONFIG.find(cfg => {
-    const s = currentStages.find(x => x.stage === cfg.key);
-    return s && s.status !== 'completed';
-  });
-  if (!activeStage && currentStages.length === 0) activeStage = STAGE_CONFIG[0];
-
-  if (activeStage) {
-    const stage = currentStages.find(s => s.stage === activeStage.key);
-    const cfg = activeStage;
-    let savedContent = {};
-    try { savedContent = stage?.content ? JSON.parse(stage.content) : {}; } catch(e) {}
-
-    html += `<div class="bg-white/30 rounded-xl p-5 border border-white/40">
-      <div class="flex items-center gap-2 mb-1">
-        <span class="text-sm font-bold text-on-surface">${cfg.name}</span>
-        <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${stage?.status === 'completed' ? 'bg-green-50 text-green-600' : stage?.status === 'in_progress' ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-500'}">${stage?.status === 'completed' ? '已完成' : stage?.status === 'in_progress' ? '进行中' : '待开始'}</span>
-      </div>
-      <p class="text-xs text-on-surface-variant mb-4">${cfg.desc}</p>`;
-
-    cfg.fields.forEach((f, i) => {
-      html += `<div class="mb-3">
-        <label class="block text-xs font-medium text-on-surface-variant mb-1">${f.label}</label>
-        <textarea id="field-${cfg.key}-${i}" rows="2" placeholder="${f.placeholder}" class="w-full px-3 py-2 bg-white/50 border border-white/60 rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none">${esc(savedContent[f.label] || '')}</textarea>
-      </div>`;
+  // ── 确定当前选中阶段 ────────────────────────────────
+  let activeIdx = window._devActiveIdx;
+  if (activeIdx < 0 || activeIdx > maxAccessibleIdx) {
+    // 默认选中第一个非完成的可访问阶段
+    activeIdx = STAGE_CONFIG.findIndex(cfg => {
+      const s = currentStages.find(x => x.stage === cfg.key);
+      return s && s.status !== 'completed';
     });
-
-    html += `<div class="flex gap-2 mt-4">
-      ${stage?.status !== 'completed' ? `<button onclick="saveStage('${cfg.key}')" class="px-4 py-2 bg-surface-container text-on-surface rounded-full text-xs font-medium active:scale-95 transition-all">保存</button>` : ''}
-      ${stage?.status !== 'completed' ? `<button onclick="completeStage('${cfg.key}')" class="px-4 py-2 bg-green-500 text-white rounded-full text-xs font-semibold active:scale-95 transition-all hover:shadow-lg hover:shadow-green-500/20">${cfg.completeBtn}</button>` : ''}
-    </div></div>`;
-  } else {
-    html += '<div class="text-center py-6"><span class="material-symbols-outlined text-4xl text-green-500 mb-2 block">celebration</span><p class="text-sm font-medium text-on-surface">所有阶段已完成！等待买家验收</p></div>';
+    if (activeIdx < 0 || activeIdx > maxAccessibleIdx) activeIdx = 0;
   }
+  window._devActiveIdx = activeIdx;
+
+  const cfg = STAGE_CONFIG[activeIdx];
+  const stage = currentStages.find(s => s.stage === cfg.key);
+  let savedContent = {};
+  try { savedContent = stage?.content ? JSON.parse(stage.content) : {}; } catch(e) {}
+
+  html += `<div class="bg-white/30 rounded-xl p-5 border border-white/40">
+    <div class="flex items-center gap-2 mb-1">
+      <span class="text-sm font-bold text-on-surface">${cfg.name}</span>
+      <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${stage?.status === 'completed' ? 'bg-green-50 text-green-600' : stage?.status === 'in_progress' ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-500'}">${stage?.status === 'completed' ? '已完成' : stage?.status === 'in_progress' ? '进行中' : '待开始'}</span>
+    </div>
+    <p class="text-xs text-on-surface-variant mb-4">${cfg.desc}</p>`;
+
+  cfg.fields.forEach((f, i) => {
+    html += `<div class="mb-3">
+      <label class="block text-xs font-medium text-on-surface-variant mb-1">${f.label}</label>
+      <textarea id="field-${cfg.key}-${i}" rows="2" placeholder="${f.placeholder}" class="w-full px-3 py-2 bg-white/50 border border-white/60 rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none">${esc(savedContent[f.label] || '')}</textarea>
+    </div>`;
+  });
+
+  html += `<div class="flex gap-2 mt-4">
+    <button onclick="saveStage('${cfg.key}')" class="px-4 py-2 bg-surface-container text-on-surface rounded-full text-xs font-medium active:scale-95 transition-all">${stage?.status === 'completed' ? '保存修改' : '保存'}</button>
+    ${stage?.status !== 'completed' ? `<button onclick="completeStage('${cfg.key}')" class="px-4 py-2 bg-green-500 text-white rounded-full text-xs font-semibold active:scale-95 transition-all hover:shadow-lg hover:shadow-green-500/20">${cfg.completeBtn}</button>` : ''}
+  </div>`;
 
   buttons.innerHTML = html;
+
+  // 高亮当前选中的圆点
+  document.querySelectorAll('#dev-stage-area .flex-1').forEach((el, i) => {
+    el.style.opacity = i === activeIdx ? '1' : i > maxAccessibleIdx ? '0.35' : '0.5';
+  });
+}
+
+function switchDevStage(idx) {
+  window._devActiveIdx = idx;
+  renderStages();
 }
 
 async function saveStage(stageKey) {
@@ -683,41 +718,67 @@ async function loadBuyerProgress(order) {
   cardEl.style.display = '';
   const stages = res.data;
 
-  let html = '<div class="flex gap-1 mb-4 overflow-x-auto no-scrollbar">';
-  STAGE_CONFIG.forEach((cfg, i) => {
+  // 找到第一个有内容的阶段作为默认选中
+  let activeIdx = 0;
+  for (let i = 0; i < STAGE_CONFIG.length; i++) {
+    const s = stages.find(x => x.stage === STAGE_CONFIG[i].key);
+    if (s && s.status !== 'pending') { activeIdx = i; break; }
+  }
+
+  const stageDots = STAGE_CONFIG.map((cfg, i) => {
     const stage = stages.find(s => s.stage === cfg.key);
     const status = stage ? stage.status : 'pending';
     const dotClass = status === 'completed' ? 'bg-green-500 text-white border-green-500' :
                      status === 'in_progress' ? 'bg-primary text-white border-primary shadow-[0_0_0_4px_rgba(183,0,79,0.15)]' :
                      'bg-surface-container text-outline border-outline-variant/50';
-    html += `<div class="flex-1 text-center min-w-[60px]">
+    return `<div class="flex-1 text-center min-w-[60px] cursor-pointer active:scale-95 transition-transform" onclick="switchBuyerStage(${i})">
       <div class="w-8 h-8 rounded-full border-2 flex items-center justify-center mx-auto mb-1.5 text-xs font-bold transition-all ${dotClass}">
         ${status === 'completed' ? '<span class="material-symbols-outlined text-sm">check</span>' : (i+1)}
       </div>
       <div class="text-[10px] font-medium ${status === 'completed' ? 'text-green-600' : status === 'in_progress' ? 'text-primary' : 'text-outline'}">${cfg.name}</div>
     </div>`;
   });
-  html += '</div>';
-  card.innerHTML = html;
+  card.innerHTML = '<div class="flex gap-1 mb-4 overflow-x-auto no-scrollbar">' + stageDots.join('') + '</div>';
 
-  let detailHtml = '';
-  STAGE_CONFIG.forEach(cfg => {
-    const stage = stages.find(s => s.stage === cfg.key);
-    if (!stage || stage.status === 'pending') return;
-    let content = {};
-    try { content = stage.content ? JSON.parse(stage.content) : {}; } catch(e) {}
-    detailHtml += `<div class="bg-white/30 rounded-xl p-4 border border-white/40">
-      <div class="flex items-center gap-2 mb-3">
-        <span class="text-sm font-bold text-on-surface">${cfg.name}</span>
-        <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${stage.status === 'completed' ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'}">${stage.status === 'completed' ? '已完成' : '进行中'}</span>
-      </div>`;
-    cfg.fields.forEach(f => {
-      const val = content[f.label] || '';
-      if (val) detailHtml += `<div class="mb-2"><div class="text-[10px] font-mono text-on-surface-variant uppercase tracking-wider mb-0.5">${f.label}</div><div class="text-sm text-on-surface leading-relaxed">${esc(val)}</div></div>`;
-    });
-    detailHtml += '</div>';
+  // 保存 stages 数据，供切换时使用
+  card.dataset.activeIdx = activeIdx;
+  window._buyerStages = stages;
+  renderBuyerStageDetail(activeIdx);
+}
+
+function renderBuyerStageDetail(idx) {
+  const cfg = STAGE_CONFIG[idx];
+  const stages = window._buyerStages || [];
+  const stage = stages.find(s => s.stage === cfg.key);
+  const detail = document.getElementById('buyer-stage-detail');
+  if (!stage || stage.status === 'pending') {
+    detail.innerHTML = '<div class="text-center py-4 text-sm text-outline">该阶段尚未开始</div>';
+    return;
+  }
+  let content = {};
+  try { content = stage.content ? JSON.parse(stage.content) : {}; } catch(e) {}
+
+  // 高亮对应的圆点
+  document.querySelectorAll('#buyer-stage-progress .flex-1').forEach((el, i) => {
+    el.style.opacity = i === idx ? '1' : '0.5';
   });
-  detail.innerHTML = detailHtml || '<div class="text-center py-4 text-sm text-outline">开发者尚未开始</div>';
+
+  let detailHtml = `<div class="bg-white/30 rounded-xl p-4 border border-white/40">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="text-sm font-bold text-on-surface">${cfg.name}</span>
+      <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${stage.status === 'completed' ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'}">${stage.status === 'completed' ? '已完成' : '进行中'}</span>
+    </div>`;
+  cfg.fields.forEach(f => {
+    const val = content[f.label] || '';
+    if (val) detailHtml += `<div class="mb-2"><div class="text-[10px] font-mono text-on-surface-variant uppercase tracking-wider mb-0.5">${f.label}</div><div class="text-sm text-on-surface leading-relaxed">${esc(val)}</div></div>`;
+  });
+  detailHtml += '</div>';
+  detail.innerHTML = detailHtml;
+}
+
+function switchBuyerStage(idx) {
+  document.getElementById('buyer-stage-progress').dataset.activeIdx = idx;
+  renderBuyerStageDetail(idx);
 }
 
 function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
@@ -730,18 +791,18 @@ let currentRepoTab = 'commits';
 
 async function loadRepoInfo(orderId) {
   const panel = document.getElementById('repo-panel');
+  // 买家不显示代码版本管理
+  if (currentUser?.role !== 'developer') { panel.style.display = 'none'; return; }
   const res = await api('GET', '/api/repos/' + orderId);
   const repoContent = document.getElementById('repo-panel-content');
   if (!res.success || !res.data) {
-    // 仓库未初始化：开发者看到初始化按钮，买家看到等待提示
+    // 仓库未初始化，显示初始化按钮
     panel.style.display = '';
     repoContent.innerHTML = `
       <div class="p-5 text-center">
         <span class="material-symbols-outlined text-4xl text-outline-variant mb-3 block">folder</span>
         <p class="text-sm text-on-surface-variant mb-4">代码版本仓库尚未初始化</p>
-        ${currentUser?.role === 'developer'
-          ? '<button onclick="initCurrentRepo()" class="px-5 py-2.5 bg-primary text-on-primary rounded-full text-sm font-semibold active:scale-95 transition-all hover:shadow-lg hover:shadow-primary/20">初始化仓库</button>'
-          : '<p class="text-xs text-outline">等待开发者初始化</p>'}
+        <button onclick="initCurrentRepo()" class="px-5 py-2.5 bg-primary text-on-primary rounded-full text-sm font-semibold active:scale-95 transition-all hover:shadow-lg hover:shadow-primary/20">初始化仓库</button>
       </div>`;
     return;
   }
@@ -808,15 +869,19 @@ function renderCommitForm() {
     <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 text-xs text-blue-700 leading-relaxed mb-4">
       <strong>💡 如何提交代码？</strong>
       <ol class="list-decimal ml-4 mt-2 space-y-1">
-        <li>点击下方 <strong>"从本机选择文件"</strong>，在工程目录里选中你要提交的文件（可多选）</li>
-        <li>文件会自动读入，<strong>文件路径</strong> 可以手动修改</li>
+        <li>点击 <strong>"选择文件夹"</strong> 上传你的工程目录，文件会自动读入</li>
+        <li>给这个版本起个名字，方便以后识别</li>
         <li>也可以手动 <strong>"+ 添加文件"</strong>，粘贴代码片段</li>
-        <li>填写 <strong>提交说明</strong>，点击提交即可</li>
+        <li>点击提交即可</li>
       </ol>
     </div>
     <div>
-      <label class="block text-xs font-medium text-on-surface-variant mb-1.5 font-mono uppercase tracking-wider">提交说明</label>
-      <input id="commit-message" type="text" placeholder="例如：实现了用户登录功能" class="w-full px-4 py-3 bg-white/50 border border-white/60 rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"/>
+      <label class="block text-xs font-medium text-on-surface-variant mb-1.5 font-mono uppercase tracking-wider">代码版本名称</label>
+      <input id="commit-message" type="text" placeholder="例如：v1-登录功能" class="w-full px-4 py-3 bg-white/50 border border-white/60 rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"/>
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-on-surface-variant mb-1.5 font-mono uppercase tracking-wider">此版本描述（选填）</label>
+      <textarea id="commit-description" rows="3" placeholder="简单描述这个版本做了什么改动..." class="w-full px-4 py-3 bg-white/50 border border-white/60 rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none"></textarea>
     </div>
     <div>
       <div class="flex items-center justify-between mb-1.5">
@@ -932,30 +997,33 @@ function addCommitFileEntry(path, content) {
   div.className = 'p-3 bg-white/30 rounded-xl border border-white/40';
   div.id = 'commit-file-' + idx;
   div.innerHTML = `
-    <div class="flex items-center gap-2 mb-2">
-      <input id="cf-path-${idx}" type="text" placeholder="文件路径（如 src/index.ts）" value="${esc(path || '')}"
-        class="flex-1 px-3 py-2 bg-white/50 border border-white/60 rounded-xl text-xs font-mono text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"/>
-      <button onclick="this.closest('.p-3').remove()" class="w-7 h-7 flex items-center justify-center rounded-full text-outline hover:text-red-500 hover:bg-red-50 transition-all">
+    <div class="flex items-center gap-2 mb-1.5">
+      <span class="flex-1 text-xs font-mono text-on-surface truncate" title="${esc(path || '')}">
+        <span class="material-symbols-outlined text-sm align-middle -ml-0.5 text-outline" style="font-size:14px">description</span>
+        <span class="cf-path-text">${esc(path || '')}</span>
+      </span>
+      <button onclick="this.closest('.p-3').remove()" class="w-6 h-6 flex items-center justify-center rounded-full text-outline hover:text-red-500 hover:bg-red-50 transition-all">
         <span class="material-symbols-outlined text-sm">close</span>
       </button>
     </div>
-    <textarea id="cf-content-${idx}" rows="6" placeholder="粘贴文件内容..." class="w-full px-3 py-2 bg-white/50 border border-white/60 rounded-xl text-xs font-mono text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none">${esc(content || '')}</textarea>
+    <textarea id="cf-content-${idx}" rows="4" placeholder="文件内容..." class="w-full px-3 py-2 bg-white/50 border border-white/60 rounded-xl text-xs font-mono text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none">${esc(content || '')}</textarea>
   `;
   container.appendChild(div);
 }
 
 async function submitCommit() {
   const message = document.getElementById('commit-message').value.trim();
-  if (!message) return showCommitError('请填写提交说明');
+  if (!message) return showCommitError('请填写代码版本名称');
 
   const fileEntries = document.querySelectorAll('[id^="commit-file-"]');
   const files = [];
   for (const entry of fileEntries) {
     const idx = entry.id.replace('commit-file-', '');
-    const pathEl = document.getElementById('cf-path-' + idx);
+    const pathSpan = entry.querySelector('.cf-path-text');
     const contentEl = document.getElementById('cf-content-' + idx);
-    if (pathEl && contentEl && pathEl.value.trim()) {
-      files.push({ path: pathEl.value.trim(), content: contentEl.value });
+    const path = pathSpan ? pathSpan.textContent.trim() : '';
+    if (path && contentEl) {
+      files.push({ path, content: contentEl.value });
     }
   }
   if (!files.length) return showCommitError('请至少添加一个文件');
@@ -965,7 +1033,11 @@ async function submitCommit() {
   btn.disabled = true;
   btn.innerHTML = '<span class="material-symbols-outlined text-base align-middle mr-1">hourglass_top</span> 提交中...';
 
-  const res = await api('POST', '/api/repos/' + currentOrderId + '/commit', { message, files });
+  const description = document.getElementById('commit-description').value.trim();
+  const payload = { message, files };
+  if (description) payload.description = description;
+
+  const res = await api('POST', '/api/repos/' + currentOrderId + '/commit', payload);
   btn.disabled = false;
   btn.innerHTML = origText;
   if (!res.success) return showCommitError(res.error || '提交失败');
@@ -1008,7 +1080,8 @@ function renderCommits() {
         <span class="text-sm font-bold text-primary font-mono">${esc(c.ref)}</span>
         <button class="text-[10px] text-on-surface-variant hover:text-primary px-2 py-0.5 rounded-full hover:bg-primary/5 transition-all" onclick="event.stopPropagation();showRollbackConfirm('${c.ref}')">⏪ 回退</button>
       </div>
-      <p class="text-sm text-on-surface mb-2">${esc(c.message)}</p>
+      <p class="text-sm text-on-surface mb-1">${esc(c.message)}</p>
+      ${c.description ? `<p class="text-xs text-outline mb-1 italic">${esc(c.description)}</p>` : ''}
       <div class="flex items-center gap-3 text-[10px] text-outline">
         <span>${esc(c.authorName)}</span>
         <span>${c.fileCount} 个文件</span>

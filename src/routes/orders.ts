@@ -430,7 +430,12 @@ orderRoutes.put('/:id/stages/:stage', (req: Request, res: Response) => {
       return;
     }
 
-    db.updateStage(order.id, stageName, { content, status: 'in_progress' });
+    // 如果已完成则保留完成状态，否则标记为进行中
+    const updateData: any = { content };
+    if (stage.status !== 'completed') {
+      updateData.status = 'in_progress';
+    }
+    db.updateStage(order.id, stageName, updateData);
 
     res.json({ success: true } as ApiResponse);
   } catch (err: any) {

@@ -93,7 +93,8 @@ GET /api/repos/:orderId/file?path=src/index.ts&ref=v3
 ### 5. 提交代码（创建版本快照）
 POST /api/repos/:orderId/commit
 请求体: {
-  message: "提交说明",
+  message: "代码版本名称",
+  description: "版本描述（选填）",
   files: [
     { path: "src/index.ts", content: "文件内容" },
     { path: "logo.png", content: "base64:base64编码的内容" }
@@ -268,7 +269,7 @@ repoRoutes.post('/:orderId/commit', (req: Request, res: Response) => {
       return;
     }
 
-    const { message, files } = req.body as CommitRequest;
+    const { message, description, files } = req.body as CommitRequest;
     if (!message || !files || !files.length) {
       res.status(400).json({ success: false, error: '请填写提交说明并至少上传一个文件' } as ApiResponse);
       return;
@@ -283,6 +284,7 @@ repoRoutes.post('/:orderId/commit', (req: Request, res: Response) => {
       id: commitId,
       repoId: repo.id,
       message,
+      description,
       parentId,
     });
 
@@ -309,6 +311,7 @@ repoRoutes.post('/:orderId/commit', (req: Request, res: Response) => {
       ref: commit.ref,
       id: commit.id,
       message: commit.message,
+      description: commit.description,
       branch: repo.defaultBranch,
       parentRef: commit.parentId ? db.getCommit(commit.parentId)?.ref || null : null,
       authorId: user.id,
@@ -354,6 +357,7 @@ repoRoutes.get('/:orderId/commits', (req: Request, res: Response) => {
           ref: c.ref,
           id: c.id,
           message: c.message,
+          description: c.description,
           branch: branchName || repo.defaultBranch,
           parentRef: c.parentId ? db.getCommit(c.parentId)?.ref || null : null,
           authorId: user.id,
