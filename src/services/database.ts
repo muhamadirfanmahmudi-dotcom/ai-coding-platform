@@ -134,6 +134,18 @@ class Database {
       )
     `);
 
+    this.db.run(`
+      CREATE TABLE IF NOT EXISTS chat_messages (
+        id TEXT PRIMARY KEY,
+        order_id TEXT NOT NULL,
+        sender_id TEXT NOT NULL,
+        content TEXT NOT NULL,
+        created_at TEXT DEFAULT (datetime('now')),
+        FOREIGN KEY (order_id) REFERENCES orders(id),
+        FOREIGN KEY (sender_id) REFERENCES users(id)
+      )
+    `);
+
     // Add description column if not exists (migration for existing DBs)
     try {
       this.db.run(`ALTER TABLE code_commits ADD COLUMN description TEXT DEFAULT ''`);
@@ -171,6 +183,26 @@ class Database {
         console.log('[DB] Added users.role');
       }
     }
+
+    // Migrate: add avatar column to users if missing
+    try {
+      const avatarCols = this.db.exec(`PRAGMA table_info(users)`);
+      if (avatarCols.length > 0) {
+        const colNames2 = avatarCols[0].values.map((v: any) => v[1]);
+        if (!colNames2.includes('avatar')) {
+          this.db.run(`ALTER TABLE users ADD COLUMN avatar TEXT DEFAULT NULL`);
+          console.log('[DB] Added users.avatar');
+        }
+      }
+    } catch {} // column already exists
+
+    // Migrate: fix existing user roles based on order assignments
+    this.db.run(`
+      UPDATE users SET role = 'developer'
+      WHERE role = 'buyer' AND id IN (
+        SELECT DISTINCT developer_id FROM orders WHERE developer_id IS NOT NULL
+      )
+    `);
 
     this.save();
     console.log('[DB] Migration completed');
@@ -226,6 +258,35 @@ class Database {
       [sid, id]
     );
     this.save();
+  }
+
+  listDevelopers() {
+    // Include users with role='developer' OR who have appeared as developer_id in orders
+    const stmt = this.db.prepare(`
+      SELECT DISTINCT u.* FROM users u
+      LEFT JOIN orders o ON o.developer_id = u.id
+      WHERE u.role = 'developer' OR o.developer_id IS NOT NULL
+      ORDER BY u.created_at DESC
+    `);
+    const users: any[] = [];
+    while (stmt.step()) {
+      users.push(rowToUser(stmt.getAsObject()));
+    }
+    stmt.free();
+    return users;
+  }
+
+  updateUserProfile(id: string, data: { name?: string; avatar?: string | null }) {
+    const setClauses: string[] = [];
+    const params: any[] = [];
+    if (data.name !== undefined) { setClauses.push('name = ?'); params.push(data.name); }
+    if (data.avatar !== undefined) { setClauses.push('avatar = ?'); params.push(data.avatar); }
+    if (setClauses.length === 0) return null;
+    setClauses.push(`updated_at = datetime('now')`);
+    params.push(id);
+    this.db.run(`UPDATE users SET ${setClauses.join(', ')} WHERE id = ?`, params);
+    this.save();
+    return this.getUserById(id)!;
   }
 
   // ═══════════════════════════════════════════════════
@@ -726,6 +787,44 @@ class Database {
 
     return changes;
   }
+
+  // ═══════════════════════════════════════════════════════════
+  //  Chat Methods
+  // ═══════════════════════════════════════════════════════════
+
+  sendMessage(params: { id: string; orderId: string; senderId: string; content: string }) {
+    this.db.run(
+      `INSERT INTO chat_messages (id, order_id, sender_id, content) VALUES (?, ?, ?, ?)`,
+      [params.id, params.orderId, params.senderId, params.content]
+    );
+    this.save();
+    return this.getMessageById(params.id)!;
+  }
+
+  getMessageById(id: string) {
+    const stmt = this.db.prepare(`SELECT * FROM chat_messages WHERE id = ?`);
+    stmt.bind([id]);
+    if (stmt.step()) {
+      const row = rowToChatMessage(stmt.getAsObject());
+      stmt.free();
+      return row;
+    }
+    stmt.free();
+    return null;
+  }
+
+  getChatMessages(orderId: string, limit = 100) {
+    const stmt = this.db.prepare(
+      `SELECT * FROM chat_messages WHERE order_id = ? ORDER BY created_at ASC LIMIT ?`
+    );
+    stmt.bind([orderId, limit]);
+    const items: any[] = [];
+    while (stmt.step()) {
+      items.push(rowToChatMessage(stmt.getAsObject()));
+    }
+    stmt.free();
+    return items;
+  }
 }
 
 // ─── Row Mappers ──────────────────────────────────────
@@ -738,6 +837,7 @@ function rowToUser(row: any) {
     password: row.password,
     role: row.role,
     sid: row.sid,
+    avatar: row.avatar || null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -781,6 +881,18 @@ function rowToStage(row: any) {
     content: row.content,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+  };
+}
+
+// ─── Chat Row Mapper ─────────────────────────────────
+
+function rowToChatMessage(row: any) {
+  return {
+    id: row.id,
+    orderId: row.order_id,
+    senderId: row.sender_id,
+    content: row.content,
+    createdAt: row.created_at,
   };
 }
 

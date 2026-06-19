@@ -281,18 +281,54 @@ tailwind.config = {
           <div id="repo-commits"></div>
         </div>
       </div>
+
+      <!-- ══ Page: 在线对话 ══ -->
+      <div id="detail-page-chat" style="display:none" class="space-y-4">
+        <div onclick="showDetailPage('menu')" class="flex items-center gap-1.5 text-on-surface-variant text-sm cursor-pointer hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined text-base">arrow_back</span>
+          <span>返回</span>
+        </div>
+        <div class="glass-panel rounded-lg overflow-hidden shadow-[0_16px_32px_-12px_rgba(30,41,59,0.08)] flex flex-col" style="height:calc(100vh - 220px)">
+          <!-- Chat header -->
+          <div class="px-5 py-3 border-b border-outline-variant/20 flex items-center gap-2 bg-white/50">
+            <span class="material-symbols-outlined text-primary text-lg">forum</span>
+            <span class="text-sm font-semibold text-on-surface">在线对话</span>
+          </div>
+          <!-- Messages area -->
+          <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-surface-container-low/30">
+            <div class="text-center py-8 text-sm text-outline">
+              <span class="material-symbols-outlined text-3xl text-outline-variant mb-2 block">chat</span>
+              加载中...
+            </div>
+          </div>
+          <!-- Input area -->
+          <div class="px-4 py-3 border-t border-outline-variant/20 bg-white/50 flex items-center gap-3">
+            <input id="chat-input" type="text" placeholder="输入消息..." class="flex-1 px-4 py-2.5 bg-white/70 border border-white/60 rounded-full text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" onkeydown="if(event.key==='Enter')sendChatMessage()"/>
+            <button onclick="sendChatMessage()" class="shrink-0 w-10 h-10 bg-primary text-on-primary rounded-full flex items-center justify-center active:scale-90 transition-all hover:shadow-lg hover:shadow-primary/20">
+              <span class="material-symbols-outlined text-base">send</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ─── Profile View ─── -->
     <div id="profile-view" style="display:none" class="anim-slide-up space-y-5">
       <div class="glass-panel rounded-lg p-8 shadow-[0_16px_32px_-12px_rgba(30,41,59,0.08)]">
         <div class="flex items-center gap-4 mb-6">
-          <div class="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center">
-            <span class="material-symbols-outlined text-3xl text-on-primary-container">person</span>
+          <div id="profile-avatar-wrap" class="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center overflow-hidden shrink-0 cursor-pointer hover:opacity-80 transition-all" onclick="document.getElementById('avatar-picker').click()">
+            <span id="profile-avatar-placeholder" class="material-symbols-outlined text-3xl text-on-primary-container">person</span>
+            <img id="profile-avatar-img" class="w-full h-full object-cover hidden" alt="头像"/>
           </div>
-          <div>
-            <h2 id="profile-name" class="font-display text-xl font-bold text-on-surface"></h2>
+          <div class="flex-1 min-w-0">
+            <h2 id="profile-name" class="font-display text-xl font-bold text-on-surface truncate"></h2>
             <span id="profile-role" class="text-xs font-mono font-medium px-2.5 py-0.5 rounded-full mt-1 inline-block"></span>
+            <div class="mt-2 flex gap-2">
+              <button onclick="openProfileEdit()" class="text-xs px-3 py-1.5 bg-surface-container text-on-surface rounded-full font-medium active:scale-95 transition-all flex items-center gap-1">
+                <span class="material-symbols-outlined text-xs">edit</span>
+                编辑资料
+              </button>
+            </div>
           </div>
         </div>
         <div class="border-t border-outline-variant/20 pt-6 mt-2">
@@ -325,11 +361,72 @@ tailwind.config = {
     </div>
   </div>
 
+  <!-- Profile Edit Modal -->
+  <div id="profile-edit-modal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4" style="display:none" onclick="if(event.target===this)closeProfileEdit()">
+    <div class="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col anim-slide-up" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-outline-variant/20">
+        <h3 class="font-display text-lg font-bold text-on-surface">编辑资料</h3>
+        <button onclick="closeProfileEdit()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-all">
+          <span class="material-symbols-outlined text-sm">close</span>
+        </button>
+      </div>
+      <div class="p-5 space-y-5">
+        <!-- 头像 -->
+        <div>
+          <label class="block text-xs font-medium text-on-surface-variant mb-2 font-mono uppercase tracking-wider">头像</label>
+          <input id="avatar-picker" type="file" accept="image/*" style="display:none" onchange="onAvatarFilePicked(this)"/>
+          <div class="flex items-center gap-4">
+            <div id="edit-avatar-preview" class="w-20 h-20 rounded-full bg-primary-container flex items-center justify-center overflow-hidden shrink-0 cursor-pointer hover:opacity-80 transition-all border-2 border-dashed border-outline-variant/50" onclick="document.getElementById('avatar-picker').click()">
+              <span id="edit-avatar-placeholder" class="material-symbols-outlined text-3xl text-on-primary-container">add_a_photo</span>
+              <canvas id="edit-avatar-canvas" class="w-full h-full object-cover hidden"></canvas>
+            </div>
+            <div class="text-xs text-outline leading-relaxed">
+              点击上传头像，支持 JPG/PNG<br/>
+              建议使用正方形图片<br/>
+              上传后可框选裁剪
+            </div>
+          </div>
+        </div>
+        <!-- 用户名 -->
+        <div>
+          <label class="block text-xs font-medium text-on-surface-variant mb-1.5 font-mono uppercase tracking-wider">用户名</label>
+          <input id="edit-name-input" type="text" class="w-full px-4 py-3 bg-white/50 border border-white/60 rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"/>
+        </div>
+      </div>
+      <!-- 裁剪区域（选择图片后显示） -->
+      <div id="crop-area" class="px-5 pb-2 hidden">
+        <div class="bg-surface-container-low rounded-xl p-4">
+          <div class="text-xs font-medium text-on-surface-variant mb-3">拖拽调整裁剪区域</div>
+          <div id="crop-container" class="relative mx-auto overflow-hidden select-none" style="max-width:300px;max-height:300px;touch-action:none">
+            <img id="crop-image" class="w-full h-full object-contain" alt="裁剪预览"/>
+            <div id="crop-overlay" class="absolute inset-0">
+              <!-- 遮罩层 -->
+              <div class="absolute inset-0 bg-black/40"></div>
+              <!-- 选择框 -->
+              <div id="crop-box" class="absolute border-2 border-white shadow-[0_0_0_9999px_rgba(0,0,0,0.4)] cursor-move" style="width:200px;height:200px;top:50px;left:50px">
+                <!-- 拖动手柄（4个角） -->
+                <div class="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-primary rounded-sm cursor-nw-resize"></div>
+                <div class="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-primary rounded-sm cursor-ne-resize"></div>
+                <div class="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-primary rounded-sm cursor-sw-resize"></div>
+                <div class="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-primary rounded-sm cursor-se-resize"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="px-5 py-4 border-t border-outline-variant/20 flex gap-3">
+        <button onclick="closeProfileEdit()" class="flex-1 py-2.5 rounded-full text-sm font-medium text-on-surface-variant glass-panel active:scale-95 transition-all">取消</button>
+        <button onclick="saveProfile()" class="flex-1 py-2.5 bg-primary text-on-primary rounded-full text-sm font-semibold active:scale-95 transition-all hover:shadow-lg hover:shadow-primary/20">保存</button>
+      </div>
+      <div id="profile-edit-error" class="text-xs text-center min-h-5 px-5 pb-2"></div>
+    </div>
+  </div>
+
   <!-- BottomNavBar -->
   <nav class="fixed bottom-0 w-full z-50 bg-white/70 backdrop-blur-[40px] border-t border-white/50 shadow-[0_-8px_24px_-12px_rgba(30,41,59,0.04)] flex justify-around items-center px-4 py-1 max-w-3xl mx-auto">
     <button class="nav-btn flex flex-col items-center justify-center text-on-surface-variant p-1.5 hover:bg-secondary-container/20 rounded-xl transition-all active:scale-90" onclick="switchTab('hall', this)" id="nav-hall">
-      <span class="material-symbols-outlined text-xl">storefront</span>
-      <span class="nav-label text-[10px] mt-0.5">抢单大厅</span>
+      <span class="material-symbols-outlined text-xl" id="nav-hall-icon">storefront</span>
+      <span class="nav-label text-[10px] mt-0.5" id="nav-hall-label">抢单大厅</span>
     </button>
     <button class="nav-btn flex flex-col items-center justify-center text-on-surface-variant p-1.5 hover:bg-secondary-container/20 rounded-xl transition-all active:scale-90" onclick="switchTab('mine', this)" id="nav-mine" style="display:none">
       <span class="material-symbols-outlined text-xl">folder_open</span>
@@ -353,6 +450,9 @@ let currentTab = 'hall';
 let currentOrderId = null;
 let currentOrder = null;
 let selectedRole = 'buyer';
+let chatUnread = false;
+let lastSeenChatTime = null;
+let chatBgPollTimer = null;
 
 async function api(method, path, body) {
   const headers = { 'Content-Type': 'application/json' };
@@ -460,14 +560,20 @@ function renderNav() {
   const createBtn = document.getElementById('btn-create');
   const navMine = document.getElementById('nav-mine');
   const navDev = document.getElementById('nav-developer');
+  const hallLabel = document.getElementById('nav-hall-label');
+  const hallIcon = document.getElementById('nav-hall-icon');
   if (currentUser.role === 'developer') {
     createBtn.style.display = 'none';
     navMine.style.display = 'none';
     navDev.style.display = '';
+    if (hallLabel) hallLabel.textContent = '抢单大厅';
+    if (hallIcon) hallIcon.textContent = 'storefront';
   } else {
     createBtn.style.display = '';
     navMine.style.display = '';
     navDev.style.display = 'none';
+    if (hallLabel) hallLabel.textContent = '人才推荐';
+    if (hallIcon) hallIcon.textContent = 'groups';
   }
   // 高亮当前的底部导航按钮
   const tabMap = { hall: 'nav-hall', mine: 'nav-mine', developer: 'nav-developer' };
@@ -483,6 +589,7 @@ function renderNav() {
 }
 
 function showMain() {
+  stopChatBgPoll();
   document.getElementById('main-view').style.display = 'block';
   document.getElementById('create-view').style.display = 'none';
   document.getElementById('detail-view').style.display = 'none';
@@ -517,6 +624,7 @@ function showDetail(orderId) {
 }
 
 function switchTab(tab, el) {
+  stopChatBgPoll();
   currentTab = tab;
   // 切换到主视图（从详情/个人信息页返回）
   document.getElementById('main-view').style.display = 'block';
@@ -534,17 +642,36 @@ function switchTab(tab, el) {
     const label = el.querySelector('.nav-label');
     if (label) label.classList.add('font-medium');
   }
-  const titles = { hall: '抢单大厅', mine: '我的订单', developer: '我接的单' };
+  const isBuyer = currentUser.role === 'buyer';
+  const titles = { hall: isBuyer ? '人才推荐' : '抢单大厅', mine: '我的订单', developer: '我接的单' };
   document.getElementById('view-title').textContent = titles[tab] || '';
   loadOrders();
 }
 
 function showProfile() {
+  stopChatBgPoll();
   document.getElementById('main-view').style.display = 'none';
   document.getElementById('create-view').style.display = 'none';
   document.getElementById('detail-view').style.display = 'none';
   document.getElementById('profile-view').style.display = 'block';
   document.getElementById('view-title').textContent = '个人信息';
+  // 加载最新用户信息（含头像）
+  api('GET', '/api/users/me').then(res => {
+    if (res.success && res.data) {
+      currentUser.name = res.data.name;
+      currentUser.avatar = res.data.avatar;
+      localStorage.setItem('userName', res.data.name);
+      if (res.data.avatar) localStorage.setItem('userAvatar', res.data.avatar);
+      else localStorage.removeItem('userAvatar');
+      renderProfileView();
+    } else {
+      // 降级：使用本地缓存
+      renderProfileView();
+    }
+  }).catch(() => renderProfileView());
+}
+
+function renderProfileView() {
   document.getElementById('profile-name').textContent = currentUser.name;
   const roleEl = document.getElementById('profile-role');
   if (currentUser.role === 'developer') {
@@ -554,6 +681,18 @@ function showProfile() {
     roleEl.textContent = '买家';
     roleEl.className = 'text-xs font-mono font-medium px-2.5 py-0.5 rounded-full bg-primary/10 text-primary';
   }
+  // 显示头像
+  const avatar = currentUser.avatar || localStorage.getItem('userAvatar');
+  const placeholder = document.getElementById('profile-avatar-placeholder');
+  const img = document.getElementById('profile-avatar-img');
+  if (avatar) {
+    placeholder.style.display = 'none';
+    img.classList.remove('hidden');
+    img.src = avatar;
+  } else {
+    placeholder.style.display = '';
+    img.classList.add('hidden');
+  }
   // 取消所有底部导航的高亮
   document.querySelectorAll('.nav-btn').forEach(b => {
     b.classList.remove('text-primary');
@@ -562,10 +701,345 @@ function showProfile() {
   });
 }
 
+// ─── 编辑资料（头像裁剪 + 用户名修改）────────────────────
+
+let cropState = { imgW: 0, imgH: 0, displayW: 0, displayH: 0, offsetX: 0, offsetY: 0 };
+
+function openProfileEdit() {
+  document.getElementById('profile-edit-modal').style.display = 'flex';
+  document.getElementById('edit-name-input').value = currentUser.name || '';
+  document.getElementById('crop-area').classList.add('hidden');
+  document.getElementById('profile-edit-error').textContent = '';
+  // 重置头像预览
+  const placeholder = document.getElementById('edit-avatar-placeholder');
+  const canvas = document.getElementById('edit-avatar-canvas');
+  placeholder.style.display = '';
+  canvas.classList.add('hidden');
+  // 如果有头像，在编辑预览中显示
+  const avatar = currentUser.avatar || localStorage.getItem('userAvatar');
+  if (avatar) {
+    const img = new Image();
+    img.onload = () => {
+      canvas.classList.remove('hidden');
+      placeholder.style.display = 'none';
+      const ctx = canvas.getContext('2d');
+      canvas.width = 80; canvas.height = 80;
+      ctx.drawImage(img, 0, 0, 80, 80);
+    };
+    img.src = avatar;
+  }
+}
+
+function closeProfileEdit() {
+  document.getElementById('profile-edit-modal').style.display = 'none';
+  // 清除裁剪相关状态
+  document.getElementById('crop-area').classList.add('hidden');
+  document.getElementById('avatar-picker').value = '';
+}
+
+function onAvatarFilePicked(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const dataUrl = e.target.result;
+    initCrop(dataUrl);
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function initCrop(dataUrl) {
+  const img = new Image();
+  img.onload = function() {
+    const natW = this.naturalWidth;
+    const natH = this.naturalHeight;
+    // 计算显示尺寸（在容器内）
+    const container = document.getElementById('crop-container');
+    const maxW = Math.min(300, container.clientWidth || 300);
+    const maxH = Math.min(300, container.clientHeight || 300);
+    const scale = Math.min(maxW / natW, maxH / natH, 1);
+    const dispW = Math.round(natW * scale);
+    const dispH = Math.round(natH * scale);
+    const offsetX = Math.round((maxW - dispW) / 2);
+    const offsetY = Math.round((maxH - dispH) / 2);
+
+    // 设置图片显示
+    const imgEl = document.getElementById('crop-image');
+    imgEl.src = dataUrl;
+    imgEl.style.width = dispW + 'px';
+    imgEl.style.height = dispH + 'px';
+    imgEl.style.marginLeft = offsetX + 'px';
+    imgEl.style.marginTop = offsetY + 'px';
+    container.style.width = maxW + 'px';
+    container.style.height = maxH + 'px';
+
+    cropState = { imgW: natW, imgH: natH, displayW: dispW, displayH: dispH, offsetX, offsetY };
+
+    // 初始化裁剪框为图片中央的正方形
+    const boxSize = Math.min(dispW, dispH, 200);
+    const box = document.getElementById('crop-box');
+    box.style.width = boxSize + 'px';
+    box.style.height = boxSize + 'px';
+    box.style.top = offsetY + Math.round((dispH - boxSize) / 2) + 'px';
+    box.style.left = offsetX + Math.round((dispW - boxSize) / 2) + 'px';
+
+    // 显示裁剪区域
+    document.getElementById('crop-area').classList.remove('hidden');
+
+    // 设置预览缩略图
+    updateCropPreview();
+  };
+  img.src = dataUrl;
+}
+
+// ─── 裁剪框拖拽 ────────────────────────────────────────
+
+let cropDragging = null;
+
+function setupCropDrag() {
+  const box = document.getElementById('crop-box');
+  const container = document.getElementById('crop-container');
+
+  // 鼠标事件
+  box.addEventListener('mousedown', startDrag);
+  document.addEventListener('mousemove', onDrag);
+  document.addEventListener('mouseup', endDrag);
+  // 触摸事件
+  box.addEventListener('touchstart', startDragTouch, { passive: false });
+  document.addEventListener('touchmove', onDragTouch, { passive: false });
+  document.addEventListener('touchend', endDrag, { passive: false });
+
+  // 手柄拖拽
+  box.querySelectorAll('[class*="cursor-"]').forEach(handle => {
+    handle.addEventListener('mousedown', function(e) {
+      e.stopPropagation();
+      const dir = this.classList.contains('cursor-nw-resize') ? 'nw' :
+                  this.classList.contains('cursor-ne-resize') ? 'ne' :
+                  this.classList.contains('cursor-sw-resize') ? 'sw' : 'se';
+      startResize(e, dir);
+    });
+    handle.addEventListener('touchstart', function(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      const dir = this.classList.contains('cursor-nw-resize') ? 'nw' :
+                  this.classList.contains('cursor-ne-resize') ? 'ne' :
+                  this.classList.contains('cursor-sw-resize') ? 'sw' : 'se';
+      startResize(e, dir);
+    }, { passive: false });
+  });
+}
+
+function startDrag(e) {
+  cropDragging = { type: 'move', startX: e.clientX, startY: e.clientY,
+    boxLeft: parseInt(document.getElementById('crop-box').style.left),
+    boxTop: parseInt(document.getElementById('crop-box').style.top) };
+  e.preventDefault();
+}
+
+function startDragTouch(e) {
+  const t = e.touches[0];
+  cropDragging = { type: 'move', startX: t.clientX, startY: t.clientY,
+    boxLeft: parseInt(document.getElementById('crop-box').style.left),
+    boxTop: parseInt(document.getElementById('crop-box').style.top) };
+  e.preventDefault();
+}
+
+function startResize(e, dir) {
+  const box = document.getElementById('crop-box');
+  cropDragging = { type: 'resize', dir, startX: e.clientX || e.touches[0].clientX,
+    startY: e.clientY || e.touches[0].clientY,
+    boxLeft: parseInt(box.style.left), boxTop: parseInt(box.style.top),
+    boxW: parseInt(box.style.width), boxH: parseInt(box.style.height) };
+  e.preventDefault();
+}
+
+function onDrag(e) {
+  if (!cropDragging) return;
+  if (cropDragging.type === 'move') moveBox(e.clientX, e.clientY);
+  else resizeBox(e.clientX, e.clientY);
+}
+
+function onDragTouch(e) {
+  if (!cropDragging) return;
+  const t = e.touches[0];
+  if (cropDragging.type === 'move') moveBox(t.clientX, t.clientY);
+  else resizeBox(t.clientX, t.clientY);
+  e.preventDefault();
+}
+
+function endDrag() {
+  if (!cropDragging) return;
+  cropDragging = null;
+}
+
+function moveBox(clientX, clientY) {
+  const container = document.getElementById('crop-container');
+  const box = document.getElementById('crop-box');
+  const cw = container.clientWidth, ch = container.clientHeight;
+  const bw = parseInt(box.style.width), bh = parseInt(box.style.height);
+  let left = cropDragging.boxLeft + (clientX - cropDragging.startX);
+  let top = cropDragging.boxTop + (clientY - cropDragging.startY);
+  left = Math.max(cropState.offsetX, Math.min(cw - bw - cropState.offsetX + (cw - cropState.displayW - cropState.offsetX), left));
+  top = Math.max(cropState.offsetY, Math.min(ch - bh - cropState.offsetY + (ch - cropState.displayH - cropState.offsetY), top));
+  box.style.left = left + 'px';
+  box.style.top = top + 'px';
+  updateCropPreview();
+}
+
+function resizeBox(clientX, clientY) {
+  const box = document.getElementById('crop-box');
+  const dx = clientX - cropDragging.startX;
+  const dy = clientY - cropDragging.startY;
+  let newLeft = cropDragging.boxLeft, newTop = cropDragging.boxTop;
+  let newW = cropDragging.boxW, newH = cropDragging.boxH;
+
+  const dir = cropDragging.dir;
+  if (dir.includes('e')) newW = Math.max(40, cropDragging.boxW + dx);
+  if (dir.includes('w')) { newW = Math.max(40, cropDragging.boxW - dx); newLeft = cropDragging.boxLeft + cropDragging.boxW - newW; }
+  if (dir.includes('s')) newH = Math.max(40, cropDragging.boxH + dy);
+  if (dir.includes('n')) { newH = Math.max(40, cropDragging.boxH - dy); newTop = cropDragging.boxTop + cropDragging.boxH - newH; }
+
+  // 保持正方形
+  const size = Math.max(newW, newH);
+  if (dir === 'nw' || dir === 'se') {
+    newW = size; newH = size;
+  } else if (dir === 'ne' || dir === 'sw') {
+    newW = size; newH = size;
+  } else {
+    newW = size; newH = size;
+  }
+
+  // 边界约束
+  const container = document.getElementById('crop-container');
+  const cw = container.clientWidth, ch = container.clientHeight;
+  if (newLeft + newW > cw) newLeft = cw - newW;
+  if (newTop + newH > ch) newTop = ch - newH;
+  newLeft = Math.max(cropState.offsetX, newLeft);
+  newTop = Math.max(cropState.offsetY, newTop);
+  newW = Math.min(newW, cw - newLeft - cropState.offsetX + (cw - cropState.displayW - cropState.offsetX));
+  newH = Math.min(newH, ch - newTop - cropState.offsetY + (ch - cropState.displayH - cropState.offsetY));
+
+  box.style.width = newW + 'px';
+  box.style.height = newH + 'px';
+  box.style.left = newLeft + 'px';
+  box.style.top = newTop + 'px';
+  updateCropPreview();
+}
+
+function updateCropPreview() {
+  const box = document.getElementById('crop-box');
+  const boxLeft = parseInt(box.style.left);
+  const boxTop = parseInt(box.style.top);
+  const boxSize = parseInt(box.style.width);
+  // 计算实际图片中的裁剪区域
+  const sx = Math.round((boxLeft - cropState.offsetX) / cropState.displayW * cropState.imgW);
+  const sy = Math.round((boxTop - cropState.offsetY) / cropState.displayH * cropState.imgH);
+  const sw = Math.round(boxSize / cropState.displayW * cropState.imgW);
+  const sh = Math.round(boxSize / cropState.displayH * cropState.imgH);
+  cropState.sx = sx; cropState.sy = sy; cropState.sw = sw; cropState.sh = sh;
+}
+
+async function saveProfile() {
+  const name = document.getElementById('edit-name-input').value.trim();
+  if (!name) return showProfileEditError('用户名不能为空');
+
+  let avatarDataUrl = null;
+  const canvas = document.getElementById('edit-avatar-canvas');
+  if (!canvas.classList.contains('hidden')) {
+    // 已上传新头像且裁剪完成 — 不需要额外操作，用已有信息
+  }
+
+  // 如果有裁剪中的图片，执行裁剪
+  const cropImg = document.getElementById('crop-image');
+  if (cropImg.src && !cropImg.classList.contains('hidden') && cropImg.src.startsWith('data:')) {
+    const offscreen = document.createElement('canvas');
+    offscreen.width = 200;
+    offscreen.height = 200;
+    const ctx = offscreen.getContext('2d');
+    const sx = cropState.sx || 0, sy = cropState.sy || 0;
+    const sw = cropState.sw || cropState.imgW, sh = cropState.sh || cropState.imgH;
+    ctx.drawImage(cropImg, sx, sy, sw, sh, 0, 0, 200, 200);
+    avatarDataUrl = offscreen.toDataURL('image/jpeg', 0.85);
+  }
+
+  // 如果没选新图片，保持原有头像不变（不传 avatar 字段）
+  const payload = { name };
+  if (avatarDataUrl) payload.avatar = avatarDataUrl;
+
+  const btn = document.querySelector('#profile-edit-modal .bg-primary');
+  const origText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '保存中...';
+
+  const res = await api('PUT', '/api/users/profile', payload);
+  btn.disabled = false;
+  btn.textContent = origText;
+
+  if (!res.success) return showProfileEditError(res.error || '保存失败');
+
+  // 更新本地状态
+  currentUser.name = res.data.name;
+  if (res.data.avatar) {
+    currentUser.avatar = res.data.avatar;
+    localStorage.setItem('userAvatar', res.data.avatar);
+  }
+  localStorage.setItem('userName', res.data.name);
+  document.getElementById('user-name').textContent = currentUser.name;
+  closeProfileEdit();
+  // 刷新个人页显示
+  renderProfileView();
+}
+
+function showProfileEditError(msg) {
+  const el = document.getElementById('profile-edit-error');
+  el.style.color = '#ba1a1a';
+  el.textContent = msg;
+}
+
+// 初始化裁剪拖拽事件
+setTimeout(setupCropDrag, 100);
+
 async function loadOrders() {
+  const list = document.getElementById('order-list');
+
+  // 买家在「人才推荐」tab 加载开发者列表，隐藏创建按钮
+  if (currentUser.role === 'buyer' && currentTab === 'hall') {
+    document.getElementById('btn-create').style.display = 'none';
+    const res = await api('GET', '/api/users/developers');
+    if (!res.success || !res.data || !res.data.length) {
+      list.innerHTML = `<div class="text-center py-16 text-on-surface-variant">
+        <span class="material-symbols-outlined text-5xl text-outline-variant mb-3 block">groups</span>
+        <p class="text-sm">暂无注册开发者</p>
+      </div>`;
+      return;
+    }
+    list.innerHTML = res.data.map(d => `
+      <div class="glass-panel p-5 rounded-lg active:scale-[0.98] transition-all hover:shadow-[0_8px_24px_-8px_rgba(30,41,59,0.12)]">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center overflow-hidden shrink-0">
+            ${d.avatar ? `<img src="${esc(d.avatar)}" alt="" class="w-full h-full object-cover"/>` : `<span class="material-symbols-outlined text-2xl text-secondary">code</span>`}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="font-semibold text-on-surface">${esc(d.name)}</div>
+            <div class="text-xs text-outline mt-0.5">注册时间：${formatTime(d.createdAt)}</div>
+          </div>
+          <div class="shrink-0">
+            <span class="text-xs font-mono font-medium px-2.5 py-1 rounded-full bg-secondary/10 text-secondary">开发者</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+    return;
+  }
+
+  // 买家在「我的订单」tab 恢复创建按钮
+  if (currentUser.role === 'buyer' && currentTab === 'mine') {
+    document.getElementById('btn-create').style.display = '';
+  }
+
   const paths = { hall: '/api/orders/hall', mine: '/api/orders/mine', developer: '/api/orders/developer' };
   const res = await api('GET', paths[currentTab]);
-  const list = document.getElementById('order-list');
   if (!res.success || !res.data.length) {
     const msgs = { hall: '大厅暂无订单', mine: '你还没有创建过订单', developer: '你还没有接过单' };
     const icons = { hall: 'inbox', mine: 'note_add', developer: 'code_off' };
@@ -642,6 +1116,8 @@ async function loadOrderDetail(orderId) {
   renderActionPanel(o);
   if (currentUser.role !== 'developer') loadBuyerProgress(o);
   loadRepoInfo(orderId);
+  // 如果有开发者被分配，启动聊天红点后台轮询
+  if (o.developerId) startChatBgPoll(orderId);
   showDetailPage('menu');
 }
 
@@ -650,17 +1126,20 @@ function renderDetailMenu(order) {
   const isDev = currentUser.role === 'developer';
   const hasFlow = isDev || (order.developerId && !isDev);
   const hasRepo = isDev && order.developerId === currentUser.id;
+  const hasChat = !!order.developerId; // Both sides can chat when a developer is assigned
 
   const items = [
     { key: 'info', label: '订单详情', icon: 'description', show: true },
     { key: 'flow', label: isDev ? '开发进度' : '开发进度', icon: isDev ? 'sync_alt' : 'progress_activity', show: hasFlow },
+    { key: 'chat', label: '在线对话', icon: 'forum', show: hasChat },
     { key: 'repo', label: '版本管理', icon: 'folder_open', show: hasRepo },
   ];
 
   menuEl.innerHTML = items.filter(i => i.show).map(item => `
     <div onclick="showDetailPage('${item.key}')" class="glass-panel p-4 rounded-lg cursor-pointer active:scale-[0.98] transition-all hover:shadow-[0_4px_16px_-8px_rgba(30,41,59,0.1)] flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+      <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center${item.key === 'chat' ? ' relative' : ''}">
         <span class="material-symbols-outlined text-primary">${item.icon}</span>
+        ${item.key === 'chat' ? '<span id="chat-unread-badge" class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" style="display:none"></span>' : ''}
       </div>
       <div>
         <div class="font-semibold text-on-surface text-sm">${item.label}</div>
@@ -672,10 +1151,25 @@ function renderDetailMenu(order) {
 
 function showDetailPage(page) {
   // 所有 detail-page-* 隐藏
-  const pages = ['detail-page-menu', 'detail-page-info', 'detail-page-flow', 'detail-page-repo', 'detail-page-repo-commit', 'detail-page-repo-commits'];
+  const pages = ['detail-page-menu', 'detail-page-info', 'detail-page-flow', 'detail-page-repo', 'detail-page-repo-commit', 'detail-page-repo-commits', 'detail-page-chat'];
   pages.forEach(p => { const el = document.getElementById(p); if (el) el.style.display = 'none'; });
   const target = document.getElementById('detail-page-' + page);
   if (target) target.style.display = '';
+  // Stop chat polling when leaving chat
+  if (page !== 'chat' && chatPollTimer) {
+    clearInterval(chatPollTimer);
+    chatPollTimer = null;
+  }
+  // 进入聊天页面：标记已读，停止后台轮询
+  if (page === 'chat' && currentOrderId) {
+    stopChatBgPoll();
+    markChatRead();
+    loadChat(currentOrderId);
+  }
+  // 不在聊天页面时启动后台轮询（检测新消息红点）
+  if (page !== 'chat' && currentOrderId && currentOrder?.developerId) {
+    startChatBgPoll(currentOrderId);
+  }
   // 进入提交代码页面时渲染表单
   if (page === 'repo-commit') renderCommitForm();
   // 进入版本历史页面时加载数据
@@ -1356,6 +1850,138 @@ async function showFileContent(path, ref) {
     document.getElementById('file-viewer-content').textContent = '// 无法加载文件内容';
     document.getElementById('file-viewer-lines').textContent = '1';
   }
+}
+
+// ─── 在线对话 ─────────────────────────────────────────
+
+let chatPollTimer = null;
+
+async function loadChat(orderId) {
+  // Stop any existing poll
+  if (chatPollTimer) { clearInterval(chatPollTimer); chatPollTimer = null; }
+  await fetchChatMessages(orderId);
+  // Poll for new messages every 3 seconds
+  chatPollTimer = setInterval(() => fetchChatMessages(orderId, true), 3000);
+}
+
+async function fetchChatMessages(orderId, isPoll) {
+  const res = await api('GET', '/api/chat/' + orderId);
+  if (!res.success) {
+    if (!isPoll) {
+      document.getElementById('chat-messages').innerHTML = '<div class="text-center py-8 text-sm text-outline">无法加载聊天记录</div>';
+    }
+    return;
+  }
+  renderChatMessages(res.data || []);
+}
+
+function renderAvatar(avatar, name, color) {
+  if (avatar) {
+    return `<div class="w-7 h-7 rounded-full overflow-hidden shrink-0 bg-surface-container">
+      <img src="${esc(avatar)}" alt="" class="w-full h-full object-cover" onerror="this.style.display='none'"/>
+    </div>`;
+  }
+  return `<div class="w-7 h-7 rounded-full bg-${color}/10 flex items-center justify-center shrink-0">
+    <span class="material-symbols-outlined text-xs text-${color}">person</span>
+  </div>`;
+}
+
+function renderChatMessages(messages) {
+  const el = document.getElementById('chat-messages');
+  if (!messages.length) {
+    el.innerHTML = '<div class="text-center py-8 text-sm text-outline">暂无消息，开始对话吧</div>';
+    return;
+  }
+
+  // Check if we were already at the bottom before updating
+  const wasAtBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 50;
+
+  el.innerHTML = messages.map(m => {
+    const isMe = m.senderId === currentUser?.id;
+    const time = formatChatTime(m.createdAt);
+    return `
+      <div class="flex ${isMe ? 'justify-end' : 'justify-start'} items-end gap-2 chat-msg">
+        ${!isMe ? renderAvatar(m.senderAvatar, m.senderName, 'secondary') : ''}
+        <div class="max-w-[75%]">
+          <div class="text-[10px] text-outline mb-0.5 ${isMe ? 'text-right' : ''}">${isMe ? '' : esc(m.senderName)}</div>
+          <div class="${isMe ? 'bg-primary text-on-primary rounded-2xl rounded-br-md' : 'bg-surface-container text-on-surface rounded-2xl rounded-bl-md'} px-3.5 py-2 text-sm leading-relaxed shadow-sm">
+            ${esc(m.content)}
+          </div>
+          <div class="text-[10px] text-outline/60 mt-0.5 ${isMe ? 'text-right' : ''}">${time}</div>
+        </div>
+        ${isMe ? renderAvatar(m.senderAvatar, m.senderName, 'primary') : ''}
+      </div>
+    `;
+  }).join('');
+
+  // Scroll to bottom if was already at bottom or first load
+  if (wasAtBottom) {
+    el.scrollTop = el.scrollHeight;
+  }
+}
+
+async function sendChatMessage() {
+  const input = document.getElementById('chat-input');
+  const content = input.value.trim();
+  if (!content) return;
+  input.value = '';
+  const res = await api('POST', '/api/chat/' + currentOrderId, { content });
+  if (!res.success) {
+    // Refetch to show any messages that may have been missed
+    fetchChatMessages(currentOrderId);
+    return alert('发送失败: ' + (res.error || '未知错误'));
+  }
+  // Immediately fetch to show the new message
+  await fetchChatMessages(currentOrderId);
+  // Focus back on input
+  input.focus();
+}
+
+function formatChatTime(t) {
+  if (!t) return '';
+  const d = new Date(t + 'Z');
+  return d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+}
+
+// ─── 红点未读检测 ─────────────────────────────────────
+
+function startChatBgPoll(orderId) {
+  stopChatBgPoll();
+  // 立即检查一次
+  checkChatUnread(orderId);
+  // 每 10 秒轮询
+  chatBgPollTimer = setInterval(() => checkChatUnread(orderId), 10000);
+}
+
+function stopChatBgPoll() {
+  if (chatBgPollTimer) {
+    clearInterval(chatBgPollTimer);
+    chatBgPollTimer = null;
+  }
+}
+
+async function checkChatUnread(orderId) {
+  if (!orderId) return;
+  // 如果正在聊天页面中，不检测（聊天页面自己的轮询会处理）
+  const chatPage = document.getElementById('detail-page-chat');
+  if (chatPage && chatPage.style.display !== 'none') return;
+  const res = await api('GET', '/api/chat/' + orderId);
+  if (!res.success || !res.data || !res.data.length) return;
+  const lastMsg = res.data[res.data.length - 1];
+  if (lastSeenChatTime && lastMsg.createdAt <= lastSeenChatTime) return;
+  chatUnread = true;
+  updateChatBadge();
+}
+
+function markChatRead() {
+  chatUnread = false;
+  lastSeenChatTime = new Date().toISOString().replace('T', ' ').slice(0, 19);
+  updateChatBadge();
+}
+
+function updateChatBadge() {
+  const badge = document.getElementById('chat-unread-badge');
+  if (badge) badge.style.display = chatUnread ? '' : 'none';
 }
 
 (function init() {

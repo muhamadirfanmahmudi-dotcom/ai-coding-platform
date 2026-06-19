@@ -39,6 +39,12 @@ export interface UserResponse {
   email: string;
   role: string;
   sid: string;
+  avatar?: string | null;
+}
+
+export interface ProfileUpdateRequest {
+  name?: string;
+  avatar?: string | null;
 }
 
 export interface OrderResponse {
@@ -196,4 +202,22 @@ export interface DiffResponse {
 /** LLM API 规范响应 */
 export interface ApiSpecResponse {
   spec: string;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Chat Types
+// ═══════════════════════════════════════════════════════════
+
+export interface ChatMessageResponse {
+  id: string;
+  orderId: string;
+  senderId: string;
+  senderName: string;
+  senderAvatar?: string | null;
+  content: string;
+  createdAt: string;
+}
+
+export interface SendChatRequest {
+  content: string;
 }

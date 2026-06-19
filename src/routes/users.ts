@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { db } from '../services/database';
 import { v4 as uuid } from 'uuid';
-import type { RegisterRequest, LoginRequest, ApiResponse, UserResponse } from '../models';
+import type { RegisterRequest, LoginRequest, ApiResponse, UserResponse, ProfileUpdateRequest } from '../models';
 
 export const userRoutes = Router();
 
@@ -40,7 +40,7 @@ export function getUserFromSid(req: Request): { id: string; name: string; role: 
 
 userRoutes.post('/register', (req: Request, res: Response) => {
   try {
-    const { name, email, password } = req.body as RegisterRequest;
+    const { name, email, password, role } = req.body as RegisterRequest;
 
     if (!name || !email || !password) {
       res.status(400).json({ success: false, error: '请填写完整信息' } as ApiResponse);
@@ -54,7 +54,7 @@ userRoutes.post('/register', (req: Request, res: Response) => {
     }
 
     const id = uuid();
-    const user = db.createUser({ id, name, email, password });
+    const user = db.createUser({ id, name, email, password, role: role || 'buyer' });
 
     const response: ApiResponse<UserResponse> = {
       success: true,
@@ -92,7 +92,7 @@ userRoutes.post('/login', (req: Request, res: Response) => {
 
     const response: ApiResponse<UserResponse> = {
       success: true,
-      data: { id: user.id, name: user.name, email: user.email, role: loginRole, sid },
+      data: { id: user.id, name: user.name, email: user.email, role: loginRole, sid, avatar: user.avatar || null },
     };
 
     res.json(response);
@@ -125,8 +125,91 @@ userRoutes.get('/me', (req: Request, res: Response) => {
       email: fullUser.email,
       role: user.role,
       sid: req.headers.authorization!.replace('Bearer ', ''),
+      avatar: fullUser.avatar || null,
     },
   };
 
   res.json(response);
+});
+
+// ─── GET /api/users/developers ── 开发者列表（人才推荐）──
+
+userRoutes.get('/developers', (req: Request, res: Response) => {
+  const user = getUserFromSid(req);
+  if (!user) {
+    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
+    return;
+  }
+
+  try {
+    const developers = db.listDevelopers();
+    const data = developers.map((d) => ({
+      id: d.id,
+      name: d.name,
+      role: 'developer',
+      avatar: d.avatar || null,
+      createdAt: d.createdAt,
+    }));
+
+    res.json({ success: true, data } as ApiResponse);
+  } catch (err: any) {
+    console.error('[Users] Developers list error:', err.message);
+    res.status(500).json({ success: false, error: '服务器错误' } as ApiResponse);
+  }
+});
+
+// ─── PUT /api/users/profile ── 更新用户名/头像 ──────────
+
+userRoutes.put('/profile', (req: Request, res: Response) => {
+  const user = getUserFromSid(req);
+  if (!user) {
+    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
+    return;
+  }
+
+  try {
+    const { name, avatar } = req.body as ProfileUpdateRequest;
+
+    // Validate name
+    if (name !== undefined && (!name || !name.trim())) {
+      res.status(400).json({ success: false, error: '用户名不能为空' } as ApiResponse);
+      return;
+    }
+
+    // Validate avatar size (max 500KB for base64)
+    if (avatar !== undefined && avatar !== null) {
+      const sizeInBytes = Math.round((avatar.length * 3) / 4);
+      if (sizeInBytes > 500 * 1024) {
+        res.status(400).json({ success: false, error: '头像文件过大，请控制在 500KB 以内' } as ApiResponse);
+        return;
+      }
+    }
+
+    const updateData: { name?: string; avatar?: string | null } = {};
+    if (name !== undefined) updateData.name = name.trim();
+    if (avatar !== undefined) updateData.avatar = avatar;
+
+    const updated = db.updateUserProfile(user.id, updateData);
+    if (!updated) {
+      res.status(400).json({ success: false, error: '没有需要更新的内容' } as ApiResponse);
+      return;
+    }
+
+    const response: ApiResponse<UserResponse> = {
+      success: true,
+      data: {
+        id: updated.id,
+        name: updated.name,
+        email: updated.email,
+        role: user.role,
+        sid: req.headers.authorization!.replace('Bearer ', ''),
+        avatar: updated.avatar,
+      },
+    };
+
+    res.json(response);
+  } catch (err: any) {
+    console.error('[Users] Profile update error:', err.message);
+    res.status(500).json({ success: false, error: '服务器错误' } as ApiResponse);
+  }
 });

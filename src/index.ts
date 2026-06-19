@@ -5,6 +5,7 @@ import { config } from './config';
 import { userRoutes } from './routes/users';
 import { orderRoutes } from './routes/orders';
 import { repoRoutes } from './routes/repos';
+import { chatRoutes } from './routes/chat';
 // ⚠️ 真实 Git Smart HTTP 路由已暂时禁用 —— 用内置 SQLite 版本管理替代
 // 问题：git-repo.ts 的 syncToDatabase 用 execSync 会阻塞事件循环，导致卡死
 // import { gitRoutes } from './routes/git';
@@ -34,6 +35,7 @@ app.get('/api/health', (_req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/repos', repoRoutes);
+app.use('/api/chat', chatRoutes);
 // app.use('/git', gitRoutes);  // 已禁用，见上方 import
 
 // Fallback: serve index.html for SPA-like routing
