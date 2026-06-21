@@ -1,15 +1,14 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import { createServer } from 'http';
 import { config } from './config';
 import { userRoutes } from './routes/users';
 import { orderRoutes } from './routes/orders';
 import { repoRoutes } from './routes/repos';
 import { chatRoutes } from './routes/chat';
-// ⚠️ 真实 Git Smart HTTP 路由已暂时禁用 —— 用内置 SQLite 版本管理替代
-// 问题：git-repo.ts 的 syncToDatabase 用 execSync 会阻塞事件循环，导致卡死
-// import { gitRoutes } from './routes/git';
 import { db } from './services/database';
+import { initSocket } from './services/socket';
 
 const app = express();
 
@@ -36,7 +35,6 @@ app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/repos', repoRoutes);
 app.use('/api/chat', chatRoutes);
-// app.use('/git', gitRoutes);  // 已禁用，见上方 import
 
 // Fallback: serve index.html for SPA-like routing
 app.get('*', (_req, res) => {
@@ -49,7 +47,11 @@ async function main() {
     await db.connect();
     console.log('[DB] SQLite database ready');
 
-    app.listen(config.port, config.host, () => {
+    const httpServer = createServer(app);
+    initSocket(httpServer);
+    console.log('[WS] Socket.IO initialized');
+
+    httpServer.listen(config.port, config.host, () => {
       console.log(`[Server] Running at http://${config.host}:${config.port}`);
       console.log(`[Server] Health check: http://localhost:${config.port}/api/health`);
     });

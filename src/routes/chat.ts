@@ -1,19 +1,18 @@
 import { Router, Request, Response } from 'express';
 import { db } from '../services/database';
-import { getUserFromSid } from './users';
+import { requireAuth, AuthenticatedRequest } from '../middleware/auth';
 import { v4 as uuid } from 'uuid';
 import type { ApiResponse, ChatMessageResponse, SendChatRequest } from '../models';
 
 export const chatRoutes = Router();
 
+// ─── 所有聊天路由都需要登录 ────────────────────────────
+chatRoutes.use(requireAuth);
+
 // ─── GET /api/chat/:orderId ── 获取聊天消息列表 ─────────
 
 chatRoutes.get('/:orderId', (req: Request, res: Response) => {
-  const user = getUserFromSid(req);
-  if (!user) {
-    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
-    return;
-  }
+  const user = (req as AuthenticatedRequest).currentUser;
 
   const orderId = Array.isArray(req.params.orderId) ? req.params.orderId[0] : req.params.orderId;
 
@@ -56,11 +55,7 @@ chatRoutes.get('/:orderId', (req: Request, res: Response) => {
 // ─── POST /api/chat/:orderId ── 发送消息 ────────────────
 
 chatRoutes.post('/:orderId', (req: Request, res: Response) => {
-  const user = getUserFromSid(req);
-  if (!user) {
-    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
-    return;
-  }
+  const user = (req as AuthenticatedRequest).currentUser;
 
   const orderId = Array.isArray(req.params.orderId) ? req.params.orderId[0] : req.params.orderId;
 

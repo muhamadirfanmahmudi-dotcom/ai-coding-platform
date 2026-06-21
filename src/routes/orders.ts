@@ -1,24 +1,41 @@
 import { Router, Request, Response } from 'express';
 import { db } from '../services/database';
-import { getUserFromSid } from './users';
+import { requireAuth, AuthenticatedRequest } from '../middleware/auth';
 import { v4 as uuid } from 'uuid';
-import type { ApiResponse, CreateOrderRequest, OrderResponse, OrderProgressResponse } from '../models';
+import type { ApiResponse, CreateOrderRequest, OrderResponse, OrderProgressResponse, OrderStatus } from '../models';
 
 function paramId(req: Request): string {
   const id = req.params.id;
   return Array.isArray(id) ? id[0] : id;
 }
 
+/** 数据库行 → OrderResponse（不含 developerName） */
+function fmtOrder(o: {
+  id: string; title: string; description: string;
+  userInfo: string | null; problem: string | null;
+  features: string | null; antiFeatures: string | null; successCriteria: string | null;
+  status: string; buyerId: string; developerId: string | null;
+  createdAt: string; updatedAt: string;
+}): OrderResponse {
+  return {
+    id: o.id, title: o.title, description: o.description,
+    userInfo: o.userInfo, problem: o.problem,
+    features: o.features, antiFeatures: o.antiFeatures, successCriteria: o.successCriteria,
+    status: o.status as OrderStatus,
+    buyerId: o.buyerId, developerId: o.developerId,
+    createdAt: o.createdAt, updatedAt: o.updatedAt,
+  };
+}
+
 export const orderRoutes = Router();
+
+// ─── 所有订单路由都需要登录 ────────────────────────────
+orderRoutes.use(requireAuth);
 
 // ─── POST /api/orders ── 创建订单 ─────────────────────
 
 orderRoutes.post('/', (req: Request, res: Response) => {
-  const user = getUserFromSid(req);
-  if (!user) {
-    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
-    return;
-  }
+  const user = (req as AuthenticatedRequest).currentUser;
   if (user.role !== 'buyer') {
     res.status(403).json({ success: false, error: '只有买家可以创建订单' } as ApiResponse);
     return;
@@ -46,21 +63,7 @@ orderRoutes.post('/', (req: Request, res: Response) => {
 
     const response: ApiResponse<OrderResponse> = {
       success: true,
-      data: {
-        id: order.id,
-        title: order.title,
-        description: order.description,
-        userInfo: order.userInfo,
-        problem: order.problem,
-        features: order.features,
-        antiFeatures: order.antiFeatures,
-        successCriteria: order.successCriteria,
-        status: order.status as any,
-        buyerId: order.buyerId,
-        developerId: order.developerId,
-        createdAt: order.createdAt,
-        updatedAt: order.updatedAt,
-      },
+      data: fmtOrder(order),
     };
 
     res.status(201).json(response);
@@ -73,29 +76,11 @@ orderRoutes.post('/', (req: Request, res: Response) => {
 // ─── GET /api/orders/hall ── 抢单大厅 ──────────────────
 
 orderRoutes.get('/hall', (req: Request, res: Response) => {
-  const user = getUserFromSid(req);
-  if (!user) {
-    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
-    return;
-  }
+  const user = (req as AuthenticatedRequest).currentUser;
 
   try {
     const orders = db.listHallOrders();
-    const data: OrderResponse[] = orders.map((o) => ({
-      id: o.id,
-      title: o.title,
-      description: o.description,
-      userInfo: o.userInfo,
-      problem: o.problem,
-      features: o.features,
-      antiFeatures: o.antiFeatures,
-      successCriteria: o.successCriteria,
-      status: o.status,
-      buyerId: o.buyerId,
-      developerId: o.developerId,
-      createdAt: o.createdAt,
-      updatedAt: o.updatedAt,
-    }));
+    const data: OrderResponse[] = orders.map(fmtOrder);
 
     res.json({ success: true, data } as ApiResponse<OrderResponse[]>);
   } catch (err: any) {
@@ -107,29 +92,11 @@ orderRoutes.get('/hall', (req: Request, res: Response) => {
 // ─── GET /api/orders/mine ── 我的订单 ──────────────────
 
 orderRoutes.get('/mine', (req: Request, res: Response) => {
-  const user = getUserFromSid(req);
-  if (!user) {
-    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
-    return;
-  }
+  const user = (req as AuthenticatedRequest).currentUser;
 
   try {
     const orders = db.listMyOrders(user.id);
-    const data: OrderResponse[] = orders.map((o) => ({
-      id: o.id,
-      title: o.title,
-      description: o.description,
-      userInfo: o.userInfo,
-      problem: o.problem,
-      features: o.features,
-      antiFeatures: o.antiFeatures,
-      successCriteria: o.successCriteria,
-      status: o.status,
-      buyerId: o.buyerId,
-      developerId: o.developerId,
-      createdAt: o.createdAt,
-      updatedAt: o.updatedAt,
-    }));
+    const data: OrderResponse[] = orders.map(fmtOrder);
 
     res.json({ success: true, data } as ApiResponse<OrderResponse[]>);
   } catch (err: any) {
@@ -141,29 +108,11 @@ orderRoutes.get('/mine', (req: Request, res: Response) => {
 // ─── GET /api/orders/developer ── 我接的单 ──────────────
 
 orderRoutes.get('/developer', (req: Request, res: Response) => {
-  const user = getUserFromSid(req);
-  if (!user) {
-    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
-    return;
-  }
+  const user = (req as AuthenticatedRequest).currentUser;
 
   try {
     const orders = db.listDeveloperOrders(user.id);
-    const data: OrderResponse[] = orders.map((o) => ({
-      id: o.id,
-      title: o.title,
-      description: o.description,
-      userInfo: o.userInfo,
-      problem: o.problem,
-      features: o.features,
-      antiFeatures: o.antiFeatures,
-      successCriteria: o.successCriteria,
-      status: o.status,
-      buyerId: o.buyerId,
-      developerId: o.developerId,
-      createdAt: o.createdAt,
-      updatedAt: o.updatedAt,
-    }));
+    const data: OrderResponse[] = orders.map(fmtOrder);
 
     res.json({ success: true, data } as ApiResponse<OrderResponse[]>);
   } catch (err: any) {
@@ -175,11 +124,7 @@ orderRoutes.get('/developer', (req: Request, res: Response) => {
 // ─── GET /api/orders/:id ── 订单详情 + 进度 ────────────
 
 orderRoutes.get('/:id', (req: Request, res: Response) => {
-  const user = getUserFromSid(req);
-  if (!user) {
-    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
-    return;
-  }
+  const user = (req as AuthenticatedRequest).currentUser;
 
   try {
     const order = db.getOrderById(paramId(req));
@@ -188,8 +133,16 @@ orderRoutes.get('/:id', (req: Request, res: Response) => {
       return;
     }
 
+    // 权限：待接单的订单任何人可看（大厅浏览），已接单的只有买家/开发者可看
+    if (order.status !== 'pending' && user.id !== order.buyerId && user.id !== order.developerId) {
+      res.status(403).json({ success: false, error: '无权查看该订单详情' } as ApiResponse);
+      return;
+    }
+
     const progress = db.getOrderProgress(order.id);
-    let developerName = null;
+
+    // Enrich with developer name
+    let developerName: string | null = null;
     if (order.developerId) {
       const dev = db.getUserById(order.developerId);
       if (dev) developerName = dev.name;
@@ -198,22 +151,7 @@ orderRoutes.get('/:id', (req: Request, res: Response) => {
     res.json({
       success: true,
       data: {
-        order: {
-          id: order.id,
-          title: order.title,
-          description: order.description,
-          userInfo: order.userInfo,
-          problem: order.problem,
-          features: order.features,
-          antiFeatures: order.antiFeatures,
-          successCriteria: order.successCriteria,
-          status: order.status,
-          buyerId: order.buyerId,
-          developerId: order.developerId,
-          developerName,
-          createdAt: order.createdAt,
-          updatedAt: order.updatedAt,
-        },
+        order: { ...fmtOrder(order), developerName },
         progress: progress.map((p) => ({
           id: p.id,
           orderId: p.orderId,
@@ -232,11 +170,7 @@ orderRoutes.get('/:id', (req: Request, res: Response) => {
 // ─── POST /api/orders/:id/claim ── 接单 ────────────────
 
 orderRoutes.post('/:id/claim', (req: Request, res: Response) => {
-  const user = getUserFromSid(req);
-  if (!user) {
-    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
-    return;
-  }
+  const user = (req as AuthenticatedRequest).currentUser;
   if (user.role !== 'developer') {
     res.status(403).json({ success: false, error: '只有开发者可以接单' } as ApiResponse);
     return;
@@ -270,11 +204,7 @@ orderRoutes.post('/:id/claim', (req: Request, res: Response) => {
 // ─── POST /api/orders/:id/progress ── 添加进度 ─────────
 
 orderRoutes.post('/:id/progress', (req: Request, res: Response) => {
-  const user = getUserFromSid(req);
-  if (!user) {
-    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
-    return;
-  }
+  const user = (req as AuthenticatedRequest).currentUser;
 
   try {
     const order = db.getOrderById(paramId(req));
@@ -305,16 +235,18 @@ orderRoutes.post('/:id/progress', (req: Request, res: Response) => {
 // ─── GET /api/orders/:id/progress ── 获取进度 ──────────
 
 orderRoutes.get('/:id/progress', (req: Request, res: Response) => {
-  const user = getUserFromSid(req);
-  if (!user) {
-    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
-    return;
-  }
+  const user = (req as AuthenticatedRequest).currentUser;
 
   try {
     const order = db.getOrderById(paramId(req));
     if (!order) {
       res.status(404).json({ success: false, error: '订单不存在' } as ApiResponse);
+      return;
+    }
+
+    // 只有买家或接单开发者可以查看进度
+    if (user.id !== order.buyerId && user.id !== order.developerId) {
+      res.status(403).json({ success: false, error: '无权查看该订单的进度' } as ApiResponse);
       return;
     }
 
@@ -339,11 +271,7 @@ orderRoutes.get('/:id/progress', (req: Request, res: Response) => {
 // ─── POST /api/orders/:id/status ── 更新状态 ───────────
 
 orderRoutes.post('/:id/status', (req: Request, res: Response) => {
-  const user = getUserFromSid(req);
-  if (!user) {
-    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
-    return;
-  }
+  const user = (req as AuthenticatedRequest).currentUser;
 
   try {
     const order = db.getOrderById(paramId(req));
@@ -375,16 +303,18 @@ orderRoutes.post('/:id/status', (req: Request, res: Response) => {
 // ─── GET /api/orders/:id/stages ── 获取阶段列表 ───────
 
 orderRoutes.get('/:id/stages', (req: Request, res: Response) => {
-  const user = getUserFromSid(req);
-  if (!user) {
-    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
-    return;
-  }
+  const user = (req as AuthenticatedRequest).currentUser;
 
   try {
     const order = db.getOrderById(paramId(req));
     if (!order) {
       res.status(404).json({ success: false, error: '订单不存在' } as ApiResponse);
+      return;
+    }
+
+    // 只有买家或接单开发者可以查看阶段内容
+    if (user.id !== order.buyerId && user.id !== order.developerId) {
+      res.status(403).json({ success: false, error: '无权查看该订单的开发阶段' } as ApiResponse);
       return;
     }
 
@@ -404,11 +334,7 @@ orderRoutes.get('/:id/stages', (req: Request, res: Response) => {
 // ─── PUT /api/orders/:id/stages/:stage ── 更新阶段内容 ──
 
 orderRoutes.put('/:id/stages/:stage', (req: Request, res: Response) => {
-  const user = getUserFromSid(req);
-  if (!user) {
-    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
-    return;
-  }
+  const user = (req as AuthenticatedRequest).currentUser;
 
   try {
     const order = db.getOrderById(paramId(req));
@@ -451,11 +377,7 @@ orderRoutes.put('/:id/stages/:stage', (req: Request, res: Response) => {
 // ─── POST /api/orders/:id/stages/:stage/complete ── 完成阶段
 
 orderRoutes.post('/:id/stages/:stage/complete', (req: Request, res: Response) => {
-  const user = getUserFromSid(req);
-  if (!user) {
-    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
-    return;
-  }
+  const user = (req as AuthenticatedRequest).currentUser;
 
   try {
     const order = db.getOrderById(paramId(req));

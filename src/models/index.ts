@@ -79,6 +79,12 @@ export interface OrderProgressResponse {
 export type FileAction = 'add' | 'modify' | 'delete';
 
 /** 仓库信息 */
+export interface RepoBranchInfo {
+  name: string;
+  headRef: string | null;
+  createdAt: string;
+}
+
 export interface RepoResponse {
   id: string;
   orderId: string;
@@ -87,6 +93,7 @@ export interface RepoResponse {
   currentRef: string | null;
   totalCommits: number;
   totalBranches: number;
+  branches: RepoBranchInfo[];
   createdAt: string;
   updatedAt: string;
 }
@@ -169,34 +176,6 @@ export interface CreateBranchRequest {
 /** 切换分支请求 */
 export interface CheckoutRequest {
   branch: string;
-}
-
-/** 回退请求 */
-export interface RollbackRequest {
-  ref: string;
-}
-
-/** 回退响应（返回目标版本所有文件，便于 AI 直接写入本地） */
-export interface RollbackResponse {
-  newRef: string;
-  message: string;
-  targetRef: string;
-  files: { path: string; content: string }[];
-}
-
-/** 差异条目 */
-export interface DiffEntry {
-  path: string;
-  action: FileAction;
-  beforeRef: string | null;
-  afterRef: string | null;
-}
-
-/** 差异响应 */
-export interface DiffResponse {
-  fromRef: string;
-  toRef: string;
-  changes: DiffEntry[];
 }
 
 /** LLM API 规范响应 */

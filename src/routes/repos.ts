@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { db } from '../services/database';
-import { getUserFromSid } from './users';
+import { requireAuth, AuthenticatedRequest } from '../middleware/auth';
 import { v4 as uuid } from 'uuid';
 import crypto from 'crypto';
 import type {
@@ -137,21 +137,13 @@ POST /api/repos/:orderId/rollback
   res.json({ success: true, data: { spec } } as ApiResponse<ApiSpecResponse>);
 });
 
-// ─── Middleware: require login ─────────────────────────
-repoRoutes.use((req, res, next) => {
-  const user = getUserFromSid(req);
-  if (!user) {
-    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
-    return;
-  }
-  (req as any).currentUser = user;
-  next();
-});
+// ─── 所有仓库路由都需要登录 ────────────────────────────
+repoRoutes.use(requireAuth);
 
 // ─── GET /api/repos/:orderId ── 仓库信息 ──────────────
 repoRoutes.get('/:orderId', (req: Request, res: Response) => {
   try {
-    const user = (req as any).currentUser;
+    const user = (req as AuthenticatedRequest).currentUser;
     const order = db.getOrderById(paramOrderId(req));
     if (!order) {
       res.status(404).json({ success: false, error: '订单不存在' } as ApiResponse);
@@ -185,6 +177,11 @@ repoRoutes.get('/:orderId', (req: Request, res: Response) => {
         : null,
       totalCommits,
       totalBranches: branches.length,
+      branches: branches.map(b => ({
+        name: b.name,
+        headRef: b.headCommitId ? db.getCommit(b.headCommitId)?.ref || null : null,
+        createdAt: b.createdAt,
+      })),
       createdAt: repo.createdAt,
       updatedAt: repo.updatedAt,
     };
@@ -199,7 +196,7 @@ repoRoutes.get('/:orderId', (req: Request, res: Response) => {
 // ─── POST /api/repos/:orderId/init ── 初始化仓库 ──────
 repoRoutes.post('/:orderId/init', (req: Request, res: Response) => {
   try {
-    const user = (req as any).currentUser;
+    const user = (req as AuthenticatedRequest).currentUser;
     const order = db.getOrderById(paramOrderId(req));
     if (!order) {
       res.status(404).json({ success: false, error: '订单不存在' } as ApiResponse);
@@ -235,6 +232,11 @@ repoRoutes.post('/:orderId/init', (req: Request, res: Response) => {
       currentRef: null,
       totalCommits: 0,
       totalBranches: branches.length,
+      branches: branches.map(b => ({
+        name: b.name,
+        headRef: null,
+        createdAt: b.createdAt,
+      })),
       createdAt: repo.createdAt,
       updatedAt: repo.updatedAt,
     };
@@ -249,7 +251,7 @@ repoRoutes.post('/:orderId/init', (req: Request, res: Response) => {
 // ─── POST /api/repos/:orderId/commit ── 提交代码 ──────
 repoRoutes.post('/:orderId/commit', (req: Request, res: Response) => {
   try {
-    const user = (req as any).currentUser;
+    const user = (req as AuthenticatedRequest).currentUser;
     const order = db.getOrderById(paramOrderId(req));
     if (!order) {
       res.status(404).json({ success: false, error: '订单不存在' } as ApiResponse);
@@ -272,8 +274,14 @@ repoRoutes.post('/:orderId/commit', (req: Request, res: Response) => {
       return;
     }
 
-    const branch = db.getBranch(repo.id, repo.defaultBranch);
-    const parentId = branch?.headCommitId || undefined;
+    // ── 确定目标分支（优先 ?branch= 查询参数，否则用默认分支） ──
+    const targetBranchName = (req.query.branch as string) || repo.defaultBranch;
+    const branch = db.getBranch(repo.id, targetBranchName);
+    if (!branch) {
+      res.status(400).json({ success: false, error: `分支 ${targetBranchName} 不存在` } as ApiResponse);
+      return;
+    }
+    const parentId = branch.headCommitId || undefined;
 
     // Create the commit
     const commitId = uuid();
@@ -301,7 +309,7 @@ repoRoutes.post('/:orderId/commit', (req: Request, res: Response) => {
     }
 
     // Update branch head
-    db.updateBranchHead(repo.id, repo.defaultBranch, commit.id);
+    db.updateBranchHead(repo.id, targetBranchName, commit.id);
 
     // Build response
     const commitData: CommitResponse = {
@@ -309,7 +317,7 @@ repoRoutes.post('/:orderId/commit', (req: Request, res: Response) => {
       id: commit.id,
       message: commit.message,
       description: commit.description,
-      branch: repo.defaultBranch,
+      branch: targetBranchName,
       parentRef: commit.parentId ? db.getCommit(commit.parentId)?.ref || null : null,
       authorId: user.id,
       authorName: user.name,
@@ -327,7 +335,7 @@ repoRoutes.post('/:orderId/commit', (req: Request, res: Response) => {
 // ─── GET /api/repos/:orderId/commits ── 提交历史 ──────
 repoRoutes.get('/:orderId/commits', (req: Request, res: Response) => {
   try {
-    const user = (req as any).currentUser;
+    const user = (req as AuthenticatedRequest).currentUser;
     const order = db.getOrderById(paramOrderId(req));
     if (!order) {
       res.status(404).json({ success: false, error: '订单不存在' } as ApiResponse);
@@ -376,7 +384,7 @@ repoRoutes.get('/:orderId/commits', (req: Request, res: Response) => {
 // ─── GET /api/repos/:orderId/tree ── 文件树 ───────────
 repoRoutes.get('/:orderId/tree', (req: Request, res: Response) => {
   try {
-    const user = (req as any).currentUser;
+    const user = (req as AuthenticatedRequest).currentUser;
     const order = db.getOrderById(paramOrderId(req));
     if (!order) {
       res.status(404).json({ success: false, error: '订单不存在' } as ApiResponse);
@@ -394,6 +402,7 @@ repoRoutes.get('/:orderId/tree', (req: Request, res: Response) => {
     }
 
     const ref = req.query.ref as string;
+    const branchName = req.query.branch as string;
     let commitId: string;
 
     if (ref) {
@@ -404,7 +413,8 @@ repoRoutes.get('/:orderId/tree', (req: Request, res: Response) => {
       }
       commitId = commit.id;
     } else {
-      const branch = db.getBranch(repo.id, repo.defaultBranch);
+      const targetBranch = branchName || repo.defaultBranch;
+      const branch = db.getBranch(repo.id, targetBranch);
       if (!branch || !branch.headCommitId) {
         res.json({ success: true, data: { ref: null, commitId: null, message: '暂无提交', files: [] } } as unknown as ApiResponse<TreeResponse>);
         return;
@@ -436,7 +446,7 @@ repoRoutes.get('/:orderId/tree', (req: Request, res: Response) => {
 // ─── GET /api/repos/:orderId/file ── 文件内容 ─────────
 repoRoutes.get('/:orderId/file', (req: Request, res: Response) => {
   try {
-    const user = (req as any).currentUser;
+    const user = (req as AuthenticatedRequest).currentUser;
     const order = db.getOrderById(paramOrderId(req));
     if (!order) {
       res.status(404).json({ success: false, error: '订单不存在' } as ApiResponse);
@@ -460,6 +470,7 @@ repoRoutes.get('/:orderId/file', (req: Request, res: Response) => {
     }
 
     const ref = req.query.ref as string;
+    const branchName = req.query.branch as string;
     let commitId: string;
 
     if (ref) {
@@ -470,7 +481,8 @@ repoRoutes.get('/:orderId/file', (req: Request, res: Response) => {
       }
       commitId = commit.id;
     } else {
-      const branch = db.getBranch(repo.id, repo.defaultBranch);
+      const targetBranch = branchName || repo.defaultBranch;
+      const branch = db.getBranch(repo.id, targetBranch);
       if (!branch || !branch.headCommitId) {
         res.status(404).json({ success: false, error: '暂无提交' } as ApiResponse);
         return;
@@ -509,7 +521,7 @@ repoRoutes.get('/:orderId/file', (req: Request, res: Response) => {
 // ─── PUT /api/repos/:orderId/commits/:ref ── 修改版本名称 ─
 repoRoutes.put('/:orderId/commits/:ref', (req: Request, res: Response) => {
   try {
-    const user = (req as any).currentUser;
+    const user = (req as AuthenticatedRequest).currentUser;
     if (user.role !== 'developer') {
       res.status(403).json({ success: false, error: '只有开发者可以操作' } as ApiResponse);
       return;
@@ -555,7 +567,7 @@ repoRoutes.put('/:orderId/commits/:ref', (req: Request, res: Response) => {
 // ─── GET /api/repos/:orderId/branches ── 分支列表 ─────
 repoRoutes.get('/:orderId/branches', (req: Request, res: Response) => {
   try {
-    const user = (req as any).currentUser;
+    const user = (req as AuthenticatedRequest).currentUser;
     const order = db.getOrderById(paramOrderId(req));
     if (!order) {
       res.status(404).json({ success: false, error: '订单不存在' } as ApiResponse);
@@ -589,7 +601,7 @@ repoRoutes.get('/:orderId/branches', (req: Request, res: Response) => {
 // ─── POST /api/repos/:orderId/branches ── 创建分支 ────
 repoRoutes.post('/:orderId/branches', (req: Request, res: Response) => {
   try {
-    const user = (req as any).currentUser;
+    const user = (req as AuthenticatedRequest).currentUser;
     const order = db.getOrderById(paramOrderId(req));
     if (!order) {
       res.status(404).json({ success: false, error: '订单不存在' } as ApiResponse);
@@ -651,7 +663,7 @@ repoRoutes.post('/:orderId/branches', (req: Request, res: Response) => {
 // ─── POST /api/repos/:orderId/checkout ── 切换分支 ────
 repoRoutes.post('/:orderId/checkout', (req: Request, res: Response) => {
   try {
-    const user = (req as any).currentUser;
+    const user = (req as AuthenticatedRequest).currentUser;
     const order = db.getOrderById(paramOrderId(req));
     if (!order) {
       res.status(404).json({ success: false, error: '订单不存在' } as ApiResponse);

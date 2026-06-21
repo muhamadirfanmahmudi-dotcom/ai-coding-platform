@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import { requireAuth, AuthenticatedRequest, getUserFromSid } from '../middleware/auth';
 import { db } from '../services/database';
 import { v4 as uuid } from 'uuid';
 import type { RegisterRequest, LoginRequest, ApiResponse, UserResponse, ProfileUpdateRequest } from '../models';
@@ -9,31 +10,6 @@ export const userRoutes = Router();
 
 function encodeSid(userId: string, role: string): string {
   return Buffer.from(JSON.stringify({ id: userId, role, t: Date.now() })).toString('base64');
-}
-
-function decodeSid(sid: string): { id: string; role: string } | null {
-  try {
-    const raw = Buffer.from(sid, 'base64').toString('utf-8');
-    const data = JSON.parse(raw);
-    if (data.id && data.role) return { id: data.id, role: data.role };
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-export function getUserFromSid(req: Request): { id: string; name: string; role: string } | null {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return null;
-
-  const sid = authHeader.replace('Bearer ', '');
-  const decoded = decodeSid(sid);
-  if (!decoded) return null;
-
-  const user = db.getUserById(decoded.id);
-  if (!user) return null;
-
-  return { id: user.id, name: user.name, role: decoded.role };
 }
 
 // ─── POST /api/users/register ──────────────────────────
@@ -104,12 +80,8 @@ userRoutes.post('/login', (req: Request, res: Response) => {
 
 // ─── GET /api/users/me ─────────────────────────────────
 
-userRoutes.get('/me', (req: Request, res: Response) => {
-  const user = getUserFromSid(req);
-  if (!user) {
-    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
-    return;
-  }
+userRoutes.get('/me', requireAuth, (req: Request, res: Response) => {
+  const user = (req as AuthenticatedRequest).currentUser;
 
   const fullUser = db.getUserById(user.id);
   if (!fullUser) {
@@ -134,12 +106,8 @@ userRoutes.get('/me', (req: Request, res: Response) => {
 
 // ─── GET /api/users/developers ── 开发者列表（人才推荐）──
 
-userRoutes.get('/developers', (req: Request, res: Response) => {
-  const user = getUserFromSid(req);
-  if (!user) {
-    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
-    return;
-  }
+userRoutes.get('/developers', requireAuth, (req: Request, res: Response) => {
+  const user = (req as AuthenticatedRequest).currentUser;
 
   try {
     const developers = db.listDevelopers();
@@ -160,12 +128,8 @@ userRoutes.get('/developers', (req: Request, res: Response) => {
 
 // ─── PUT /api/users/profile ── 更新用户名/头像 ──────────
 
-userRoutes.put('/profile', (req: Request, res: Response) => {
-  const user = getUserFromSid(req);
-  if (!user) {
-    res.status(401).json({ success: false, error: '未登录' } as ApiResponse);
-    return;
-  }
+userRoutes.put('/profile', requireAuth, (req: Request, res: Response) => {
+  const user = (req as AuthenticatedRequest).currentUser;
 
   try {
     const { name, avatar } = req.body as ProfileUpdateRequest;
